@@ -50,6 +50,26 @@ Never invent a metric. Every number carries its source and the date it was pulle
 Search Console is the only truth for received traffic; Ahrefs organic traffic is a
 model, so label it an estimate. Full tool list: `docs/data-sources.md`.
 
+## Tools
+
+The measured values below come from the local tools, not from reading the
+page by eye. No API key, no install, no network beyond the page itself:
+
+| Need                                            | Command                                                  |
+|-------------------------------------------------|----------------------------------------------------------|
+| Full on-page extraction and audit of one URL    | `python -m seo_tools page <url> --json` |
+| Status, redirect chain and SEO response headers | `python -m seo_tools fetch <url> --json` |
+| Sitemap declarations against what is reachable  | `python -m seo_tools sitemap <url> --expand --json` |
+| Crawler access, including the AI crawlers       | `python -m seo_tools robots <url> --json` |
+| Snapshot a page before a release                | `python -m seo_tools baseline <url> --label "pre-release"` |
+| Ask what changed since that snapshot            | `python -m seo_tools drift <url> --json` |
+
+Every command takes `--json`, which is the form to use here. Exit code 0
+means it answered, 1 means it could not. Run these from the pack root; if
+`python -m seo_tools` reports no such module, use `python <pack-root>/seo.py`
+instead, which works from any directory. If anything errors, run
+`python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
+
 ## Procedure
 
 1. **Resolve the crawl and state its age.** Call `site-audit-projects`, pick the

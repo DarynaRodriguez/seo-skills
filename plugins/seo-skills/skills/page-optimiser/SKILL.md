@@ -38,6 +38,23 @@ the answer, so ask rather than assume.
 
 Full text, image and video standards: `references/content-quality.md`.
 
+## Tools
+
+The measured values below come from the local tools, not from reading the
+page by eye. No API key, no install, no network beyond the page itself:
+
+| Need                                             | Command                                   |
+|--------------------------------------------------|-------------------------------------------|
+| Everything measurable about the page in one call | `python -m seo_tools page <url> --json` |
+| Title and description widths                     | `python -m seo_tools meta <url> --json` |
+| Heading outline                                  | `python -m seo_tools headings <url> --json` |
+
+Every command takes `--json`, which is the form to use here. Exit code 0
+means it answered, 1 means it could not. Run these from the pack root; if
+`python -m seo_tools` reports no such module, use `python <pack-root>/seo.py`
+instead, which works from any directory. If anything errors, run
+`python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
+
 ## Procedure
 
 1. **Read the page properly.** All of it, in order, as a buyer would. Note where you

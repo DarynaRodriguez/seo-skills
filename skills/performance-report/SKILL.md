@@ -54,6 +54,21 @@ for clicks, impressions, CTR and position; Ahrefs organic traffic and traffic va
 are models. Ahrefs monetary values are USD cents, divide by 100 to display. Full
 tool list: `docs/data-sources.md`.
 
+## Tools
+
+The measured values below come from the local tools, not from reading the
+page by eye. No API key, no install, no network beyond the page itself:
+
+| Need                                                    | Command                                                         |
+|---------------------------------------------------------|-----------------------------------------------------------------|
+| Totals, weighted position and period on period movement | `python -m seo_tools gsc <now.csv> --compare <before.csv> --json` |
+
+Every command takes `--json`, which is the form to use here. Exit code 0
+means it answered, 1 means it could not. Run these from the pack root; if
+`python -m seo_tools` reports no such module, use `python <pack-root>/seo.py`
+instead, which works from any directory. If anything errors, run
+`python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
+
 ## Procedure
 
 1. **Fix the comparison window and name it in the report.** State both windows

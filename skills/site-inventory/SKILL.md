@@ -41,6 +41,21 @@ Search Console is the only source of truth for what the site actually receives. 
 organic traffic is a model: it never fills a `clicks_28d` cell. State the date every
 pull was taken, in the summary header, once.
 
+## Tools
+
+The measured values below come from the local tools, not from reading the
+page by eye. No API key, no install, no network beyond the page itself:
+
+| Need                                               | Command                                                        |
+|----------------------------------------------------|----------------------------------------------------------------|
+| Sitemaps, index files and the URL set they declare | `python -m seo_tools sitemap <url> --expand --limit 5000 --json` |
+
+Every command takes `--json`, which is the form to use here. Exit code 0
+means it answered, 1 means it could not. Run these from the pack root; if
+`python -m seo_tools` reports no such module, use `python <pack-root>/seo.py`
+instead, which works from any directory. If anything errors, run
+`python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
+
 ## Procedure
 
 1. **Resolve scope.** Fetch `robots.txt` and `sitemap.xml`, follow every child sitemap,

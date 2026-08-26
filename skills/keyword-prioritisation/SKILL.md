@@ -81,6 +81,21 @@ perfect buyer fit scores `10(0.1) + 25(1.0) + 20(1.0) + 20(0.7) + 10(0.3) + 15(0
 wins, and the components show exactly why, so anyone who disagrees can move a
 weight rather than argue about vibes.
 
+## Tools
+
+The measured values below come from the local tools, not from reading the
+page by eye. No API key, no install, no network beyond the page itself:
+
+| Need                                                        | Command                                                           |
+|-------------------------------------------------------------|-------------------------------------------------------------------|
+| Rows with impressions but no clicks yet, and CTR shortfalls | `python -m seo_tools gsc <export.csv> --min-impressions 100 --json` |
+
+Every command takes `--json`, which is the form to use here. Exit code 0
+means it answered, 1 means it could not. Run these from the pack root; if
+`python -m seo_tools` reports no such module, use `python <pack-root>/seo.py`
+instead, which works from any directory. If anything errors, run
+`python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
+
 ## Procedure
 
 1. **Take the candidate set and check it is classified.** Every row needs intent,

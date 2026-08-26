@@ -40,6 +40,22 @@ words, banned characters, claims that are not signed off.
 | How competing snippets read for the query | `mcp__Ahrefs__serp-overview` | Ask for a pasted top 10 with date and country |
 | Target keyword per page | `.seo/keyword-map.csv` from `/keyword-page-mapping` | Ask which keyword each page targets, one per page |
 
+## Tools
+
+The measured values below come from the local tools, not from reading the
+page by eye. No API key, no install, no network beyond the page itself:
+
+| Need                                           | Command                                                           |
+|------------------------------------------------|-------------------------------------------------------------------|
+| Measure a live title and description in pixels | `python -m seo_tools meta <url> --json` |
+| Measure copy you are drafting, before it ships | `python -m seo_tools meta --title "..." --description "..." --json` |
+
+Every command takes `--json`, which is the form to use here. Exit code 0
+means it answered, 1 means it could not. Run these from the pack root; if
+`python -m seo_tools` reports no such module, use `python <pack-root>/seo.py`
+instead, which works from any directory. If anything errors, run
+`python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
+
 ## Procedure
 
 1. **Find the pages worth rewriting.** Pull page-level impressions, clicks, CTR and

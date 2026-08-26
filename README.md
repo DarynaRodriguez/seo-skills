@@ -125,6 +125,55 @@ filling the column with a guess. Tool names and unit gotchas live in
 
 ---
 
+## Measured, not guessed
+
+A skill written only as prose has to ask a model to read a page and report what
+the title is. That works most of the time, which is exactly the problem: the
+failures are invisible and nothing can be re-checked.
+
+So the facts come from tools instead. `seo_tools` is a small command line layer
+that measures the things a skill should never estimate, and every skill that has
+a tool behind it calls it rather than eyeballing the page.
+
+```bash
+python -m seo_tools doctor            # will this run on my machine
+python -m seo_tools page <url>        # everything measurable on one page
+python -m seo_tools meta <url>        # does the title fit, in pixels
+python -m seo_tools robots <url>      # which AI crawlers may read this
+python -m seo_tools gsc export.csv    # what your Search Console export says
+```
+
+**No install.** Standard library Python only, so it runs with whatever Python is
+already on your machine. No `pip install`, no requirements file, no API key, no
+account. CI fails the build if a dependency file ever appears.
+
+**Testable, which is the point.** 140 tests, run with
+`python -m unittest discover -s tests -t .` and no test runner to install.
+Writing them found five real bugs, including a robots.txt group-precedence case
+that would have reported GPTBot as allowed when it was blocked.
+
+Three things worth knowing:
+
+- **`robots` separates blocked crawlers by what blocking them costs.** A blocked
+  live-fetch or search-index crawler costs you citations now. A blocked training
+  crawler costs you nothing today. Blocking `Google-Extended` does not remove
+  you from Google Search or AI Overviews, and there is a test pinning that.
+- **`meta` measures pixels, not characters.** "Illinois" and "Wholesale" are both
+  nine characters and one is nearly twice as wide. The number is labelled an
+  estimate in the output, with the method, every time.
+- **`baseline` and `drift` give the pack a memory.** Snapshot a page, ship, then
+  ask what changed. 19 rules, fixed severities, and the rule that fired is named
+  so you can disagree with it.
+
+`gsc` is the one to try first if you have no paid tools: a Search Console CSV
+export is free, is real received traffic rather than a model of it, and drives
+the cannibalisation, decay and prioritisation work.
+
+Full reference, including the deliberate limits and how to use it from ChatGPT:
+[`docs/execution-layer.md`](docs/execution-layer.md).
+
+---
+
 ## What runs where
 
 | Skill | Claude.ai & Cowork | Claude Code & local agents | ChatGPT Work | ChatGPT |

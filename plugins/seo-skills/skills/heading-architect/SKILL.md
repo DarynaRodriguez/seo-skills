@@ -33,6 +33,21 @@ the answer, so ask rather than assume.
 | Section structure of the pages that rank | `mcp__Ahrefs__serp-overview` then read the top pages, or `/serp-analysis` | Ask for a pasted top 10, then read those pages directly |
 | Existing headings on a page being restructured | `mcp__Ahrefs__site-audit-page-content`, or a fetch | Ask the user to paste the current headings |
 
+## Tools
+
+The measured values below come from the local tools, not from reading the
+page by eye. No API key, no install, no network beyond the page itself:
+
+| Need                                                | Command                                   |
+|-----------------------------------------------------|-------------------------------------------|
+| Read the real heading outline and find breaks in it | `python -m seo_tools headings <url> --json` |
+
+Every command takes `--json`, which is the form to use here. Exit code 0
+means it answered, 1 means it could not. Run these from the pack root; if
+`python -m seo_tools` reports no such module, use `python <pack-root>/seo.py`
+instead, which works from any directory. If anything errors, run
+`python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
+
 ## Procedure
 
 1. **Fix the primary keyword and the intent.** One primary keyword, one intent. If

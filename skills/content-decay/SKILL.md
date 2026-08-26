@@ -49,6 +49,22 @@ Never invent a metric. Every number carries its source and the date it was pulle
 Search Console is truth for received traffic; the Ahrefs page trend is a model,
 label it. Full tool list: `docs/data-sources.md`.
 
+## Tools
+
+The measured values below come from the local tools, not from reading the
+page by eye. No API key, no install, no network beyond the page itself:
+
+| Need                                                 | Command                                                                          |
+|------------------------------------------------------|----------------------------------------------------------------------------------|
+| Join two exports and rank what lost clicks           | `python -m seo_tools gsc <now.csv> --compare <before.csv> --dimension page --json` |
+| Check whether a decayed page changed on the way down | `python -m seo_tools drift <url> --json` |
+
+Every command takes `--json`, which is the form to use here. Exit code 0
+means it answered, 1 means it could not. Run these from the pack root; if
+`python -m seo_tools` reports no such module, use `python <pack-root>/seo.py`
+instead, which works from any directory. If anything errors, run
+`python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
+
 ## Procedure
 
 1. **Compare like periods and say which.** Pull `gsc-pages-history` and compare

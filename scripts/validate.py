@@ -60,7 +60,38 @@ for doc in ("README.md", "PRINCIPLES.md", "CONTRIBUTING.md", "AGENTS.md"):
     if p.exists() and DASHES.search(p.read_text(encoding="utf-8")):
         errors.append(f"{doc}: dash characters found")
 
-print(f"{len(names)} skills checked")
+# Every `python -m seo_tools <command>` a skill tells the reader to run has to be
+# a command the CLI actually has. Without this check a skill can promise a tool
+# that does not exist, which is the failure mode the execution layer exists to
+# remove in the first place.
+TOOL_CALL = re.compile(r"python -m seo_tools\s+([a-z][a-z0-9-]*)")
+sys.path.insert(0, str(ROOT))
+try:
+    from seo_tools.cli import build_parser
+
+    actions = build_parser()._subparsers._group_actions[0]  # noqa: SLF001
+    commands = set(actions.choices)
+except Exception as exc:  # the CLI failing to import is itself an error
+    commands = set()
+    errors.append(f"could not import seo_tools.cli to check tool references: {exc}")
+
+if commands:
+    referenced = set()
+    for path in [*sorted(SKILLS.rglob("SKILL.md")), *sorted((ROOT / "docs").glob("*.md"))]:
+        for command in TOOL_CALL.findall(path.read_text(encoding="utf-8")):
+            referenced.add(command)
+            if command not in commands:
+                errors.append(
+                    f"{path.relative_to(ROOT)}: refers to `python -m seo_tools {command}`, "
+                    f"which is not a command. Known: {', '.join(sorted(commands))}"
+                )
+    undocumented = commands - referenced - {"doctor"}
+    if undocumented:
+        warnings.append(
+            f"commands no skill or doc mentions: {', '.join(sorted(undocumented))}"
+        )
+
+print(f"{len(names)} skills checked, {len(commands)} tool commands available")
 for w in warnings:
     print(f"  warn  {w}")
 for e in errors:
