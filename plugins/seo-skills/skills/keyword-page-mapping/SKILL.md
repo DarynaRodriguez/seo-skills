@@ -2,6 +2,7 @@
 name: keyword-page-mapping
 description: "Assigns exactly one primary keyword to each page across the whole site, resolves contested terms with a stated reason, lists the new pages the map requires, and writes .seo/keyword-map.csv plus a markdown table."
 when_to_use: "The user asks which page should target which keyword, wants a keyword map or a site-wide keyword-to-URL table, suspects two pages target the same term, or is planning a new page's target; or /keyword-prioritisation or /site-inventory hands off a list."
+argument-hint: "[keyword list or export.csv]"
 ---
 
 # Keyword to Page Mapping

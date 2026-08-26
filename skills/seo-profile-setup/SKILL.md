@@ -2,6 +2,7 @@
 name: seo-profile-setup
 description: "Runs the one-time seo-skills interview and writes the site profile to .seo/profile.md or ~/.seo-skills/profile.md, researching the live site, Ahrefs and Peec first so the user corrects a populated draft instead of filling in a blank form."
 when_to_use: "The user is setting up seo-skills for a site, asks to create or update the site profile, or another seo-skills skill reports that no profile exists at .seo/profile.md or ~/.seo-skills/profile.md."
+argument-hint: "[domain]"
 ---
 
 # SEO Profile Setup

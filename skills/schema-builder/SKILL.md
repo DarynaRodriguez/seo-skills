@@ -2,6 +2,7 @@
 name: schema-builder
 description: "Produces correct JSON-LD for a page: maps page type to schema type, states required versus recommended properties, generates the block from what is actually on the page, gives CMS implementation notes, and closes with a validation step."
 when_to_use: "The user asks for schema, structured data, JSON-LD, rich results, FAQPage, Article, Product or Organization markup, or asks why a rich result is not showing; or /page-optimiser, /snippet-targeting or /technical-audit hands off a page missing markup."
+argument-hint: "[url]"
 ---
 
 # Schema Builder

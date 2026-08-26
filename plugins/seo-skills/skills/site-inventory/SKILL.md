@@ -2,6 +2,7 @@
 name: site-inventory
 description: "Crawls or pulls every indexable URL on a site and writes the baseline page inventory to .seo/pages.csv, classifying page type, market and language, attaching title, H1 and 28-day Search Console traffic, and flagging orphaned, thin and duplicated pages."
 when_to_use: "The user asks for a page inventory, a site crawl, a list of pages with titles and traffic, or a baseline before an audit; or /seo-profile-setup hands off; or another seo-skills skill reports that .seo/pages.csv is missing."
+argument-hint: "[domain]"
 ---
 
 # Site Inventory

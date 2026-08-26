@@ -4,7 +4,7 @@ For agents. If you are a human, the README is friendlier.
 
 ## The contract
 
-Twenty-five skills in `skills/`, each a `SKILL.md` with frontmatter. They share
+Twenty-six skills in `skills/`, each a `SKILL.md` with frontmatter. They share
 three things:
 
 1. **A profile.** `.seo/profile.md` in the working project, or

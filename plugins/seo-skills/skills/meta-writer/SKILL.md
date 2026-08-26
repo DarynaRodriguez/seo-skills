@@ -2,6 +2,7 @@
 name: meta-writer
 description: "Writes and rewrites meta titles and descriptions that fit the pixel budget and earn clicks, prioritised by Search Console impressions and CTR against position, and returns a paste-ready table of current copy, issue, revised copy and character counts."
 when_to_use: "The user asks for meta titles, meta descriptions, SEO titles, page titles, snippet copy or a title rewrite; or /page-optimiser, /content-decay or /content-brief hands off a page whose title and description need writing."
+argument-hint: "[url or keyword]"
 ---
 
 # Meta Writer

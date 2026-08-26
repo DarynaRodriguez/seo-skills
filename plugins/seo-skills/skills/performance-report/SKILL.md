@@ -2,6 +2,7 @@
 name: performance-report
 description: "Writes the monthly organic search report a marketer can send to an executive without editing: one headline sentence, the profile's own metric, what moved and why, what shipped and what it did, what is not working, next period's plan, and honest caveats."
 when_to_use: "The user asks for a monthly or quarterly SEO report, an update for leadership, a summary of organic performance, or asks what changed and why; or an audit or optimisation skill needs its outcome reported after a period has passed."
+argument-hint: "[now.csv] [before.csv]"
 ---
 
 # Performance Report

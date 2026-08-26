@@ -60,6 +60,29 @@ class TestCriticalChanges(unittest.TestCase):
         after = BEFORE_HTML.replace("/pricing\">", "/plans\">")
         self.assertIn("canonical.changed", rules_fired(compare(self.baseline, snapshot(after))))
 
+    def test_a_cosmetically_different_canonical_is_not_a_change(self):
+        # Caught on a live page: the baseline held a trailing slash and the page
+        # did not, which raised a critical on two spellings of the same URL. A
+        # false critical here is what gets a whole drift report ignored.
+        for variant in (
+            "https://example.com/pricing/",
+            "https://example.com/pricing?utm_source=newsletter",
+            "https://Example.com/pricing",
+            "https://example.com:443/pricing",
+        ):
+            with self.subTest(variant=variant):
+                after = BEFORE_HTML.replace(
+                    'href="https://example.com/pricing"', 'href="{}"'.format(variant)
+                )
+                fired = rules_fired(compare(self.baseline, snapshot(after)))
+                self.assertNotIn("canonical.changed", fired)
+
+    def test_a_genuinely_different_path_still_fires(self):
+        after = BEFORE_HTML.replace(
+            'href="https://example.com/pricing"', 'href="https://example.com/pricing-old"'
+        )
+        self.assertIn("canonical.changed", rules_fired(compare(self.baseline, snapshot(after))))
+
     def test_losing_schema_types_is_critical(self):
         after = BEFORE_HTML.replace('{"@type":"Product","name":"Widget"}', "{}")
         result = compare(self.baseline, snapshot(after))

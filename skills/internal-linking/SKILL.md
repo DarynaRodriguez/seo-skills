@@ -2,6 +2,7 @@
 name: internal-linking
 description: "Finds the internal links that are missing: maps pillars and clusters, spots orphaned and under-linked pages, checks anchor distribution, locates where link authority actually sits, and returns a build list of source url, source section, anchor text, target url and why."
 when_to_use: "The user asks about internal links, orphan pages, site architecture, pillar and cluster structure, anchor text, or how to pass authority to a page that will not rank; or /page-optimiser, /keyword-page-mapping or /content-decay hands off a page that needs inbound links."
+argument-hint: "[url]"
 ---
 
 # Internal Linking

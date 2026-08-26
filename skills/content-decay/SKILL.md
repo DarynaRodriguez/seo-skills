@@ -2,6 +2,7 @@
 name: content-decay
 description: "Finds pages losing clicks and rankings over time, separates real decay from seasonality, dead demand and SERP layout change, and returns a verdict per page: refresh, consolidate, retire or replace with a new page."
 when_to_use: "The user asks which pages are declining, why organic traffic is down, what to refresh or update, whether to delete or redirect old posts, or wants a content refresh backlog; or /performance-report flags a drop, or /site-inventory hands off an ageing page set."
+argument-hint: "[now.csv] [before.csv]"
 ---
 
 # Content Decay

@@ -2,6 +2,7 @@
 name: ai-visibility-audit
 description: "Establishes where a brand actually stands in AI answers: visibility, share of voice, sentiment and average position across tracked prompts, broken down by topic and by engine, with aided and unaided prompts counted separately and every figure carrying its source and date."
 when_to_use: "The user asks whether the brand appears in ChatGPT, Perplexity, Google AI Overviews, Copilot or Gemini answers, wants an AI visibility or share of voice baseline, asks why a competitor is being recommended instead, or asks for an AI search report; or /serp-analysis hands off an AI-overview-dominated query, or /performance-report needs the AI-answer section."
+argument-hint: "[brand or domain]"
 ---
 
 # AI Visibility Audit

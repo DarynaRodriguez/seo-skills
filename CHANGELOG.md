@@ -11,6 +11,19 @@ to read a page and report what it saw.
 
 ### Added
 
+- **`drift-check`**, the twenty-sixth skill and the home for baselines. Snapshot
+  a page before a release, diff after, and get the changes classified by whether
+  anyone would plausibly have made them on purpose. Slots into the traffic-drop
+  workflow second, because "what changed" is a cheaper question than "what is
+  wrong", and into a new release workflow that has to start before the work does.
+- `argument-hint` on all 26 skills, so the `/` menu says whether a skill wants a
+  URL, a keyword or a CSV export.
+- `docs/frontmatter.md`: what each frontmatter field does, why `user-invocable`
+  and `disable-model-invocation` are deliberately absent, and which distribution
+  paths accept which fields.
+- `scripts/validate.py` now rejects any frontmatter key outside a known set. An
+  unrecognised key is ignored silently, so a misspelled `when_to_use` costs a
+  skill its trigger phrases and nothing says so.
 - `seo_tools`, a standard library only command line layer. No `pip install`, no
   requirements file, no API key, no account. Twelve commands: `doctor`, `fetch`,
   `page`, `meta`, `headings`, `schema`, `robots`, `sitemap`, `baseline`, `drift`,
@@ -48,6 +61,9 @@ to read a page and report what it saw.
 
 ### Fixed
 
+- `scripts/validate.py` reported a false sibling reference for any URL path in an
+  example output block, so `/pricing` looked like a missing skill. Sibling
+  references are now checked in prose only.
 - `safety.validate_url`: `allow_private`, the test-only escape hatch, was
   propagating through every redirect hop, so a fixture server could redirect a
   test into a cloud metadata endpoint. It now relaxes only the private-address

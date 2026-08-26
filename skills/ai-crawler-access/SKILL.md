@@ -2,6 +2,7 @@
 name: ai-crawler-access
 description: "Checks whether AI crawlers and answer-time fetchers can actually retrieve the site: robots.txt directives per named agent, CDN, WAF and bot rules, JavaScript-rendered content, login and geo walls, and rate limits, verified against logged agent visits, with a per-crawler allowed or blocked verdict, the business consequence and the fix."
 when_to_use: "The user asks whether ChatGPT, Perplexity, Google or Copilot can crawl the site, wants to block or allow AI crawlers, asks about llms.txt or robots.txt for AI, or reports zero AI visibility; or /ai-visibility-audit, /citation-gap or /geo-rewrite hits a page the engines never retrieve. Run this before any other AI visibility work."
+argument-hint: "[url]"
 ---
 
 # AI Crawler Access

@@ -11,6 +11,8 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional
 
+from .safety import normalise_url
+
 Change = Dict[str, object]
 
 # Word count moving by less than this is normal editing, not drift.
@@ -26,6 +28,22 @@ def _change(rule: str, severity: str, field: str, before, after, note: str) -> C
         "after": after,
         "note": note,
     }
+
+
+def _same_url(before, after) -> bool:
+    """Whether two URL values point at the same place.
+
+    Both empty counts as the same. One empty and the other set does not, because
+    a canonical appearing or disappearing is a real change.
+    """
+    if not before and not after:
+        return True
+    if not before or not after:
+        return False
+    try:
+        return normalise_url(str(before)) == normalise_url(str(after))
+    except ValueError:
+        return str(before) == str(after)
 
 
 def _as_list(value) -> List[str]:
@@ -104,7 +122,12 @@ def compare(baseline: Dict[str, object], current: Dict[str, object]) -> Dict[str
 
     old_canonical = before.get("canonical")
     new_canonical = current.get("canonical")
-    if old_canonical != new_canonical:
+    # Compare normalised, report raw. A trailing slash or a tracking parameter is
+    # not a canonical change, and a false critical here is exactly the kind of
+    # noise that gets a whole drift report ignored.
+    if _same_url(old_canonical, new_canonical):
+        pass
+    elif old_canonical != new_canonical:
         if old_canonical and not new_canonical:
             changes.append(
                 _change(

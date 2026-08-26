@@ -2,6 +2,7 @@
 name: snippet-targeting
 description: "Targets the featured snippet and the people-also-ask slot: picks the snippet type for the query, drafts the 40 to 60 word direct answer under a question heading, tightens lists, specifies real HTML tables and FAQ questions people actually search, and checks who holds the snippet now."
 when_to_use: "The user asks about featured snippets, position zero, the answer box, people-also-ask, or how to get a page quoted directly in search; or /content-brief, /heading-architect or /page-optimiser hands off a page whose question sections need answer blocks."
+argument-hint: "[keyword]"
 ---
 
 # Snippet Targeting

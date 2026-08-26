@@ -15,10 +15,18 @@ would bloat the main file.
 name: skill-name
 description: "One sentence on what the skill does, written so a routing model can match it. Include the concrete artefacts it produces."
 when_to_use: "The user asks for X, Y or Z; or another seo-skills skill hands off <thing>."
+argument-hint: "[url]"
 ---
 ```
 
-`name` matches the directory. Both fields are quoted single-line strings.
+`name` matches the directory. `description`, `when_to_use` and `argument-hint`
+are quoted single-line strings. All four are required, and `scripts/validate.py`
+rejects any other key, because an unrecognised key is ignored silently rather
+than reported.
+
+`argument-hint` is what the `/` menu shows during autocomplete, so it names what
+the skill wants: `[url]`, `[keyword]`, `[export.csv]`. Not every field is portable
+to every distribution path: see `docs/frontmatter.md` before adding one.
 
 ## Body sections, in this order
 

@@ -7,7 +7,7 @@ skills, stops giving you generic SEO advice and starts doing the work: keyword
 maps, content briefs, meta copy, technical triage, cannibalisation resolution,
 and honest AI-answer visibility.
 
-Not a checklist. Twenty-five skills that each do one job, hand off to each other,
+Not a checklist. Twenty-six skills that each do one job, hand off to each other,
 and refuse to invent a number.
 
 📋 **Copy this prompt into any AI:**
@@ -55,6 +55,7 @@ or just describe what you want and your agent picks the right one.
 - **`/content-decay`** separates real decay from seasonality, dead demand, and a SERP layout change, then decides refresh, consolidate, or retire.
 - **`/indexation-check`** answers both halves of the question: what should be indexed and is not, and what is indexed and should not be.
 - **`/performance-report`** writes the monthly report you can send to a CMO unedited, brand split from non-brand, with an honest caveats section.
+- **`/drift-check`** snapshots a page before you ship and tells you exactly what changed after, classified by whether anyone would have done it on purpose.
 
 ### 🤖 AI visibility, get cited by the answer engines
 
@@ -78,9 +79,12 @@ or just describe what you want and your agent picks the right one.
 **Organic traffic is down and nobody knows why.**
 
 ```
-/performance-report  →  /technical-audit  →  /indexation-check  →
-/content-decay  →  /cannibalisation-audit
+/performance-report  →  /drift-check  →  /technical-audit  →
+/indexation-check  →  /content-decay  →  /cannibalisation-audit
 ```
+
+`/drift-check` goes second because "what changed" is cheaper to answer than
+"what is wrong", and it only works if you took a snapshot beforehand.
 
 **We are invisible in ChatGPT and Perplexity.**
 
@@ -202,6 +206,7 @@ Full reference, including the deliberate limits and how to use it from ChatGPT:
 | content-decay | 🔧 | 🔧 | 🔧 | ⚠️ |
 | indexation-check | 🔧 | 🔧 | 🔧 | ⚠️ |
 | performance-report | 🔧 | 🔧 | 🔧 | ⚠️ |
+| drift-check | ⚠️ | ✅ | ⚠️ | ⚠️ |
 | **AI visibility** | | | | |
 | ai-crawler-access | ⚠️ | ✅ | ⚠️ | ⚠️ |
 | ai-visibility-audit | 🔧 | 🔧 | 🔧 | ⚠️ |

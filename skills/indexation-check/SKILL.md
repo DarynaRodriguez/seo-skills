@@ -2,6 +2,7 @@
 name: indexation-check
 description: "Checks whether the right set of pages is indexed and only that set, by comparing the sitemap against crawled reality and against pages receiving impressions, and returns a table of URL classes with counts, causes, fixes and the risk of leaving each one."
 when_to_use: "The user asks why a page is not indexed, why junk pages appear in search, about index bloat, crawl budget, orphan pages, robots.txt or noindex behaviour, or wants the sitemap validated; or /technical-audit hands off an indexability finding."
+argument-hint: "[url or domain]"
 ---
 
 # Indexation Check

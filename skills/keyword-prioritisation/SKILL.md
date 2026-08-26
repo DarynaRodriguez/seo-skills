@@ -2,6 +2,7 @@
 name: keyword-prioritisation
 description: "Scores a keyword candidate set with a named, weighted, fully shown formula, estimates build effort against the profile's content capacity, and returns a sequenced plan for this month, next month and backlog."
 when_to_use: "The user asks which keywords to do first, wants a content roadmap or build order, asks how to spend limited publishing capacity, or challenges a priority call; or /keyword-discovery, /competitor-gap or /demand-trends hands off a candidate set."
+argument-hint: "[export.csv]"
 ---
 
 # Keyword Prioritisation

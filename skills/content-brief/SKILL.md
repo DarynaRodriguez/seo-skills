@@ -2,6 +2,7 @@
 name: content-brief
 description: "Writes a paste-ready content brief for one page: primary and secondary keywords with sources, the search intent in one sentence, SERP evidence, the questions the page must answer, entities to cover, recommended type and length, the differentiating angle, internal links in and out, required proof assets, CTA and a definition of done."
 when_to_use: "The user asks for a content brief, a writer brief, a page outline or a spec for something they are about to commission or write; or /keyword-page-mapping, /keyword-prioritisation, /competitor-gap or /content-decay hands off a page that needs writing or rewriting."
+argument-hint: "[keyword]"
 ---
 
 # Content Brief

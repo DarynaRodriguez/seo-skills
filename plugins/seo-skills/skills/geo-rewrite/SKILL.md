@@ -2,6 +2,7 @@
 name: geo-rewrite
 description: "Rewrites a page or section so an answer engine can lift a correct, self-contained answer from it: definition-first structure, entities named next to capabilities, question-shaped headings, specific proof, real freshness signals and matching structured data, returned with a change log and a list of what no rewrite can fix."
 when_to_use: "The user asks to optimise a page for AI search, ChatGPT, Perplexity or AI Overviews, wants content made quotable or extractable, or asks why a page is retrieved but never quoted; or /citation-gap returns an extraction gap, or /ai-visibility-audit finds the page retrieved without citation."
+argument-hint: "[url]"
 ---
 
 # GEO Rewrite

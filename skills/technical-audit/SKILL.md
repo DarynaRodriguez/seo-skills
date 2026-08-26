@@ -2,6 +2,7 @@
 name: technical-audit
 description: "Audits site-level technical SEO health and returns a short ranked list of fixes weighted by the clicks and impressions actually at risk, each with affected URL counts, effort, owner and the exact change to make."
 when_to_use: "The user asks for a technical SEO audit, reports a crawl or indexing problem, wants to know why traffic dropped after a site change, asks about Core Web Vitals, canonicals, redirects, sitemaps, robots.txt or hreflang; or /site-inventory hands off a page list that needs health checks."
+argument-hint: "[url or domain]"
 ---
 
 # Technical Audit

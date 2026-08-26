@@ -2,6 +2,7 @@
 name: cannibalisation-audit
 description: "Finds pages competing with each other for the same query using Search Console position history, the keyword map and duplicate titles, then returns a resolution table naming which page should win, the action, and the owner."
 when_to_use: "The user asks whether pages are competing or cannibalising, reports rankings flipping between URLs, sees impressions with weak CTR on a query, asks whether to merge or redirect two pages; or /keyword-page-mapping finds a keyword mapped twice, or /technical-audit finds duplicate titles or H1s."
+argument-hint: "[export.csv]"
 ---
 
 # Cannibalisation Audit

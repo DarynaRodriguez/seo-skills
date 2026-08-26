@@ -24,14 +24,19 @@ Output after this chain: `.seo/profile.md`, `.seo/pages.csv`,
 ## 2. Traffic is down and nobody knows why
 
 ```
-/performance-report  →  /technical-audit  →  /indexation-check  →
-/content-decay  →  /cannibalisation-audit
+/performance-report  →  /drift-check  →  /technical-audit  →
+/indexation-check  →  /content-decay  →  /cannibalisation-audit
 ```
 
 Why this order: quantify before diagnosing. Rule out the site-wide causes
 (something broke, pages fell out of the index) before the page-level ones (content
 aged, pages started competing). Running `/content-decay` first on a site that
 quietly noindexed a template wastes a week.
+
+`/drift-check` goes second when there is a baseline to diff against, because
+"what changed on this page since 12 August" is a cheaper question than "what is
+wrong with this site", and it usually names the cause outright. With no baseline
+it has nothing to say: skip it, and take one now so the next drop is covered.
 
 Split brand from non-brand early. A drop that is entirely brand queries is a
 marketing spend story, not an SEO one, and `/performance-report` separates them.
@@ -75,7 +80,26 @@ Why this order: the map prevents you from commissioning a page that competes wit
 one you already own. Brief before outline, outline before snippet blocks, schema
 last because it describes what the finished page actually contains.
 
-## 6. Monthly rhythm
+## 6. Shipping a redesign, migration or template change
+
+```
+/drift-check baseline  →  ship  →  /drift-check  →  /technical-audit
+```
+
+The only workflow in this pack that has to start before the work does. Baseline
+the ten to thirty pages carrying real clicks, ship, then diff. A canonical that
+moved or a `noindex` that appeared shows up in seconds instead of surfacing six
+weeks later as an unexplained decline.
+
+Two failure modes to name out loud. Baselining four hundred pages produces a
+report nobody reads. And a baseline taken while the site was mid-deploy is a
+false known-good, so check the status in the snapshot before trusting it.
+
+If content moved client side during the change, that is the finding to escalate:
+it still looks right in a browser while anything that does not run JavaScript
+sees an empty page. Hand it to `/ai-crawler-access`.
+
+## 7. Monthly rhythm
 
 | Cadence | Run |
 |---------|-----|

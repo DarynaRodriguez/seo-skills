@@ -2,6 +2,7 @@
 name: page-optimiser
 description: "Takes one live URL and a target keyword and returns a ranked fix list: intent match, first 100 words, claim quality, keyword and semantic coverage, internal links, thin or bloated sections, text image and video quality, plus a verdict on whether the page should be optimised, rewritten, merged or retired."
 when_to_use: "The user asks to optimise, audit, review or fix a specific live page for a keyword; or /content-decay, /cannibalisation-audit, /meta-writer or /performance-report hands off a URL that is under-performing."
+argument-hint: "[url]"
 ---
 
 # Page Optimiser

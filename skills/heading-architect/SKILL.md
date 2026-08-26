@@ -2,6 +2,7 @@
 name: heading-architect
 description: "Builds the H1 to H3 structure for a page or post: one H1 carrying the primary keyword and the value proposition, H2s that each answer a distinct reader question, H3s for long tail and question formats, returned as an outline with the target keyword and reader question behind every heading."
 when_to_use: "The user asks for a page outline, a heading structure, an H1 to H3 hierarchy, a blog skeleton or help fixing headings that read as keyword lists; or /content-brief hands off a brief that needs turning into a structure."
+argument-hint: "[url]"
 ---
 
 # Heading Architect
