@@ -1,0 +1,4 @@
+# normalise line endings in the repo, keep shell scripts LF so they run after clone
+* text=auto
+*.sh text eol=lf
+*.py text eol=lf

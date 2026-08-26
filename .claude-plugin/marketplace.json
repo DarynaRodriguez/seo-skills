@@ -1,0 +1,35 @@
+{
+  "name": "seo-skills",
+  "owner": {
+    "name": "Daryna Rodriguez",
+    "url": "https://github.com/DarynaRodriguez"
+  },
+  "description": "seo-skills, open-source SEO and AI-visibility skills for agents.",
+  "plugins": [
+    {
+      "name": "seo-skills",
+      "source": "./plugins/seo-skills",
+      "displayName": "SEO Skills",
+      "description": "Open-source skills that turn your agent into a full SEO team: keyword research and mapping, content briefs and meta copy, technical and cannibalisation audits, and honest AI-answer visibility work.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Daryna Rodriguez",
+        "url": "https://github.com/DarynaRodriguez"
+      },
+      "homepage": "https://github.com/DarynaRodriguez/seo-skills",
+      "repository": "https://github.com/DarynaRodriguez/seo-skills",
+      "license": "MIT",
+      "category": "productivity",
+      "keywords": [
+        "seo",
+        "geo",
+        "aeo",
+        "ai-visibility",
+        "keyword-research",
+        "technical-seo",
+        "content",
+        "skills"
+      ]
+    }
+  ]
+}

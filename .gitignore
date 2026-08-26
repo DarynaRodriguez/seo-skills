@@ -1,0 +1,11 @@
+# working state the skills create in a project, never committed
+.seo/
+!profiles/
+
+# local
+.DS_Store
+node_modules/
+__pycache__/
+*.pyc
+.env
+.env.local
