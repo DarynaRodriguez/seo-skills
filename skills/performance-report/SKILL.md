@@ -2,6 +2,7 @@
 name: performance-report
 description: "Writes the monthly organic search report a marketer can send to an executive without editing: one headline sentence, the profile's own metric, what moved and why, what shipped and what it did, what is not working, next period's plan, and honest caveats."
 when_to_use: "The user asks for a monthly or quarterly SEO report, an update for leadership, a summary of organic performance, or asks what changed and why; or an audit or optimisation skill needs its outcome reported after a period has passed."
+argument-hint: "[now.csv] [before.csv]"
 ---
 
 # Performance Report
@@ -53,6 +54,21 @@ names rather than pasting raw rows. Never invent a metric. Search Console is tru
 for clicks, impressions, CTR and position; Ahrefs organic traffic and traffic value
 are models. Ahrefs monetary values are USD cents, divide by 100 to display. Full
 tool list: `docs/data-sources.md`.
+
+## Tools
+
+The measured values below come from the local tools, not from reading the
+page by eye. No API key, no install, no network beyond the page itself:
+
+| Need                                                    | Command                                                         |
+|---------------------------------------------------------|-----------------------------------------------------------------|
+| Totals, weighted position and period on period movement | `python -m seo_tools gsc <now.csv> --compare <before.csv> --json` |
+
+Every command takes `--json`, which is the form to use here. Exit code 0
+means it answered, 1 means it could not. Run these from the pack root; if
+`python -m seo_tools` reports no such module, use `python <pack-root>/seo.py`
+instead, which works from any directory. If anything errors, run
+`python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
 
 ## Procedure
 

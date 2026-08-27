@@ -2,6 +2,7 @@
 name: snippet-targeting
 description: "Targets the featured snippet and the people-also-ask slot: picks the snippet type for the query, drafts the 40 to 60 word direct answer under a question heading, tightens lists, specifies real HTML tables and FAQ questions people actually search, and checks who holds the snippet now."
 when_to_use: "The user asks about featured snippets, position zero, the answer box, people-also-ask, or how to get a page quoted directly in search; or /content-brief, /heading-architect or /page-optimiser hands off a page whose question sections need answer blocks."
+argument-hint: "[keyword]"
 ---
 
 # Snippet Targeting
@@ -33,6 +34,21 @@ the answer, so ask rather than assume.
 | Question queries the site already receives | `mcp__Ahrefs__gsc-keywords` filtered to question terms | Ask for a Search Console query export, or take questions from sales and support and label the source |
 | Whether the page currently ranks in the top 10 | `mcp__Ahrefs__gsc-page-history`, `mcp__Ahrefs__site-explorer-organic-keywords` | Ask for the current position, and note that a page outside the top 10 rarely wins a snippet |
 | The page copy to place the block into | `mcp__Ahrefs__site-audit-page-content`, or a fetch | Ask the user to paste the section |
+
+## Tools
+
+The measured values below come from the local tools, not from reading the
+page by eye. No API key, no install, no network beyond the page itself:
+
+| Need                                                       | Command                               |
+|------------------------------------------------------------|---------------------------------------|
+| Read the headings and body the snippet would be drawn from | `python -m seo_tools page <url> --json` |
+
+Every command takes `--json`, which is the form to use here. Exit code 0
+means it answered, 1 means it could not. Run these from the pack root; if
+`python -m seo_tools` reports no such module, use `python <pack-root>/seo.py`
+instead, which works from any directory. If anything errors, run
+`python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
 
 ## Procedure
 

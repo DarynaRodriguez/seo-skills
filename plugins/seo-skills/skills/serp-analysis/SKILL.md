@@ -2,6 +2,7 @@
 name: serp-analysis
 description: "Reads one keyword's result page like a competitor: what content type wins, what the top results share, which SERP features take the clicks, the entry price in referring domains and depth, and a chase or concede verdict."
 when_to_use: "The user asks whether a keyword is worth targeting, what ranks for a term, why a page will not rank, or what to build for a query; or /keyword-discovery, /competitor-gap or /keyword-prioritisation hands off a term that needs a verdict."
+argument-hint: "[keyword]"
 ---
 
 # SERP Analysis

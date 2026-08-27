@@ -2,6 +2,7 @@
 name: competitor-gap
 description: "Finds the terms rivals rank for and the site does not, confirms who the real organic competitors are, and returns a gap table split into terms to win, terms underperforming, and terms to concede."
 when_to_use: "The user asks what competitors rank for that we do not, who our real search competitors are, why a rival outranks us, or wants a competitive keyword gap; or /keyword-discovery hands off competitor terms."
+argument-hint: "[competitor domain]"
 ---
 
 # Competitor Gap

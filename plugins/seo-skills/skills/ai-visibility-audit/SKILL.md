@@ -2,6 +2,7 @@
 name: ai-visibility-audit
 description: "Establishes where a brand actually stands in AI answers: visibility, share of voice, sentiment and average position across tracked prompts, broken down by topic and by engine, with aided and unaided prompts counted separately and every figure carrying its source and date."
 when_to_use: "The user asks whether the brand appears in ChatGPT, Perplexity, Google AI Overviews, Copilot or Gemini answers, wants an AI visibility or share of voice baseline, asks why a competitor is being recommended instead, or asks for an AI search report; or /serp-analysis hands off an AI-overview-dominated query, or /performance-report needs the AI-answer section."
+argument-hint: "[brand or domain]"
 ---
 
 # AI Visibility Audit
@@ -58,6 +59,22 @@ problem, not a rounding artefact. `position` is a rank, lower is better.
 **IDs are opaque.** Copy every `pr_`, `to_` and `tg_` identifier verbatim from the
 tool result that produced it. Never shorten, complete or reconstruct one from
 memory: a guessed ID is an invented ID. Full tool list: `docs/data-sources.md`.
+
+## Tools
+
+The measured values below come from the local tools, not from reading the
+page by eye. No API key, no install, no network beyond the page itself:
+
+| Need                                                         | Command                                 |
+|--------------------------------------------------------------|-----------------------------------------|
+| Confirm the answer engines can even reach the page           | `python -m seo_tools robots <url> --json` |
+| Check the content is in the served HTML, not client-rendered | `python -m seo_tools page <url> --json` |
+
+Every command takes `--json`, which is the form to use here. Exit code 0
+means it answered, 1 means it could not. Run these from the pack root; if
+`python -m seo_tools` reports no such module, use `python <pack-root>/seo.py`
+instead, which works from any directory. If anything errors, run
+`python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
 
 ## Procedure
 

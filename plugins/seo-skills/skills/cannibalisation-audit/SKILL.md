@@ -2,6 +2,7 @@
 name: cannibalisation-audit
 description: "Finds pages competing with each other for the same query using Search Console position history, the keyword map and duplicate titles, then returns a resolution table naming which page should win, the action, and the owner."
 when_to_use: "The user asks whether pages are competing or cannibalising, reports rankings flipping between URLs, sees impressions with weak CTR on a query, asks whether to merge or redirect two pages; or /keyword-page-mapping finds a keyword mapped twice, or /technical-audit finds duplicate titles or H1s."
+argument-hint: "[export.csv]"
 ---
 
 # Cannibalisation Audit
@@ -49,6 +50,21 @@ Pull these out before touching a tool:
 Never invent a metric. Every number carries its source and the date it was pulled.
 Search Console is truth for received traffic; Ahrefs traffic is a model, label it.
 Full tool list: `docs/data-sources.md`.
+
+## Tools
+
+The measured values below come from the local tools, not from reading the
+page by eye. No API key, no install, no network beyond the page itself:
+
+| Need                                                        | Command                                     |
+|-------------------------------------------------------------|---------------------------------------------|
+| Group competing URLs per query from a Search Console export | `python -m seo_tools gsc <export.csv> --json` |
+
+Every command takes `--json`, which is the form to use here. Exit code 0
+means it answered, 1 means it could not. Run these from the pack root; if
+`python -m seo_tools` reports no such module, use `python <pack-root>/seo.py`
+instead, which works from any directory. If anything errors, run
+`python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
 
 ## Procedure
 

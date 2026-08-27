@@ -2,6 +2,7 @@
 name: content-brief
 description: "Writes a paste-ready content brief for one page: primary and secondary keywords with sources, the search intent in one sentence, SERP evidence, the questions the page must answer, entities to cover, recommended type and length, the differentiating angle, internal links in and out, required proof assets, CTA and a definition of done."
 when_to_use: "The user asks for a content brief, a writer brief, a page outline or a spec for something they are about to commission or write; or /keyword-page-mapping, /keyword-prioritisation, /competitor-gap or /content-decay hands off a page that needs writing or rewriting."
+argument-hint: "[keyword]"
 ---
 
 # Content Brief
@@ -37,6 +38,21 @@ the answer, so ask rather than assume.
 
 People-also-ask boxes and related searches are read from the live SERP, not from
 memory. If nobody has looked at the SERP, say the questions section is incomplete.
+
+## Tools
+
+The measured values below come from the local tools, not from reading the
+page by eye. No API key, no install, no network beyond the page itself:
+
+| Need                                                 | Command                               |
+|------------------------------------------------------|---------------------------------------|
+| Read a competitor page: headings, word count, schema | `python -m seo_tools page <url> --json` |
+
+Every command takes `--json`, which is the form to use here. Exit code 0
+means it answered, 1 means it could not. Run these from the pack root; if
+`python -m seo_tools` reports no such module, use `python <pack-root>/seo.py`
+instead, which works from any directory. If anything errors, run
+`python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
 
 ## Procedure
 

@@ -2,6 +2,7 @@
 name: heading-architect
 description: "Builds the H1 to H3 structure for a page or post: one H1 carrying the primary keyword and the value proposition, H2s that each answer a distinct reader question, H3s for long tail and question formats, returned as an outline with the target keyword and reader question behind every heading."
 when_to_use: "The user asks for a page outline, a heading structure, an H1 to H3 hierarchy, a blog skeleton or help fixing headings that read as keyword lists; or /content-brief hands off a brief that needs turning into a structure."
+argument-hint: "[url]"
 ---
 
 # Heading Architect
@@ -32,6 +33,21 @@ the answer, so ask rather than assume.
 | Real questions readers ask on the topic | `mcp__Ahrefs__gsc-keywords`, `mcp__Ahrefs__keywords-explorer-search-suggestions` | Ask the user for the questions sales and support actually hear, and label the source |
 | Section structure of the pages that rank | `mcp__Ahrefs__serp-overview` then read the top pages, or `/serp-analysis` | Ask for a pasted top 10, then read those pages directly |
 | Existing headings on a page being restructured | `mcp__Ahrefs__site-audit-page-content`, or a fetch | Ask the user to paste the current headings |
+
+## Tools
+
+The measured values below come from the local tools, not from reading the
+page by eye. No API key, no install, no network beyond the page itself:
+
+| Need                                                | Command                                   |
+|-----------------------------------------------------|-------------------------------------------|
+| Read the real heading outline and find breaks in it | `python -m seo_tools headings <url> --json` |
+
+Every command takes `--json`, which is the form to use here. Exit code 0
+means it answered, 1 means it could not. Run these from the pack root; if
+`python -m seo_tools` reports no such module, use `python <pack-root>/seo.py`
+instead, which works from any directory. If anything errors, run
+`python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
 
 ## Procedure
 

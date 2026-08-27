@@ -2,6 +2,7 @@
 name: citation-gap
 description: "Finds which sources answer engines actually cite for the buyer's questions, classifies each cited source as owned, editorial, reference or community, and returns a per-source action list with owner and honest difficulty, separating pages we can fix from listings we must get corrected."
 when_to_use: "The user asks why a competitor is cited and the brand is not, which sources AI answers pull from, how to get into AI answers, or what to do about a G2 or Reddit result; or /ai-visibility-audit finds healthy mentions with no citations, or /competitor-gap finds a third-party page owning the query."
+argument-hint: "[topic or prompt]"
 ---
 
 # Citation Gap

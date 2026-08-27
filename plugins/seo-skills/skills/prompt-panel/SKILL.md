@@ -2,6 +2,7 @@
 name: prompt-panel
 description: "Builds or extends the tracked AI-answer prompt set from real buyer evidence, structured by buying-journey stage and proximity to the brand, with every prompt marked aided or unaided, plus a quarantine list of rejected prompts and the reason each was refused."
 when_to_use: "The user asks what prompts to track in Peec or Brand Radar, wants to add or clean up tracked prompts, asks how AI visibility is being measured, or asks to improve visibility by changing the prompt set; or /ai-visibility-audit finds skewed or thin prompt coverage, or /citation-gap finds an untracked buyer question."
+argument-hint: "[topic]"
 ---
 
 # Prompt Panel

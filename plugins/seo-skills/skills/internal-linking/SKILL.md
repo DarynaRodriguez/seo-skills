@@ -2,6 +2,7 @@
 name: internal-linking
 description: "Finds the internal links that are missing: maps pillars and clusters, spots orphaned and under-linked pages, checks anchor distribution, locates where link authority actually sits, and returns a build list of source url, source section, anchor text, target url and why."
 when_to_use: "The user asks about internal links, orphan pages, site architecture, pillar and cluster structure, anchor text, or how to pass authority to a page that will not rank; or /page-optimiser, /keyword-page-mapping or /content-decay hands off a page that needs inbound links."
+argument-hint: "[url]"
 ---
 
 # Internal Linking
@@ -41,6 +42,21 @@ structure. The link list you build makes the real site match it.
 
 Navigation, footer and sidebar links are template links. Count them separately from
 in-body links, because they are not evidence that two pages are related.
+
+## Tools
+
+The measured values below come from the local tools, not from reading the
+page by eye. No API key, no install, no network beyond the page itself:
+
+| Need                                               | Command                               |
+|----------------------------------------------------|---------------------------------------|
+| Count and classify the links a page actually emits | `python -m seo_tools page <url> --json` |
+
+Every command takes `--json`, which is the form to use here. Exit code 0
+means it answered, 1 means it could not. Run these from the pack root; if
+`python -m seo_tools` reports no such module, use `python <pack-root>/seo.py`
+instead, which works from any directory. If anything errors, run
+`python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
 
 ## Procedure
 

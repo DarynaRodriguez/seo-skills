@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    # Windows is in the matrix because that is where this repo has actually
+    # broken: a validator that assumed a UTF-8 default encoding, and a console
+    # code page that cannot print an audit.
+    name: tests (${{ matrix.os }}, python ${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ["3.9", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Confirm there is nothing to install
+        shell: bash
+        run: |
+          if [ -f requirements.txt ] || [ -f pyproject.toml ]; then
+            echo "The execution layer is meant to be standard library only."
+            echo "If a dependency is genuinely needed, update this check and docs/execution-layer.md."
+            exit 1
+          fi
+          echo "No dependency files. Standard library only, as intended."
+      - name: Run the test suite
+        run: python -m unittest discover -s tests -t . -v
+
+  validate:
+    name: repo contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Validate skills, docs and tool references
+        run: python scripts/validate.py
+      - name: Confirm the plugin mirror is in sync
+        shell: bash
+        run: |
+          ./scripts/sync-plugin.sh
+          if ! git diff --quiet -- plugins/; then
+            echo "plugins/ is generated and out of date. Run ./scripts/sync-plugin.sh and commit the result."
+            git --no-pager diff --stat -- plugins/
+            exit 1
+          fi
+          echo "Plugin mirror matches skills/."
+
+  smoke:
+    name: cli smoke (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: doctor reports a usable machine
+        run: python -m seo_tools doctor --offline --json
+      - name: every command answers --help
+        shell: bash
+        run: |
+          for command in fetch page meta headings schema robots sitemap baseline drift history gsc doctor; do
+            python -m seo_tools "$command" --help > /dev/null || {
+              echo "$command has no working --help"; exit 1;
+            }
+          done
+          echo "All commands respond to --help."
+      - name: measuring copy works without a network
+        shell: bash
+        run: |
+          python -m seo_tools meta \
+            --title "Procurement software for mid market manufacturers" \
+            --description "Automate sourcing, manage suppliers and keep every contract in one place." \
+            --json > meta.json
+          python -c "
+          import json, sys
+          data = json.load(open('meta.json'))
+          assert data['title']['px'] > 0, data
+          assert 'Estimate' in data['title']['method'], data
+          print('meta measured:', data['title']['px'], 'px')
+          "
+
+  secrets:
+    name: secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan tracked files for credentials
+        shell: bash
+        run: |
+          # Anything matching these should never be committed to a public repo.
+          patterns='(ghp|gho|ghs|ghu)_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----'
+          if git grep -nIE "$patterns" -- . ':!.github/workflows/ci.yml'; then
+            echo "Possible credential above. Remove it and rotate the key."
+            exit 1
+          fi
+          echo "No credential patterns found."

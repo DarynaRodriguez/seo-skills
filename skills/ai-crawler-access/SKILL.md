@@ -2,6 +2,7 @@
 name: ai-crawler-access
 description: "Checks whether AI crawlers and answer-time fetchers can actually retrieve the site: robots.txt directives per named agent, CDN, WAF and bot rules, JavaScript-rendered content, login and geo walls, and rate limits, verified against logged agent visits, with a per-crawler allowed or blocked verdict, the business consequence and the fix."
 when_to_use: "The user asks whether ChatGPT, Perplexity, Google or Copilot can crawl the site, wants to block or allow AI crawlers, asks about llms.txt or robots.txt for AI, or reports zero AI visibility; or /ai-visibility-audit, /citation-gap or /geo-rewrite hits a page the engines never retrieve. Run this before any other AI visibility work."
+argument-hint: "[url]"
 ---
 
 # AI Crawler Access
@@ -47,6 +48,22 @@ intentional block is not reported as a defect.
 Every verdict in the output carries the evidence and the date it was gathered. An
 agent you did not see in a log and did not test is `unverified`, never `allowed`.
 Full tool list: `docs/data-sources.md`.
+
+## Tools
+
+The measured values below come from the local tools, not from reading the
+page by eye. No API key, no install, no network beyond the page itself:
+
+| Need                                                    | Command                                                |
+|---------------------------------------------------------|--------------------------------------------------------|
+| Evaluate robots.txt against every AI and search crawler | `python -m seo_tools robots <url> --json` |
+| Test one agent against one path                         | `python -m seo_tools robots <url> --agent GPTBot --json` |
+
+Every command takes `--json`, which is the form to use here. Exit code 0
+means it answered, 1 means it could not. Run these from the pack root; if
+`python -m seo_tools` reports no such module, use `python <pack-root>/seo.py`
+instead, which works from any directory. If anything errors, run
+`python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
 
 ## Procedure
 

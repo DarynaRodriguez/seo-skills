@@ -2,6 +2,7 @@
 name: page-optimiser
 description: "Takes one live URL and a target keyword and returns a ranked fix list: intent match, first 100 words, claim quality, keyword and semantic coverage, internal links, thin or bloated sections, text image and video quality, plus a verdict on whether the page should be optimised, rewritten, merged or retired."
 when_to_use: "The user asks to optimise, audit, review or fix a specific live page for a keyword; or /content-decay, /cannibalisation-audit, /meta-writer or /performance-report hands off a URL that is under-performing."
+argument-hint: "[url]"
 ---
 
 # Page Optimiser
@@ -37,6 +38,23 @@ the answer, so ask rather than assume.
 | Whether another page competes for the keyword | `.seo/keyword-map.csv`, `mcp__Ahrefs__site-explorer-organic-keywords` | Ask which other pages target the term |
 
 Full text, image and video standards: `references/content-quality.md`.
+
+## Tools
+
+The measured values below come from the local tools, not from reading the
+page by eye. No API key, no install, no network beyond the page itself:
+
+| Need                                             | Command                                   |
+|--------------------------------------------------|-------------------------------------------|
+| Everything measurable about the page in one call | `python -m seo_tools page <url> --json` |
+| Title and description widths                     | `python -m seo_tools meta <url> --json` |
+| Heading outline                                  | `python -m seo_tools headings <url> --json` |
+
+Every command takes `--json`, which is the form to use here. Exit code 0
+means it answered, 1 means it could not. Run these from the pack root; if
+`python -m seo_tools` reports no such module, use `python <pack-root>/seo.py`
+instead, which works from any directory. If anything errors, run
+`python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
 
 ## Procedure
 

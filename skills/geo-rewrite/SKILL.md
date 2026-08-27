@@ -2,6 +2,7 @@
 name: geo-rewrite
 description: "Rewrites a page or section so an answer engine can lift a correct, self-contained answer from it: definition-first structure, entities named next to capabilities, question-shaped headings, specific proof, real freshness signals and matching structured data, returned with a change log and a list of what no rewrite can fix."
 when_to_use: "The user asks to optimise a page for AI search, ChatGPT, Perplexity or AI Overviews, wants content made quotable or extractable, or asks why a page is retrieved but never quoted; or /citation-gap returns an extraction gap, or /ai-visibility-audit finds the page retrieved without citation."
+argument-hint: "[url]"
 ---
 
 # GEO Rewrite
@@ -43,6 +44,21 @@ claims we may not make stay out, whatever it would do for extractability. Sectio
 Every number that enters the rewritten copy carries a source the page can show.
 An unsourced statistic is not a proof point, it is a liability. Full tool list:
 `docs/data-sources.md`.
+
+## Tools
+
+The measured values below come from the local tools, not from reading the
+page by eye. No API key, no install, no network beyond the page itself:
+
+| Need                                                      | Command                               |
+|-----------------------------------------------------------|---------------------------------------|
+| Confirm the text is in the served HTML an engine will see | `python -m seo_tools page <url> --json` |
+
+Every command takes `--json`, which is the form to use here. Exit code 0
+means it answered, 1 means it could not. Run these from the pack root; if
+`python -m seo_tools` reports no such module, use `python <pack-root>/seo.py`
+instead, which works from any directory. If anything errors, run
+`python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
 
 ## Procedure
 

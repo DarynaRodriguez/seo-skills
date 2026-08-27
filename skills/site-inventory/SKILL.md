@@ -2,6 +2,7 @@
 name: site-inventory
 description: "Crawls or pulls every indexable URL on a site and writes the baseline page inventory to .seo/pages.csv, classifying page type, market and language, attaching title, H1 and 28-day Search Console traffic, and flagging orphaned, thin and duplicated pages."
 when_to_use: "The user asks for a page inventory, a site crawl, a list of pages with titles and traffic, or a baseline before an audit; or /seo-profile-setup hands off; or another seo-skills skill reports that .seo/pages.csv is missing."
+argument-hint: "[domain]"
 ---
 
 # Site Inventory
@@ -40,6 +41,21 @@ does not mention, report the contradiction rather than silently adopting either.
 Search Console is the only source of truth for what the site actually receives. Ahrefs
 organic traffic is a model: it never fills a `clicks_28d` cell. State the date every
 pull was taken, in the summary header, once.
+
+## Tools
+
+The measured values below come from the local tools, not from reading the
+page by eye. No API key, no install, no network beyond the page itself:
+
+| Need                                               | Command                                                        |
+|----------------------------------------------------|----------------------------------------------------------------|
+| Sitemaps, index files and the URL set they declare | `python -m seo_tools sitemap <url> --expand --limit 5000 --json` |
+
+Every command takes `--json`, which is the form to use here. Exit code 0
+means it answered, 1 means it could not. Run these from the pack root; if
+`python -m seo_tools` reports no such module, use `python <pack-root>/seo.py`
+instead, which works from any directory. If anything errors, run
+`python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
 
 ## Procedure
 

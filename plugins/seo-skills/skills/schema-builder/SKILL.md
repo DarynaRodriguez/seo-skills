@@ -2,6 +2,7 @@
 name: schema-builder
 description: "Produces correct JSON-LD for a page: maps page type to schema type, states required versus recommended properties, generates the block from what is actually on the page, gives CMS implementation notes, and closes with a validation step."
 when_to_use: "The user asks for schema, structured data, JSON-LD, rich results, FAQPage, Article, Product or Organization markup, or asks why a rich result is not showing; or /page-optimiser, /snippet-targeting or /technical-audit hands off a page missing markup."
+argument-hint: "[url]"
 ---
 
 # Schema Builder
@@ -96,6 +97,21 @@ over a stack of unconnected blocks.
 
 Required means the rich result will not be issued without it. Recommended means it
 adds accuracy or eligibility. Neither means invent it: an absent value is left out.
+
+## Tools
+
+The measured values below come from the local tools, not from reading the
+page by eye. No API key, no install, no network beyond the page itself:
+
+| Need                                             | Command                                 |
+|--------------------------------------------------|-----------------------------------------|
+| Parse and validate the JSON-LD already on a page | `python -m seo_tools schema <url> --json` |
+
+Every command takes `--json`, which is the form to use here. Exit code 0
+means it answered, 1 means it could not. Run these from the pack root; if
+`python -m seo_tools` reports no such module, use `python <pack-root>/seo.py`
+instead, which works from any directory. If anything errors, run
+`python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
 
 ## Procedure
 

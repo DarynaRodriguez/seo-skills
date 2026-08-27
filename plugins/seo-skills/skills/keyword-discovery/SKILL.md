@@ -2,6 +2,7 @@
 name: keyword-discovery
 description: "Expands profile seeds, site rankings and Search Console queries into a classified keyword candidate set, and returns a candidate table plus a discard list with reasons."
 when_to_use: "The user asks what keywords to target, wants a keyword list built for a market or language, needs seed expansion for a new topic or page; or /seo-profile-setup or /site-inventory hands off a profile and a page list."
+argument-hint: "[seed keyword]"
 ---
 
 # Keyword Discovery

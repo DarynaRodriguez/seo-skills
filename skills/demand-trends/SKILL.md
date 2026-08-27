@@ -2,6 +2,7 @@
 name: demand-trends
 description: "Reads volume history and Search Console history to classify demand as growing, flat, seasonal, or a passed spike, names the lead time before a seasonal peak, and flags category-name shifts where buyers migrate from one term to another."
 when_to_use: "The user asks whether a topic or keyword is growing or dying, wants seasonality or timing guidance, sees traffic move and wants to know if demand moved, or asks whether a term is being replaced; or /keyword-prioritisation needs a trend input."
+argument-hint: "[keyword]"
 ---
 
 # Demand Trends
