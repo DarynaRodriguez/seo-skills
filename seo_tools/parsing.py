@@ -27,10 +27,66 @@ _SPA_ROOT = re.compile(
     r"<(?:div|main)[^>]+id\s*=\s*[\"\']?(?:root|app|__next|__nuxt|q-app)[\"\']?", re.I
 )
 
+# Scripts that do not put spaces between words, so counting letter runs returns 1
+# for an entire sentence. Chinese and Japanese are counted per character instead,
+# which is also how word counts are conventionally reported in those languages.
+# Korean is deliberately absent: it uses spaces, so letter runs are already right.
+_UNSPACED = (
+    (0x3040, 0x309F),  # hiragana
+    (0x30A0, 0x30FF),  # katakana
+    (0x3400, 0x4DBF),  # CJK extension A
+    (0x4E00, 0x9FFF),  # CJK unified ideographs
+    (0xF900, 0xFAFF),  # CJK compatibility ideographs
+    (0x20000, 0x2A6DF),  # CJK extension B
+)
+# Scripts with no word spacing and no reliable character-level unit either.
+# Segmenting them needs a dictionary, which would mean a dependency.
+_UNSEGMENTABLE = (
+    (0x0E00, 0x0E7F),  # Thai
+    (0x0E80, 0x0EFF),  # Lao
+    (0x1780, 0x17FF),  # Khmer
+    (0x1000, 0x109F),  # Myanmar
+)
+
+
+def _in_ranges(code: int, ranges) -> bool:
+    return any(low <= code <= high for low, high in ranges)
+
 
 def count_words(text: str) -> int:
-    """Words a reader would count: letter runs, so numbers and punctuation do not inflate it."""
-    return len(_WORD.findall(text or ""))
+    """Count the units a reader of this text would count.
+
+    Letter runs for space-separated scripts, plus one per character for Chinese
+    and Japanese, where a whole sentence is a single run and counting runs would
+    return 1. Mixed-script text is counted correctly because the two passes are
+    additive and do not overlap.
+    """
+    if not text:
+        return 0
+    unspaced = 0
+    remainder = []
+    for char in text:
+        if _in_ranges(ord(char), _UNSPACED):
+            unspaced += 1
+        else:
+            remainder.append(char)
+    return len(_WORD.findall("".join(remainder))) + unspaced
+
+
+def counting_basis(text: str) -> str:
+    """How count_words treated this text, so a caller can caveat the number."""
+    if not text:
+        return "no text"
+    has_unspaced = any(_in_ranges(ord(c), _UNSPACED) for c in text)
+    has_unsegmentable = any(_in_ranges(ord(c), _UNSEGMENTABLE) for c in text)
+    if has_unsegmentable:
+        return (
+            "unreliable: text contains a script with no word spacing that cannot be "
+            "segmented without a dictionary. Treat the count as indicative only."
+        )
+    if has_unspaced:
+        return "words, plus one unit per Chinese or Japanese character"
+    return "words"
 
 
 class PageParser(HTMLParser):
@@ -340,6 +396,7 @@ def parse_page(html: str, url: str = "") -> Dict[str, object]:
         ),
         "word_count": count_words(body_text),
         "main_word_count": count_words(main_text),
+        "word_count_basis": counting_basis(main_text or body_text),
         "text_preview": body_text[:400],
         "images": len(parser.images),
         "images_missing_alt": len(images_missing_alt),

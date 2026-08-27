@@ -6,6 +6,41 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+Locale bugs. The tools handled English and German, which made them look general
+while they produced wrong numbers or no numbers at all for everything else. Each
+fix has a test pinning it, in `tests/test_locales.py`.
+
+- **Word counts returned 1 for any Chinese or Japanese text.** Those scripts do
+  not separate words with spaces, so counting letter runs treated a whole sentence
+  as one word. Worse than a wrong count: the client-rendering heuristic is "app
+  root element plus almost no text", so every CJK page was flagged as
+  client-rendered. Now counted per character, with `word_count_basis` reporting
+  which rule applied. Korean is unaffected, since it uses spaces.
+- **Title and description widths measured wide characters as Latin ones.** A CJK
+  title that truncates reported as fitting, in the pack's flagship deterministic
+  feature. Wide and fullwidth characters are now measured at one em via
+  `unicodedata.east_asian_width`, and combining marks at zero so accented and
+  Indic text is not charged twice for one glyph.
+- **The truncation preview returned a bare ellipsis for text without spaces.**
+  Cutting on word boundaries alone cannot work where there are none. Falls back to
+  cutting per character.
+- **Length checks used character floors, which are not comparable across scripts.**
+  A 28-character Japanese title filling 85% of the available width was reported as
+  too short. Every pass or fail decision is now made in pixels; character counts
+  are still reported, because that is what briefs are written against.
+- **Search Console exports in most languages lost their columns.** The header
+  normaliser stripped every non-ASCII character, so Japanese, Korean, Chinese and
+  Cyrillic headers reduced to an empty string, and Spanish, Italian, Dutch and
+  Polish had no aliases. Only "CTR" matched, because it is spelled the same
+  everywhere. Aliases now cover 14 languages, with `--columns` as a positional
+  override for any locale not listed.
+- **The crawler list covered only Western engines.** Added YandexBot, Baiduspider,
+  Yeti, SeznamBot, PetalBot and Applebot, each with what blocking it costs in its
+  market. Applebot is distinguished from Applebot-Extended, which is the same trap
+  as Google-Extended.
+
 ### Added
 
 Evidence from a verified AEO research pack, folded into six skills. Every figure

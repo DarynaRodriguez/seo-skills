@@ -160,7 +160,12 @@ def cmd_meta(args) -> int:
             print("  shows as: {}".format(measured["truncated_preview"]))
     print("\n" + output.rule("findings"))
     print("\n".join(output.findings_text(payload["findings"])))
-    print(typography.METHOD)
+    # The method depends on the script, so read it off the measurement rather
+    # than printing the Latin default at a CJK title.
+    for measured in (payload["title"], payload["description"]):
+        if measured:
+            print(measured["method"])
+            break
     return EXIT_OK
 
 
@@ -348,8 +353,10 @@ def cmd_history(args) -> int:
 
 def cmd_gsc(args) -> int:
     try:
-        current = gsc_module.load_csv(args.csv)
-        previous = gsc_module.load_csv(args.compare) if args.compare else None
+        current = gsc_module.load_csv(args.csv, columns=args.columns)
+        previous = (
+            gsc_module.load_csv(args.compare, columns=args.columns) if args.compare else None
+        )
     except gsc_module.GscError as exc:
         _fail(str(exc), args)
 
@@ -357,6 +364,7 @@ def cmd_gsc(args) -> int:
     payload: Dict[str, object] = {
         "file": current["path"],
         "columns_detected": current["columns_detected"],
+        "columns_resolved_by": current["columns_resolved_by"],
         "columns_ignored": current["columns_ignored"],
         "rows": current["row_count"],
         "totals": gsc_module.summarise(rows),
@@ -586,6 +594,11 @@ def build_parser() -> argparse.ArgumentParser:
     gsc.add_argument("--compare", help="an earlier export, to diff period on period")
     gsc.add_argument("--dimension", choices=("page", "query"), default="page", help="what to join on")
     gsc.add_argument("--min-impressions", type=float, default=100, help="ignore rows below this")
+    gsc.add_argument(
+        "--columns",
+        help="name the columns positionally when the export is in a language the "
+        "aliases do not cover, e.g. query,clicks,impressions,ctr,position. Use - to skip one",
+    )
 
     doctor = add("doctor", cmd_doctor, "Check this machine can run the tools.")
     doctor.add_argument("--offline", action="store_true", help="skip the network check")

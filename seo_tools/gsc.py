@@ -21,16 +21,81 @@ from typing import Dict, Iterable, List, Optional, Sequence
 
 # Header aliases, lowercased and stripped of punctuation before matching.
 # English and German cover the GSC UI exports this is most likely to meet.
+# Search Console localises its export headers, so an English-only alias list makes
+# the whole module English-only. These cover the UI export in the languages most
+# likely to turn up. Anything unlisted is handled by --columns, so a locale that
+# is missing here is an inconvenience rather than a wall.
 COLUMN_ALIASES: Dict[str, Sequence[str]] = {
-    "query": ("query", "queries", "top queries", "search query", "suchanfrage", "haufigste suchanfragen", "keyword"),
-    "page": ("page", "pages", "top pages", "landing page", "seite", "haufigste seiten", "url", "address"),
-    "clicks": ("clicks", "click", "klicks"),
-    "impressions": ("impressions", "impression", "impressionen"),
-    "ctr": ("ctr", "click through rate", "clickthrough rate", "klickrate"),
-    "position": ("position", "average position", "avg position", "durchschnittliche position", "pos"),
-    "country": ("country", "land"),
-    "device": ("device", "gerat"),
-    "date": ("date", "datum"),
+    "query": (
+        "query", "queries", "top queries", "search query", "keyword", "keywords",
+        "suchanfrage", "suchanfragen", "haufigste suchanfragen",          # de
+        "requete", "requetes", "requetes les plus frequentes",            # fr
+        "consulta", "consultas", "consultas principales",                 # es
+        "query principali",                                              # it
+        "zoekopdracht", "populairste zoekopdrachten",                     # nl
+        "consultas mais frequentes", "principais consultas",              # pt
+        "zapytanie", "najpopularniejsze zapytania",                       # pl
+        "sokfraga", "vanligaste sokfragorna",                             # sv
+        "sogeord", "mest almindelige sogeord",                            # da
+        "hakusanat", "suosituimmat kyselyt",                              # fi
+        "sorgu", "en populer sorgular",                                   # tr
+        "dotaz", "nejcastejsi dotazy",                                    # cs
+        "zapros", "zaprosy", "poiskovyy zapros",                          # ru transliterated
+        "поисковый запрос", "запрос", "запросы",              # ru
+        "上位のクエリ", "クエリ",                                            # ja
+        "인기 검색어", "검색어",                                             # ko
+        "热门查询", "查询",                                                 # zh
+    ),
+    "page": (
+        "page", "pages", "top pages", "landing page", "url", "urls", "address",
+        "seite", "seiten", "haufigste seiten",                             # de
+        "pages les plus frequentes", "page de destination",                # fr
+        "paginas principales", "pagina",                                   # es
+        "pagine principali",                                              # it
+        "populairste paginas",                                            # nl
+        "paginas mais frequentes",                                        # pt
+        "najpopularniejsze strony", "strona",                              # pl
+        "vanligaste sidorna", "sida",                                      # sv
+        "mest almindelige sider",                                          # da
+        "suosituimmat sivut",                                              # fi
+        "en populer sayfalar", "sayfa",                                    # tr
+        "nejcastejsi stranky",                                             # cs
+        "上位のページ", "ページ",                                            # ja
+        "인기 페이지", "페이지",                                              # ko
+        "热门网页", "网页",                                                  # zh
+        "страница", "страницы",                                     # ru
+    ),
+    "clicks": (
+        "clicks", "click", "klicks", "clics", "clic", "kliks", "klikken",
+        "cliques", "klikniecia", "klick", "klik", "napsautukset", "tiklama",
+        "kliknuti", "клики", "クリック数", "클릭수", "点击次数",
+    ),
+    "impressions": (
+        "impressions", "impression", "impressionen", "impresiones", "impressioni",
+        "vertoningen", "impressoes", "wyswietlenia", "visningar", "eksponeringar",
+        "nayttokerrat", "goruntuleme", "zobrazeni", "показы",
+        "表示回数", "노출수", "展示次数",
+    ),
+    "ctr": (
+        "ctr", "click through rate", "clickthrough rate", "klickrate",
+        "taux de clics", "porcentaje de clics", "percentuale di clic",
+        "doorklikratio", "taxa de cliques", "wspolczynnik klikniec",
+        "klickfrekvens", "napsautussuhde", "tiklama orani", "mira prokliku",
+        "ctr（クリック率）", "클릭률", "点击率",
+    ),
+    "position": (
+        "position", "average position", "avg position", "pos",
+        "durchschnittliche position", "position moyenne", "posicion",
+        "posicion media", "posizione", "posizione media", "positie",
+        "posicao", "pozycja", "genomsnittlig position", "keskimaarainen sijainti",
+        "ortalama konum", "prumerna pozice", "позиция",
+        "掲載順位", "平均掲載順位", "掲出順位",           # ja
+        "평균 게재순위", "게재순위",                                # ko
+        "平均排名",                                                  # zh
+    ),
+    "country": ("country", "land", "pays", "pais", "paese", "kraj", "ulke", "国", "국가", "国家/地区"),
+    "device": ("device", "gerat", "appareil", "dispositivo", "apparaat", "urzadzenie", "cihaz", "デバイス", "기기", "设备"),
+    "date": ("date", "datum", "fecha", "data", "tarih", "日付", "날짜", "日期"),
 }
 
 _PUNCT = re.compile(r"[^a-z0-9 ]+")
@@ -41,28 +106,85 @@ class GscError(ValueError):
 
 
 ACCENT_FOLD = {
-    "ä": "a", "ö": "o", "ü": "u", "ß": "ss", "á": "a", "à": "a", "â": "a",
-    "é": "e", "è": "e", "ê": "e", "í": "i", "ì": "i", "ó": "o", "ò": "o",
-    "ô": "o", "ú": "u", "ù": "u", "ñ": "n", "ç": "c", "å": "a", "ø": "o", "æ": "ae",
+    # German, Nordic
+    "ä": "a", "ö": "o", "ü": "u", "ß": "ss", "å": "a", "ø": "o", "æ": "ae",
+    # Romance
+    "á": "a", "à": "a", "â": "a", "ã": "a", "é": "e", "è": "e", "ê": "e",
+    "ë": "e", "í": "i", "ì": "i", "î": "i", "ï": "i", "ó": "o", "ò": "o",
+    "ô": "o", "õ": "o", "ú": "u", "ù": "u", "û": "u", "ñ": "n", "ç": "c",
+    # Polish
+    "ł": "l", "ę": "e", "ą": "a", "ś": "s", "ż": "z", "ź": "z", "ć": "c", "ń": "n",
+    # Czech, Slovak
+    "č": "c", "ř": "r", "š": "s", "ž": "z", "ý": "y", "ď": "d", "ť": "t",
+    "ň": "n", "ů": "u", "ě": "e",
+    # Turkish
+    "ı": "i", "ş": "s", "ğ": "g", "İ": "i",
+    # Romanian, Baltic
+    "ă": "a", "ș": "s", "ț": "t", "ū": "u", "ė": "e", "į": "i",
 }
+
+# Strip punctuation and symbols, keep letters and digits of every script. The
+# previous ASCII-only class deleted CJK, Cyrillic and Greek headers entirely,
+# which silently made this module Latin-only.
+_NON_WORD = re.compile(r"[^\w\s]+", re.UNICODE)
 
 
 def _canonical_header(raw: str) -> Optional[str]:
     """Match a header cell to a canonical column name.
 
-    Accents are folded before punctuation is stripped, not after. The other
-    order deletes them: the punctuation class is ASCII, so it turns
-    "Haufigste" spelled with an umlaut into "h ufigste" and no German export
-    ever matches.
+    Two ordering traps, both of which produced silent failures:
+
+    Accents are folded before punctuation is stripped. The other order deletes
+    them, turning "Haufigste" spelled with an umlaut into "h ufigste".
+
+    Punctuation stripping is Unicode-aware. An ASCII-only class removes every
+    Japanese, Korean, Chinese and Cyrillic character, so those headers reduce to
+    an empty string and never match anything.
     """
     cleaned = (raw or "").strip().lower()
     for accented, plain in ACCENT_FOLD.items():
         cleaned = cleaned.replace(accented, plain)
-    cleaned = " ".join(_PUNCT.sub(" ", cleaned).split())
+    cleaned = " ".join(_NON_WORD.sub(" ", cleaned).split())
+    if not cleaned:
+        return None
     for canonical, aliases in COLUMN_ALIASES.items():
         if cleaned in aliases:
             return canonical
     return None
+
+
+CANONICAL_COLUMNS = tuple(COLUMN_ALIASES)
+
+
+def parse_column_override(spec: str, header_length: int) -> Dict[int, str]:
+    """Turn a --columns spec into a positional mapping.
+
+    The escape hatch for any locale or tool export the aliases do not cover:
+    name the columns in order, using `-` to skip one.
+
+        --columns query,clicks,impressions,-,position
+    """
+    names = [part.strip().lower() for part in (spec or "").split(",")]
+    mapping: Dict[int, str] = {}
+    for index, name in enumerate(names):
+        if not name or name == "-":
+            continue
+        if name not in CANONICAL_COLUMNS:
+            raise GscError(
+                "unknown column name {!r} in --columns. Valid names: {}".format(
+                    name, ", ".join(CANONICAL_COLUMNS)
+                )
+            )
+        if index >= header_length:
+            raise GscError(
+                "--columns names {} columns but the file has {}".format(
+                    len(names), header_length
+                )
+            )
+        mapping[index] = name
+    if not mapping:
+        raise GscError("--columns did not name any usable column")
+    return mapping
 
 
 _GROUPED_DOT = re.compile(r"^\d{1,3}(\.\d{3})+$")
@@ -134,8 +256,12 @@ def detect_decimal_comma(text, delimiter):
     return False
 
 
-def load_csv(path: str) -> Dict[str, object]:
-    """Read one export. Returns rows with canonical keys plus what was detected."""
+def load_csv(path: str, columns: Optional[str] = None) -> Dict[str, object]:
+    """Read one export. Returns rows with canonical keys plus what was detected.
+
+    `columns` is the positional override for a locale or tool the aliases do
+    not cover. See parse_column_override.
+    """
     file_path = pathlib.Path(path)
     if not file_path.is_file():
         raise GscError("no such file: {}".format(path))
@@ -164,15 +290,24 @@ def load_csv(path: str) -> Dict[str, object]:
     except StopIteration:
         raise GscError("{} is empty".format(path))
 
-    mapping: Dict[int, str] = {}
-    for index, cell in enumerate(header):
-        canonical = _canonical_header(cell)
-        if canonical and canonical not in mapping.values():
-            mapping[index] = canonical
-    if not mapping:
-        raise GscError(
-            "no recognisable columns in {}. Header was: {}".format(path, ", ".join(header[:8]))
-        )
+    if columns:
+        mapping = parse_column_override(columns, len(header))
+        resolved_by = "the --columns override"
+    else:
+        mapping = {}
+        for index, cell in enumerate(header):
+            canonical = _canonical_header(cell)
+            if canonical and canonical not in mapping.values():
+                mapping[index] = canonical
+        resolved_by = "header names"
+        if not mapping:
+            raise GscError(
+                "no recognisable columns in {}. Header was: {}. If this export is in a "
+                "language the aliases do not cover, name the columns positionally with "
+                "--columns query,clicks,impressions,ctr,position (use - to skip one).".format(
+                    path, ", ".join(header[:8])
+                )
+            )
 
     rows: List[Dict[str, object]] = []
     for values in reader:
@@ -201,6 +336,7 @@ def load_csv(path: str) -> Dict[str, object]:
         "path": str(file_path),
         "delimiter": delimiter,
         "decimal_comma": decimal_comma,
+        "columns_resolved_by": resolved_by,
         "columns_detected": sorted(set(mapping.values())),
         "columns_ignored": [
             header[i] for i in range(len(header)) if i not in mapping and str(header[i]).strip()

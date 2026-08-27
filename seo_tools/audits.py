@@ -56,7 +56,15 @@ def _finding(check: str, severity: str, message: str, **extra) -> Finding:
 
 
 def check_meta(page: Dict[str, object]) -> List[Finding]:
-    """Title and description: presence, length, width, duplication against H1."""
+    """Title and description: presence, width, duplication against H1.
+
+    Every pass or fail decision here is made in pixels, never in characters.
+    A character count is not comparable across scripts: a 28-character Japanese
+    title fills more of the SERP than a 45-character English one, so a character
+    floor reports the Japanese title as too short while it is nearly full.
+    Character counts are still reported, because that is what briefs are written
+    against.
+    """
     findings: List[Finding] = []
     title = page.get("title")
     description = page.get("meta_description")
@@ -79,19 +87,22 @@ def check_meta(page: Dict[str, object]) -> List[Finding]:
                     px=measured["px"],
                     chars=measured["chars"],
                     preview=measured["truncated_preview"],
-                    method=typography.METHOD,
+                    method=measured["method"],
                 )
             )
-        if measured["chars"] < typography.TITLE_CHARS_MIN:
+        if measured["px_used_pct"] is not None and measured["px_used_pct"] < typography.MIN_FILL_PCT:
             findings.append(
                 _finding(
                     "title.short",
                     "warning",
-                    "Title is {} characters, under the {} character floor, so it is leaving width unused.".format(
-                        measured["chars"], typography.TITLE_CHARS_MIN
+                    "Title uses {}% of the available width, under the {}% floor, so it is "
+                    "leaving room unused.".format(
+                        measured["px_used_pct"], typography.MIN_FILL_PCT
                     ),
                     observed=title,
                     px=measured["px"],
+                    chars=measured["chars"],
+                    method=measured["method"],
                 )
             )
 
@@ -121,18 +132,20 @@ def check_meta(page: Dict[str, object]) -> List[Finding]:
                     px=measured["px"],
                     chars=measured["chars"],
                     preview=measured["truncated_preview"],
-                    method=typography.METHOD,
+                    method=measured["method"],
                 )
             )
-        if measured["chars"] < typography.DESCRIPTION_CHARS_MIN:
+        if measured["px_used_pct"] is not None and measured["px_used_pct"] < typography.MIN_FILL_PCT:
             findings.append(
                 _finding(
                     "description.short",
                     "info",
-                    "Description is {} characters, under the {} character floor.".format(
-                        measured["chars"], typography.DESCRIPTION_CHARS_MIN
+                    "Description uses {}% of the available width, under the {}% floor.".format(
+                        measured["px_used_pct"], typography.MIN_FILL_PCT
                     ),
                     observed=description,
+                    px=measured["px"],
+                    chars=measured["chars"],
                 )
             )
 

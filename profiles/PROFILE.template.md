@@ -25,6 +25,23 @@ gap visible: a blank is information, a guess is not.
 - **hreflang pairs in use:** <en-gb ↔ de, or none>
 - **Market priority order:** <which market's rankings matter most this quarter>
 
+Fill in the search engine column honestly rather than writing Google everywhere.
+Nothing in this pack assumes a market: the skills read this table, and a market
+served by Yandex, Baidu, Naver or Seznam gets checked against that engine's
+crawler instead of Googlebot. Leaving it as Google in a market where Google is not
+the leader produces an audit that passes while the site is invisible.
+
+Two notes for the tools, which follow from this table rather than from any default:
+
+- **Script.** Chinese, Japanese, Thai, Lao, Khmer and Burmese do not separate words
+  with spaces, so word counts in those markets are reported per character and
+  labelled as such. Every title and description decision is made in pixels, never
+  in characters, because a 28-character Japanese title fills more of the result
+  than a 45-character English one.
+- **Search Console exports.** The export header is localised. The tools recognise
+  14 languages; anything else is named positionally with `--columns`. See
+  `docs/execution-layer.md`.
+
 ## 3. Who we sell to
 
 - **Primary buyer:** <role, seniority, company size, industry>

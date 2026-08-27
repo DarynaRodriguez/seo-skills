@@ -165,6 +165,56 @@ Four analyses:
 two files cover equal-length, non-overlapping periods, so it states that
 assumption in the output rather than hiding it.
 
+## Locales
+
+The pack is for anyone, so no tool here assumes English or a Western market. Four
+places where that assumption is easy to make silently, and what each one does
+instead:
+
+**Word counts.** Chinese and Japanese do not put spaces between words, so counting
+letter runs returns 1 for an entire sentence. Those scripts are counted per
+character, which is also how word counts are conventionally reported in them.
+Korean uses spaces and is counted by words. `page` reports `word_count_basis` so
+the caller knows which applies. Thai, Lao, Khmer and Burmese have neither word
+spaces nor a usable character unit; segmenting them needs a dictionary, which
+would mean a dependency, so the basis field says the count is indicative only.
+
+**Title and description width.** Wide and fullwidth characters are measured at one
+em, roughly double a Latin lowercase letter. Measured as Latin, a CJK title that
+truncates reports as fitting. Combining marks are measured at zero, so accented
+and Indic text is not charged twice for one glyph. The estimate is rougher for
+non-Latin scripts because Google renders them in a different font, and the
+`method` field on every measurement says which basis was used.
+
+Every pass or fail decision about length is made in pixels. Character counts are
+reported because that is what briefs are written against, but they never decide
+anything: a character count is not comparable across scripts.
+
+**Search Console exports.** Google localises the export header. The aliases cover
+English, German, French, Spanish, Italian, Dutch, Polish, Turkish, Czech, Swedish,
+Japanese, Korean, Chinese and Russian. For anything else, name the columns
+positionally and skip what you do not need:
+
+```bash
+python -m seo_tools gsc export.csv --columns query,clicks,impressions,-,position
+```
+
+The result reports `columns_resolved_by` so it is clear whether the header was
+recognised or overridden.
+
+**Crawlers.** `robots` covers the engines that lead outside the US as well as the
+AI crawlers: YandexBot, Baiduspider, Yeti (Naver), SeznamBot, PetalBot. A profile
+that names one of those markets should read those rows first. Applebot is listed
+separately from Applebot-Extended, because one governs search visibility and the
+other only training, which is the same trap as Google-Extended.
+
+What is still Latin-centric and should be treated with care: the Arial width table
+covers Latin, Greek-adjacent punctuation and common accents. Cyrillic, Greek,
+Hebrew, Arabic and Indic characters fall through to a default width, so widths in
+those scripts are cruder than the CJK and Latin cases. If that matters for your
+market, add the metrics for your script to `ARIAL` in `seo_tools/typography.py`
+and send a pull request.
+
 ## Using it from an agent
 
 ### Claude Code
