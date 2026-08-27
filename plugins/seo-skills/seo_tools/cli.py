@@ -581,15 +581,20 @@ def cmd_normalise(args) -> int:
             continue
         rows.append({"url": url, "normalised": key, "ok": True})
 
+    # One exit code for both output modes. The JSON caller is the one most likely
+    # to be a script testing the status rather than reading the rows, so having
+    # --json always succeed is exactly backwards.
+    code = EXIT_OK if all(r["ok"] for r in rows) else EXIT_FAILED
+
     if args.json:
         output.emit_json({"count": len(rows), "urls": rows})
-        return EXIT_OK
+        return code
     for row in rows:
         if row["ok"]:
             print(row["normalised"])
         else:
             print("could not normalise {}: {}".format(row["url"], row["error"]), file=sys.stderr)
-    return EXIT_OK if all(r["ok"] for r in rows) else EXIT_FAILED
+    return code
 
 
 def cmd_doctor(args) -> int:

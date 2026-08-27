@@ -21,6 +21,11 @@ touch another agent's output file.
 | `profile_path` | no | Put `"profile"` in `inputs_missing` and suppress nothing |
 | `clicks_28d` | no | Put `"clicks"` in `inputs_missing` and set the field to `null` |
 
+`clicks_28d` is context for whoever reads the aggregate, not an input to any
+check: it is how the orchestrator sorts a hundred page files so a broken page
+with traffic outranks a broken page with none. Nothing you report depends on it,
+which is why a missing value is recorded rather than fatal.
+
 Create `<output_dir>/pages/` if it does not already exist.
 
 ## Invoking the tools
@@ -31,20 +36,19 @@ directory holding `seo.py`:
 
     python "<pack_root>/seo.py" page <url> --json
 
-That one call covers title, description, canonical, robots directives, lang,
-hreflang, the full heading list with levels, Open Graph, JSON-LD, word counts,
-images and alt coverage, link counts, whether the content is client-rendered, and
-the findings from the check suite.
+**One call is the whole audit.** It returns four top-level blocks: `page` (every
+fact about the markup), `fetch` (status, `final_url`, `redirect_chain`,
+`redirect_count`, headers), `findings`, and `checked_at`. Do not call `fetch`,
+`headings` or `schema` afterwards. Every one of them is already inside this
+output, and a second call costs a request while adding nothing.
 
-Call `fetch` as well when the status is not 200 or the page redirected, because
-the redirect chain is the one thing `page` does not return:
+Two notes on the command itself:
 
-    python "<pack_root>/seo.py" fetch <url> --json
-
-Do not call `headings` or `schema`. `page` already returns every heading and
-every JSON-LD block, so a second call adds nothing.
-
-Two or three tool calls is a complete audit of one page.
+- If `python` is not on the path, use `python3`. Both work; the launcher needs
+  3.9 or newer and nothing else.
+- On Windows, prefix the command with `PYTHONIOENCODING=utf-8` or set it in the
+  environment first. Without it a non-English page comes back as mojibake, and
+  the failure looks like an encoding fault on the site rather than in your shell.
 
 ## Severities
 
@@ -100,12 +104,25 @@ How to fill it:
   these across pages, so a suppressed critical must not reach the total. Anything
   suppressed stays visible in `suppressed`.
 - **`page_facts`** holds the non-finding facts worth having, copied from the
-  `page` output: `title`, `meta_description`, `canonical`, `html_lang`,
-  `hreflang`, `main_word_count`, `word_count_basis`, `schema_types`,
-  `links_internal`, `links_external`, `images`, `requires_js`.
-- **`audited_at`** is a full ISO 8601 timestamp, not a date. Two runs on one day
-  have to be orderable.
-- **`redirect_chain`** comes from `fetch` when the page redirected, else `[]`.
+  `page` output: `title`, `title_length`, `meta_description`, `canonical`,
+  `canonical_is_self`, `meta_robots`, `meta_robots_directives`, `html_lang`,
+  `hreflang`, `word_count`, `main_word_count`, `word_count_basis`,
+  `schema_types`, `links_internal`, `links_external`, `images`,
+  `images_missing_alt`, `has_viewport`, `requires_js`.
+
+  `meta_robots` and `meta_robots_directives` are in that list because the
+  judgement below is entirely about an intended `noindex`, and without them a
+  reader of your file cannot see whether the page carries one. Both counts are
+  there because `word_count_basis` labels a number, and shipping the label
+  without both numbers is how a page with 174 words of content and 475 words of
+  navigation gets read as a long page.
+- **`audited_at` is the tool's `checked_at`, copied.** It is a full ISO 8601
+  instant, not a date, because two runs on one day have to be orderable. Do not
+  generate your own.
+- **`redirect_chain`** is `fetch.redirect_chain` when `fetch.redirect_count` is
+  above zero, else `[]`. The chain always holds at least one entry, the request
+  that finally answered, so its length is not a redirect count. Read
+  `redirect_count`.
 - **`tools_failed`** takes the command and the error for any call that failed.
   Write the file anyway: a missing file reads as "never audited", which is worse
   than "audited, one call failed".

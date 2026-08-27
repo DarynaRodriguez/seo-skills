@@ -58,7 +58,15 @@ Shared flags: `--json`, `--timeout`, `--user-agent`, `--home`.
 
 Exit codes: `0` it answered, `1` it could not or found something critical,
 `2` the arguments were wrong. `page` and `drift` return `1` on a critical
-finding, so a release script can gate on them.
+finding, so a release script can gate on them. `--json` does not change the exit
+code: a script that only reads the status gets the same answer either way.
+
+Every `--json` payload carries `checked_at`, a full ISO 8601 instant in UTC
+saying when the answer was produced. Reports are compared against each other and
+against baselines, so a record whose timestamp was invented by whoever wrote it
+cannot be ordered against the next one. Copy the field rather than reaching for
+a clock: three separate agent runs each invented a different answer before it
+existed, and one of them would have assumed midnight.
 
 ### page
 
@@ -109,6 +117,17 @@ The output separates blocked crawlers by what blocking them costs:
 Conflating those three is the most common and most expensive mistake in this
 area. In particular, blocking `Google-Extended` does not remove you from Google
 Search or from AI Overviews, which use Googlebot. There is a test pinning that.
+
+Each verdict also carries `allow_is_implicit`: true when nothing in robots.txt
+matched the crawler at all, false when a rule decided. Both read as allowed, and
+only the second survives someone adding a broad `Disallow`, so a site whose every
+pass is implicit is one edit from blocking everything. It is a boolean because
+the alternative is matching on the wording of `reason`, which is a string meant
+for a person to read.
+
+`implicit_allow_count` and `allowed_count` are the same thing at site level.
+Equal values mean nothing on the site has been allowed deliberately. Most sites
+read 24 of 24 there, which is worth knowing but is not a finding on its own.
 
 ### baseline, drift, history
 

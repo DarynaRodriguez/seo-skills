@@ -172,5 +172,50 @@ class TestRobotsUrl(unittest.TestCase):
         )
 
 
+class TestImplicitAllowIsNamed(unittest.TestCase):
+    """A weak pass and a strong pass must be distinguishable without reading prose.
+
+    A live agent run had to infer this by matching on the wording of `reason`
+    across 24 crawlers, because the boolean its report needed did not exist.
+    Reword that sentence and every such caller goes silently wrong, so the
+    distinction is a field now.
+    """
+
+    def test_no_group_at_all_is_an_implicit_allow(self):
+        verdict = RobotsTxt("", 200).can_fetch("GPTBot", "https://example.com/page")
+        self.assertTrue(verdict["allowed"])
+        self.assertIs(verdict["allow_is_implicit"], True)
+
+    def test_a_matching_allow_rule_is_explicit(self):
+        robots = RobotsTxt("User-agent: GPTBot\nDisallow: /private/\nAllow: /private/ok/\n", 200)
+        verdict = robots.can_fetch("GPTBot", "https://example.com/private/ok/page")
+        self.assertTrue(verdict["allowed"])
+        self.assertIs(verdict["allow_is_implicit"], False)
+
+    def test_a_group_with_no_matching_rule_is_still_implicit(self):
+        robots = RobotsTxt("User-agent: GPTBot\nDisallow: /private/\n", 200)
+        verdict = robots.can_fetch("GPTBot", "https://example.com/public/page")
+        self.assertTrue(verdict["allowed"])
+        self.assertIs(verdict["allow_is_implicit"], True)
+
+    def test_a_disallow_is_never_an_implicit_allow(self):
+        verdict = RobotsTxt("User-agent: *\nDisallow: /\n", 200).can_fetch(
+            "GPTBot", "https://example.com/page"
+        )
+        self.assertFalse(verdict["allowed"])
+        self.assertIs(verdict["allow_is_implicit"], False)
+
+    def test_every_verdict_carries_the_field(self):
+        # Including the status-derived branches, which is where a caller reading
+        # the field unconditionally would otherwise hit a KeyError.
+        for status in (200, 401, 403, 404, 500):
+            with self.subTest(status=status):
+                robots = RobotsTxt("User-agent: *\nDisallow: /x/\n", status)
+                for agent in AI_AGENTS:
+                    verdict = robots.can_fetch(agent, "https://example.com/page")
+                    self.assertIn("allow_is_implicit", verdict)
+                    self.assertIsInstance(verdict["allow_is_implicit"], bool)
+
+
 if __name__ == "__main__":
     unittest.main()

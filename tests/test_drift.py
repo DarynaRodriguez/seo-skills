@@ -188,9 +188,6 @@ class TestStore(unittest.TestCase):
                 self.assertTrue(store.path.exists())
 
 
-if __name__ == "__main__":
-    unittest.main()
-
 class TestOutputIsSelfSufficient(unittest.TestCase):
     """A caller must not need the database to fill in what the contract asks for.
 

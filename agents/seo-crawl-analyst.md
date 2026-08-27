@@ -19,16 +19,21 @@ export and the site profile.
 
 ## Invoking the tools
 
-Every command below is written as `python -m seo_tools <command>`, which only
-resolves when the working directory is the pack root. It will not be, in most
-runs. If it reports `No module named seo_tools`, use the launcher instead, which
-works from anywhere:
+Use the launcher, with the absolute `pack_root` the orchestrator passes. It works
+from any working directory, which matters because yours is never the pack root:
 
-    python <pack-root>/seo.py <command> ...
+    python "<pack_root>/seo.py" <command> ...
 
-The orchestrator passes the pack root. If it did not, say so and stop rather than
-guessing at a path: a wrong path produces an empty audit that looks like a clean
-one.
+If `pack_root` was not supplied, say so and stop rather than guessing at a path:
+a wrong path produces an empty audit that looks like a clean one.
+
+Two notes on the command itself:
+
+- If `python` is not on the path, use `python3`. Both work; the launcher needs
+  3.9 or newer and nothing else.
+- On Windows, prefix the command with `PYTHONIOENCODING=utf-8` or set it in the
+  environment first. Without it a non-English export comes back as mojibake, and
+  the failure looks like a broken CSV rather than a shell setting.
 
 ## Severities
 
@@ -40,7 +45,7 @@ is the whole point.
 ## What to run
 
 ```bash
-python -m seo_tools crawl <export.csv> --json
+python "<pack_root>/seo.py" crawl <export.csv> --json
 ```
 
 It recognises Screaming Frog, Sitebulb, Semrush Site Audit and Ahrefs Site Audit
@@ -49,14 +54,14 @@ it tells you to name the columns positionally, and the canonical names are in
 `docs/data-sources.md`.
 
 ```bash
-python -m seo_tools crawl <export.csv> --columns url,status,title,-,canonical --json
+python "<pack_root>/seo.py" crawl <export.csv> --columns url,status,title,-,canonical --json
 ```
 
 If a Search Console export was supplied, run it too, so findings can be weighted
 by traffic rather than by count:
 
 ```bash
-python -m seo_tools gsc <export.csv> --json
+python "<pack_root>/seo.py" gsc <export.csv> --json
 ```
 
 ## How to read the result
@@ -135,8 +140,12 @@ Write exactly two files:
 ```
 
 Every key above is one the instructions require you to communicate, so none of
-them is improvised. The three that get misfilled:
+them is improvised. The four that get misfilled:
 
+- **`analysed_at` is the tool's `checked_at`, copied.** Every command stamps its
+  JSON with a full ISO 8601 instant, so you never generate this and never fall
+  back to a date. It is distinct from `export_date`, which is when the crawl ran:
+  a fresh analysis of a three-month-old export is the case that needs both.
 - **`limitations`** is where a caveat about the crawl goes, and it is the key the
   orchestrator prints. A partial export, an unknown freshness, a missing homepage:
   these are limitations, not site findings, and putting them in `site_findings`
