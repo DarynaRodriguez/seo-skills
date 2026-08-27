@@ -51,6 +51,7 @@ skills use. The flag works before or after the command name.
 | `drift <url>` | What changed against that snapshot, and how badly |
 | `history <url>` | Which snapshots and comparisons are held for a URL |
 | `gsc <csv>` | What a Search Console export says, with no API access |
+| `crawl <csv>` | What a crawl export says: any exporter, no API access |
 
 Shared flags: `--json`, `--timeout`, `--user-agent`, `--home`.
 
@@ -164,6 +165,30 @@ Four analyses:
 `--compare` joins two exports and ranks what moved. It cannot verify that the
 two files cover equal-length, non-overlapping periods, so it states that
 assumption in the output rather than hiding it.
+
+### crawl
+
+The other import path, and the one that makes the provider genuinely swappable.
+Screaming Frog, Sitebulb, Semrush Site Audit, Ahrefs Site Audit and a hand-built
+spreadsheet all describe the same thing, so all of them are mapped onto one
+canonical row and every analysis reads that row rather than a vendor's columns.
+
+```bash
+python -m seo_tools crawl screamingfrog.csv
+python -m seo_tools crawl export.csv --thin 500 --json
+python -m seo_tools crawl odd.csv --columns url,status,title,-,canonical
+```
+
+Answers with no API and no network: status bands, broken URLs ordered by inlinks
+so severity is visible, redirect chains found within the crawl, duplicate titles
+and descriptions and H1s, missing fields, canonicals pointing elsewhere, orphans,
+and thin pages.
+
+Two judgement calls are built in. Duplicates and missing-field counts ignore
+non-indexable pages, because a duplicate title on a noindexed thank-you page
+competes with nothing and reporting it buries the pair that does. And the
+thin-page threshold is an argument rather than a rule, because a 200-word pricing
+page can be exactly right.
 
 ## Locales
 

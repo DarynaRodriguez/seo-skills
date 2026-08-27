@@ -4,7 +4,53 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.4.0] 2026-08-27
+
+### Added
+
+Subagents, so a whole-site audit runs in parallel instead of page by page.
+
+- **`/site-audit`**, the twenty-seventh skill and the first orchestrator here. It
+  audits nothing itself: it fans out four specialists, reads the files they write,
+  aggregates by finding rather than by page so one template problem across thirty
+  URLs is one row, and ranks by clicks at risk rather than by severity. Ten rows
+  out, the rest counted in a line.
+- **`agents/`** with four subagents, each carrying a persistence contract so the
+  fan-out can be put back together: `seo-crawl-analyst` (runs first and alone,
+  because the page set is its output), `seo-ai-access-checker` (one per market),
+  `seo-page-auditor` (one per URL, concurrently) and `seo-drift-watcher` (one per
+  baselined URL).
+- `scripts/validate.py` now checks agent frontmatter against the Claude Code
+  subagent reference: required fields, unknown keys, model names, tool names, and
+  that every `python -m seo_tools` command an agent references exists. Verified by
+  breaking each rule on purpose and watching it fail.
+- Agents ship in the plugin mirror and via `install.sh`, and CI asserts the mirror
+  carries skills, agents and tools. A plugin with `/site-audit` and no agents
+  would be a skill that cannot run, which is the defect the tool layer already had
+  once.
+- `docs/data-sources.md` gains the `crawl` command reference, and
+  `docs/execution-layer.md` documents it properly.
+
+### Fixed
+
+- **Cyrillic, Greek and Hebrew were measured at a default width.** Every glyph in
+  those scripts fell through to 556 units. Cyrillic Sha is 917, so a Russian title
+  was under-measured by up to 65% per wide character. Now measured from real font
+  metrics extracted by `scripts/extract_font_widths.py`, which parses the font
+  directly rather than trusting a transcription.
+- **The German sharp s was wrong.** Recorded as 556, the font says 611. Found by
+  running the new extractor with `--verify` against the hand-written table, which
+  now passes clean over all 117 entries.
+- **Arabic and Indic widths were silently wrong rather than absent.** Arabic is
+  cursive, so letters join and change form and an isolated codepoint's advance is
+  not what renders. The Indic scripts form conjuncts, and Arial contains no
+  Devanagari at all. Both now report `UNRELIABLE` in the `method` field, label the
+  width a floor rather than an estimate, and emit `title.width_unmeasurable`
+  instead of a truncation verdict. A pass or fail on a number that does not mean
+  what it looks like is worse than no verdict.
+- **CI derived its smoke-test command list from a hardcoded string**, and it had
+  already fallen behind: `crawl` shipped without being smoke tested. Read off the
+  parser now, so a new command cannot skip it.
 
 ### Added
 

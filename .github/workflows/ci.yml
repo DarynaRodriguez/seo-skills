@@ -48,6 +48,14 @@ jobs:
           python-version: "3.13"
       - name: Validate skills, docs and tool references
         run: python scripts/validate.py
+      - name: Confirm the plugin mirror carries skills, agents and tools
+        shell: bash
+        run: |
+          for dir in skills agents seo_tools; do
+            count=$(find "plugins/seo-skills/$dir" -type f | wc -l | tr -d ' ')
+            [ "$count" -gt 0 ] || { echo "plugins/seo-skills/$dir is empty"; exit 1; }
+            echo "plugins/seo-skills/$dir: $count files"
+          done
       - name: Confirm the plugin mirror is in sync
         shell: bash
         run: |

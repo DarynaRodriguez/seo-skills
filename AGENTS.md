@@ -12,9 +12,11 @@ You are either **using** these skills on a site, or **editing** them. Different 
 3. Pick one skill. These are deliberately narrow. A request that spans lanes is a
    chain of skills, not one skill doing everything: check the workflows in
    `docs/workflows.md` before improvising.
-4. Check what data you actually have before promising an answer.
-   `docs/data-sources.md` lists the tools and, for each, what to do when the
-   connector is missing. Missing data is a stated limitation in the output.
+4. Check what data you actually have before promising an answer. The skills are
+   written against 12 named data needs, and profile section 11 says which provider
+   serves each one. `docs/data-sources.md` maps needs to providers and states what
+   a skill does when a need has none. Missing data is a stated limitation in the
+   output, never an estimate.
 5. **Measure with the tools instead of reading the page by eye.** If the skill has
    a `## Tools` section, run what it lists. Do not report a title length, a
    heading outline, a robots verdict, a schema type or a sitemap count that you
@@ -25,7 +27,7 @@ You are either **using** these skills on a site, or **editing** them. Different 
 ## The tools
 
 `seo_tools` is the measuring half of this repo. Standard library Python, no
-install, no API key: `python -m seo_tools <command> --json`. Twelve commands,
+install, no API key: `python -m seo_tools <command> --json`. Thirteen commands,
 listed in `docs/execution-layer.md`. Notes that matter when calling them:
 
 - `--json` is the form to use. It works before or after the command name.
@@ -55,6 +57,28 @@ listed in `docs/execution-layer.md`. Notes that matter when calling them:
   showing its inputs and weights.
 - New skill means a new row in the README catalogue, a new row in the support
   matrix, and a CHANGELOG entry.
+
+## Editing the agents
+
+`agents/*.md` are subagent definitions. `/site-audit` fans them out; nothing else
+invokes them.
+
+- Frontmatter fields come from the Claude Code subagent reference. `name` and
+  `description` are required; `validate.py` rejects any key outside the known set
+  and any model outside sonnet, opus, haiku, fable, inherit or a full model id.
+- `name` should match the filename. The host does not require it, the validator
+  warns, and a mismatch is confusing for no gain.
+- Every agent writes to a file under an output directory it is given, and says so
+  in a **Persistence contract** section. A fan-out that returns only chat replies
+  cannot be aggregated.
+- Keep the reply short and the file complete. The reply is a summary for the
+  orchestrator; the file is the deliverable.
+- An agent never re-grades a severity the check suite assigned. Thirty agents
+  reporting on one scale is the point.
+- A tool failure goes in `tools_failed` and the file is still written. A missing
+  file reads as "never audited", which is worse than "audited, one call failed".
+- A new agent needs a skill that invokes it, a row in the README agents table, and
+  a CHANGELOG entry. `validate.py` warns about an agent no skill mentions.
 
 ## Editing the tools
 
