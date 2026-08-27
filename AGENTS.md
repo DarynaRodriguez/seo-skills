@@ -44,6 +44,11 @@ listed in `docs/execution-layer.md`. Notes that matter when calling them:
 - A tool that cannot answer says so in its `error` field. Report that rather than
   filling the gap yourself.
 - `python -m seo_tools doctor` first if anything behaves oddly.
+- **On Windows, read tool output as UTF-8 explicitly.** Python's default encoding
+  there is cp1252, so a German or Japanese page comes back as mojibake and looks
+  like the pack mis-decoded it. It did not: set `PYTHONIOENCODING=utf-8`, or pass
+  `encoding="utf-8"` when you read the output. An agent auditing a non-English
+  market will hit this, and the tempting conclusion is the wrong one.
 
 ## Editing the skills
 

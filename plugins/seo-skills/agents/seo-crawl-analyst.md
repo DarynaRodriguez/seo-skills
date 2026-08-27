@@ -17,6 +17,26 @@ being finished.
 A path to a crawl export, an output directory, and optionally a Search Console
 export and the site profile.
 
+## Invoking the tools
+
+Every command below is written as `python -m seo_tools <command>`, which only
+resolves when the working directory is the pack root. It will not be, in most
+runs. If it reports `No module named seo_tools`, use the launcher instead, which
+works from anywhere:
+
+    python <pack-root>/seo.py <command> ...
+
+The orchestrator passes the pack root. If it did not, say so and stop rather than
+guessing at a path: a wrong path produces an empty audit that looks like a clean
+one.
+
+## Severities
+
+Findings carry exactly one of `critical`, `warning`, `info`. That set is closed.
+Do not invent a fourth, and do not re-grade one the check suite assigned: several
+agents run at once and the orchestrator compares across their files, so one scale
+is the whole point.
+
 ## What to run
 
 ```bash
@@ -49,7 +69,17 @@ yours:
 **Weight by traffic, not by count.** Two hundred thin pages in a legacy folder
 nobody lands on is a housekeeping note. Six thin pages carrying real clicks is
 the finding. Join the crawl to the Search Console export on URL and order by
-clicks. Where there is no traffic data, say the ordering is by strategic value
+clicks.
+
+Normalise both sides of that join before matching, or it fails quietly: Search
+Console and a crawler disagree about trailing slashes, `www`, protocol, casing
+and query strings. The pack already has the rule, so use it rather than writing
+your own:
+
+    python -c "from seo_tools.safety import normalise_url; print(normalise_url('<url>'))"
+
+Then report the match rate. A join that matched 30% of rows produces a ranking
+that looks weighted and is not, which is worse than an honestly unweighted one. Where there is no traffic data, say the ordering is by strategic value
 and unweighted, and never imply otherwise.
 
 **Separate template problems from page problems.** If a duplicate title group
@@ -61,6 +91,11 @@ you can make to a crawl report.
 agents: the pages with real clicks, the pages carrying a critical finding, and
 one representative of each template that showed a problem. Say why each is on the
 list. Four hundred URLs is not a page set, it is the crawl again.
+
+If the crawl is smaller than thirty URLs, the page set is every indexable 200 in
+it, and you say so. There is nothing to narrow, and trimming a small crawl throws
+away coverage for no gain. Give a reason per URL either way, because the
+orchestrator ranks on it.
 
 ## Persistence contract
 
@@ -91,6 +126,18 @@ Write exactly two files:
 Set `unweighted` to true and `traffic_joined` to false when no Search Console
 data was available. The orchestrator prints that caveat, so getting it wrong
 makes the whole report overstate its confidence.
+
+Three things about that shape, because each has caused a wrong guess:
+
+- **`clicks_at_risk` is `null` when there is no traffic data**, never `0`. Zero
+  says nobody lands on those pages, which is a claim you cannot make. This is the
+  documented no-connector path, so the field being unfillable is expected.
+- **The schema is a minimum, not a closed set.** Add keys where the job needs
+  them: the export's date, what you excluded, any limitation the orchestrator
+  should print. Dropping a caveat to stay schema-clean is the wrong trade.
+- **File modification time is not the export's date.** It records when the file
+  was copied. If the export carries no date, say the freshness is unknown rather
+  than inferring it, because an audit built on a stale crawl reads as current.
 
 ## Your reply to the orchestrator
 
