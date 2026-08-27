@@ -63,7 +63,12 @@ python -m seo_tools gsc <export.csv> --json
 
 The tool gives you status bands, broken URLs ordered by inlinks, redirect chains,
 duplicate titles and descriptions and H1s, missing fields, canonicals pointing
-elsewhere, orphans, and thin pages. All of that is fact. Three judgements are
+elsewhere, orphans, and thin pages. All of that is fact.
+
+It does not measure everything. Title and description width is not a crawl check:
+if you want it, either read it from the export's own pixel-width columns where the
+exporter provides them, or hand the page to `seo-page-auditor`, which runs `meta`.
+Do not compute a width yourself, and do not present a character count as a width. Three judgements are
 yours:
 
 **Weight by traffic, not by count.** Two hundred thin pages in a legacy folder
@@ -73,13 +78,14 @@ clicks.
 
 Normalise both sides of that join before matching, or it fails quietly: Search
 Console and a crawler disagree about trailing slashes, `www`, protocol, casing
-and query strings. The pack already has the rule, so use it rather than writing
-your own:
+and query strings. The pack has a command for it, so use that rather than writing
+your own rule:
 
-    python -c "from seo_tools.safety import normalise_url; print(normalise_url('<url>'))"
+    python "<pack_root>/seo.py" normalise <url> [<url> ...] --json
 
-Then report the match rate. A join that matched 30% of rows produces a ranking
-that looks weighted and is not, which is worse than an honestly unweighted one. Where there is no traffic data, say the ordering is by strategic value
+Then put the match rate in `join_match_rate`. A join that matched 30% of rows
+produces a ranking that looks weighted and is not, which is worse than an honestly
+unweighted one. Where there is no traffic data, say the ordering is by strategic value
 and unweighted, and never imply otherwise.
 
 **Separate template problems from page problems.** If a duplicate title group
@@ -99,28 +105,57 @@ orchestrator ranks on it.
 
 ## Persistence contract
 
+`<output_dir>` and its subdirectories are created by the orchestrator before you
+start. Create them if they are missing rather than failing.
+
 Write exactly two files:
 
 `<output_dir>/crawl.json`
 
 ```json
 {
-  "export": "<path>", "exporter": "Screaming Frog", "urls": 1284,
-  "analysed_at": "<ISO date>",
+  "export": "<path>",
+  "exporter": "Screaming Frog",
+  "urls": 1284,
+  "analysed_at": "2026-08-27T14:54:13+00:00",
+  "export_date": null,
+  "export_freshness": "unknown",
   "traffic_joined": true,
+  "join_match_rate": 0.94,
+  "unweighted": false,
+  "ordering_basis": "clicks at risk",
+  "coverage": "full crawl",
+  "limitations": [],
   "site_findings": [
     {"finding": "duplicate_titles", "severity": "warning", "affected": 30,
      "clicks_at_risk": 1200, "pattern": "/solutions/*", "template_level": true,
      "detail": "one title across the whole solutions template"}
-  ],
-  "unweighted": false
+  ]
 }
 ```
+
+Every key above is one the instructions require you to communicate, so none of
+them is improvised. The three that get misfilled:
+
+- **`limitations`** is where a caveat about the crawl goes, and it is the key the
+  orchestrator prints. A partial export, an unknown freshness, a missing homepage:
+  these are limitations, not site findings, and putting them in `site_findings`
+  forces a severity onto something that has none.
+- **`coverage`** is `"full crawl"` or a sentence saying what the export is missing.
+  An export with no homepage and a maximum depth of 2 is a slice, and saying so is
+  the difference between an audit and a misleading one.
+- **`ordering_basis`** is `"clicks at risk"` or `"strategic value, unweighted"`.
+  It has to agree with `unweighted`.
 
 `<output_dir>/page-set.json`
 
 ```json
-{"urls": [{"url": "...", "clicks_28d": 3140, "reason": "top traffic, canonical missing"}]}
+{
+  "selection_basis": "traffic and findings, or every indexable 200 in a small crawl",
+  "unweighted": false,
+  "urls": [{"url": "...", "clicks_28d": 3140, "reason": "top traffic, canonical missing"}],
+  "excluded": [{"url": "...", "reason": "redirect, nothing to audit"}]
+}
 ```
 
 Set `unweighted` to true and `traffic_joined` to false when no Search Console
