@@ -112,6 +112,41 @@ AI_AGENTS: Dict[str, Dict[str, str]] = {
         "purpose": "training",
         "cost_of_blocking": "Excluded from Cohere training data.",
     },
+    # Engines that dominate a specific market. Absent from most AI-crawler lists,
+    # which are written from a US or Western European point of view, and decisive
+    # in the markets they serve. A profile that names one of these markets should
+    # be reading these rows first.
+    "YandexBot": {
+        "operator": "Yandex",
+        "purpose": "search index",
+        "cost_of_blocking": "Removed from Yandex, the leading engine in Russia and much of the CIS.",
+    },
+    "Baiduspider": {
+        "operator": "Baidu",
+        "purpose": "search index",
+        "cost_of_blocking": "Removed from Baidu, the leading engine in mainland China.",
+    },
+    "Yeti": {
+        "operator": "Naver",
+        "purpose": "search index",
+        "cost_of_blocking": "Removed from Naver, which leads search in South Korea.",
+    },
+    "SeznamBot": {
+        "operator": "Seznam",
+        "purpose": "search index",
+        "cost_of_blocking": "Removed from Seznam, a significant engine in the Czech Republic.",
+    },
+    "Applebot": {
+        "operator": "Apple",
+        "purpose": "search index",
+        "cost_of_blocking": "Removed from Siri and Spotlight suggestions. Distinct from "
+        "Applebot-Extended, which governs Apple Intelligence training only.",
+    },
+    "PetalBot": {
+        "operator": "Huawei",
+        "purpose": "search index",
+        "cost_of_blocking": "Removed from Petal Search on Huawei devices.",
+    },
 }
 
 LIVE_FETCH_AGENTS = tuple(k for k, v in AI_AGENTS.items() if v["purpose"] == "live fetch")

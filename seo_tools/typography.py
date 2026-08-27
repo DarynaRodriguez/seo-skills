@@ -17,6 +17,7 @@ they can be corrected in one place when they move.
 """
 from __future__ import annotations
 
+import unicodedata
 from typing import Dict
 
 # Arial advance widths, units per 1000 em. These are the font metrics, not a guess.
@@ -61,31 +62,83 @@ TITLE_LIMIT_PX = 580
 DESCRIPTION_LIMIT_PX = 920
 
 # Character guidance, kept because it is what most briefs are written against.
+# Only ever used for reporting. Never for a pass or fail decision: a character
+# count means something different in every script, and a 28-character Japanese
+# title fills more of the budget than a 45-character English one.
 TITLE_CHARS_MIN = 30
 TITLE_CHARS_MAX = 60
 DESCRIPTION_CHARS_MIN = 70
 DESCRIPTION_CHARS_MAX = 160
 
+# The script-neutral version of "too short": how much of the pixel budget a
+# title or description has to use before it stops wasting available width. Set
+# to match what the character floors above imply for Latin text, so behaviour is
+# unchanged in English and correct everywhere else.
+MIN_FILL_PCT = 50.0
+
+# Kept as the default label. measure_title and measure_description call
+# method_for() instead, so a CJK title is not labelled with the Latin method.
 METHOD = "Arial advance widths scaled to the SERP font size. Estimate, not a render."
+
+
+FULLWIDTH_UNITS = 1000  # a wide or fullwidth glyph occupies one em
+LATIN_SCRIPTS_NOTE = (
+    "Arial advance widths scaled to the SERP font size. Estimate, not a render."
+)
+WIDE_SCRIPTS_NOTE = (
+    "Wide and fullwidth characters measured at one em; the rest from Arial advance "
+    "widths. Rougher than the Latin case, because Google renders CJK in a different "
+    "font. Estimate, not a render."
+)
+
+
+def char_units(char: str) -> int:
+    """Advance width of one character in units per 1000 em.
+
+    Three cases. A combining mark adds no width, so it must not be charged for:
+    counting it inflates every accented or Indic string. A wide or fullwidth
+    character occupies a full em, which is roughly double a Latin lowercase, so
+    treating a CJK title as Latin under-measures it by about half. Everything
+    else comes from the Arial table.
+    """
+    if unicodedata.combining(char):
+        return 0
+    if unicodedata.east_asian_width(char) in ("W", "F"):
+        return FULLWIDTH_UNITS
+    return ARIAL.get(char, DEFAULT_WIDTH)
+
+
+def has_wide_characters(text: str) -> bool:
+    return any(unicodedata.east_asian_width(c) in ("W", "F") for c in text or "")
+
+
+def method_for(text: str) -> str:
+    """The method label to carry with a measurement of this text."""
+    return WIDE_SCRIPTS_NOTE if has_wide_characters(text) else LATIN_SCRIPTS_NOTE
 
 
 def measure_px(text: str, font_px: int) -> float:
     """Estimated rendered width of `text` in pixels at `font_px`."""
     if not text:
         return 0.0
-    units = sum(ARIAL.get(char, DEFAULT_WIDTH) for char in text)
+    units = sum(char_units(char) for char in text)
     return round(units / 1000.0 * font_px, 1)
 
 
 def truncate_to_px(text: str, limit_px: float, font_px: int) -> str:
     """What the reader would see if the renderer cut at `limit_px`.
 
-    Cuts on a word boundary and appends an ellipsis, which is what Google does.
+    Cuts on a word boundary and appends an ellipsis, which is what Google does
+    for space-separated text. Chinese and Japanese have no spaces, so a word-only
+    cut returns a bare ellipsis and tells the reader nothing; those fall back to
+    cutting per character, which is what the renderer does there anyway.
     """
     if measure_px(text, font_px) <= limit_px:
         return text
-    ellipsis_px = measure_px("…", font_px)
-    budget = limit_px - ellipsis_px
+    budget = limit_px - measure_px("…", font_px)
+    if budget <= 0:
+        return "…"
+
     kept: list = []
     used = 0.0
     for word in text.split(" "):
@@ -94,9 +147,20 @@ def truncate_to_px(text: str, limit_px: float, font_px: int) -> str:
             break
         kept.append(word)
         used += word_px
-    if not kept:
-        return "…"
-    return " ".join(kept) + "…"
+
+    if kept:
+        return " ".join(kept) + "…"
+
+    # No word boundary fits: cut per character.
+    chars: list = []
+    used = 0.0
+    for char in text:
+        char_px = char_units(char) / 1000.0 * font_px
+        if used + char_px > budget:
+            break
+        chars.append(char)
+        used += char_px
+    return ("".join(chars) + "…") if chars else "…"
 
 
 def measure_title(text: str) -> Dict[str, object]:
@@ -111,7 +175,7 @@ def measure_title(text: str) -> Dict[str, object]:
         "truncates": width > TITLE_LIMIT_PX,
         "truncated_preview": truncate_to_px(text, TITLE_LIMIT_PX, TITLE_FONT_PX),
         "font_px": TITLE_FONT_PX,
-        "method": METHOD,
+        "method": method_for(text),
     }
 
 
@@ -127,5 +191,5 @@ def measure_description(text: str) -> Dict[str, object]:
         "truncates": width > DESCRIPTION_LIMIT_PX,
         "truncated_preview": truncate_to_px(text, DESCRIPTION_LIMIT_PX, DESCRIPTION_FONT_PX),
         "font_px": DESCRIPTION_FONT_PX,
-        "method": METHOD,
+        "method": method_for(text),
     }

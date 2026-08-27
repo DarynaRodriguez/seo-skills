@@ -201,6 +201,32 @@ A bulleted list covering the window, the reporting lag, the unexplained share,
 every modelled figure, every missing market or connector, and the attribution
 limits.
 
+Where the report carries an answer-engine referral number, it must also carry this
+caveat, because the number is always an undercount and the reader will otherwise
+treat it as a measurement:
+
+- Several platforms pass no referrer at all, so their visits land in direct.
+  Ahrefs' platform-by-platform testing found in-content links on paid ChatGPT
+  accounts using `noreferrer`, the Perplexity desktop app and Copilot on Windows
+  passing nothing, Grok passing nothing, and Google AI Mode marked `noreferrer`,
+  which John Mueller confirmed as a bug (Ahrefs, 26 May 2025, updated 12 August
+  2026). Re-check before quoting: this list changes.
+- The larger loss is not technical. Someone hears the brand named in an answer,
+  then types the domain or searches the brand. That arrives as direct or branded
+  organic and is indistinguishable from any other visit. Only about 28% of AI
+  mentions carry a link in the first place, so most influence never had a click to
+  measure.
+- The only instrument that catches it is asking. A "how did you hear about us"
+  field on the demo or signup form, with explicit options for an AI assistant and
+  for AI search, is the one measurement here that reaches revenue. Where the
+  profile's site has one, report it as its own line and label it self-reported.
+  Where it does not, name the absence as the report's largest blind spot rather
+  than presenting the referral figure as the answer.
+
+Read the three sources together and never substitute one for another: referral
+traffic shows what the engines sent, bot activity shows which pages they read, and
+self-reported attribution shows what the buyer says moved them.
+
 Write the underlying period comparison to `.seo/performance-<YYYY-MM>.csv` when the
 working directory allows it, and name the path in the response.
 

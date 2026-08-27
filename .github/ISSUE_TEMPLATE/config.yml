@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question about using the skills
+    url: https://github.com/DarynaRodriguez/seo-skills/discussions
+    about: Ask here rather than opening an issue.

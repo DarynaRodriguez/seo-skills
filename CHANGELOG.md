@@ -4,6 +4,85 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] 2026-08-27
+
+### Fixed
+
+Locale bugs. The tools handled English and German, which made them look general
+while they produced wrong numbers or no numbers at all for everything else. Each
+fix has a test pinning it, in `tests/test_locales.py`.
+
+- **Word counts returned 1 for any Chinese or Japanese text.** Those scripts do
+  not separate words with spaces, so counting letter runs treated a whole sentence
+  as one word. Worse than a wrong count: the client-rendering heuristic is "app
+  root element plus almost no text", so every CJK page was flagged as
+  client-rendered. Now counted per character, with `word_count_basis` reporting
+  which rule applied. Korean is unaffected, since it uses spaces.
+- **Title and description widths measured wide characters as Latin ones.** A CJK
+  title that truncates reported as fitting, in the pack's flagship deterministic
+  feature. Wide and fullwidth characters are now measured at one em via
+  `unicodedata.east_asian_width`, and combining marks at zero so accented and
+  Indic text is not charged twice for one glyph.
+- **The truncation preview returned a bare ellipsis for text without spaces.**
+  Cutting on word boundaries alone cannot work where there are none. Falls back to
+  cutting per character.
+- **Length checks used character floors, which are not comparable across scripts.**
+  A 28-character Japanese title filling 85% of the available width was reported as
+  too short. Every pass or fail decision is now made in pixels; character counts
+  are still reported, because that is what briefs are written against.
+- **Search Console exports in most languages lost their columns.** The header
+  normaliser stripped every non-ASCII character, so Japanese, Korean, Chinese and
+  Cyrillic headers reduced to an empty string, and Spanish, Italian, Dutch and
+  Polish had no aliases. Only "CTR" matched, because it is spelled the same
+  everywhere. Aliases now cover 14 languages, with `--columns` as a positional
+  override for any locale not listed.
+- **The crawler list covered only Western engines.** Added YandexBot, Baiduspider,
+  Yeti, SeznamBot, PetalBot and Applebot, each with what blocking it costs in its
+  market. Applebot is distinguished from Applebot-Extended, which is the same trap
+  as Google-Extended.
+- **`install.sh` installed 26 skills that call a tool layer it did not install.**
+  Every measured command in every skill failed with "No module named seo_tools"
+  straight after a clean install. The installer now places `seo_tools` and
+  `seo.py` beside the skills, prints the exact command to run, and offers
+  `--skills-only` for anyone who genuinely wants the prose alone.
+
+### Added
+
+Evidence from a verified AEO research pack, folded into six skills. Every figure
+below was re-fetched from its primary source on 27 August 2026 before being
+written in, and each carries its sample size and date in the skill text.
+
+- `geo-rewrite`: a procedure for closing the information gaps a wrong answer
+  fills. Ahrefs planted three contradicting accounts of an invented brand and put
+  56 false-premise questions to eight platforms; five of the eight trusted the
+  planted sources over the brand's own FAQ, while ChatGPT stayed under 7% and
+  cited the official FAQ in 84% of answers. The mechanism is that a vague page
+  loses to a specific fiction, so the fix is specificity: numbers, dates, named
+  standards and named systems. Two guardrails added, including one against
+  inventing the specifics that close the gap.
+- `citation-gap`: the correlation that justifies the skill. Branded web mentions
+  correlate 0.664 with AI Overview visibility against 0.218 for backlinks, 0.326
+  for domain rating and 0.295 for referring domains, across 75,000 brands. Carried
+  with both caveats: it is rank correlation, and the sample was filtered to
+  domains above DR 40. Plus a step on unlinked mentions, which are about 72% of
+  brand appearances and were previously scored as failures.
+- `ai-visibility-audit`: the ranking-independence figure. Of pages AI Overviews
+  cite, 37.9% rank in the top 10, 31.2% at 11 to 100, and 31.0% not in the top 100
+  at all, so roughly a third of citations go to pages that do not rank.
+- `keyword-discovery`: a guardrail against building a candidate set from AI
+  fan-out queries. An assistant expands one prompt into roughly nine to eleven
+  subqueries and about 95% have no measured volume, so they are a topic signal and
+  not a keyword list.
+- `keyword-prioritisation`: a click test applied before scoring. AI Overviews
+  appear on 57.9% of question queries against 15.5% of non-question queries, and
+  99.9% of triggering keywords carry an informational label, so absorption risk
+  sits on the informational end. Candidates are now labelled `click`, `citation`
+  or `both`, which changes the metric promised rather than the score.
+- `performance-report`: the caveat that has to accompany any answer-engine
+  referral number, because the number is always an undercount. Names the platforms
+  that pass no referrer, the larger loss to direct and branded organic, and
+  self-reported attribution as the only instrument that reaches revenue.
+
 ## [0.2.0] 2026-08-26
 
 The execution layer. The skills now measure with tools instead of asking a model
