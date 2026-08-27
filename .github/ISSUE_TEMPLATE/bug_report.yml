@@ -1,0 +1,60 @@
+name: Bug report
+description: A tool returns a wrong number, an install fails, or a skill does something it should not.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing, run `python -m seo_tools doctor` and paste the output below.
+        It answers most environment questions in one step.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you ran, and what came back. Paste the command and the output.
+      placeholder: |
+        $ python -m seo_tools meta https://example.com/pricing
+        ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+      description: If a number looks wrong, say what the right answer is and how you know.
+    validations:
+      required: true
+
+  - type: input
+    id: locale
+    attributes:
+      label: Language and market
+      description: >
+        Ask because most bugs found so far have been locale bugs: a script the
+        tools measured wrongly, or an export header they did not recognise.
+      placeholder: Japanese, japan. Or German, DACH. Or English, UK.
+    validations:
+      required: true
+
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Output of `python -m seo_tools doctor`
+      render: text
+    validations:
+      required: false
+
+  - type: dropdown
+    id: install
+    attributes:
+      label: How you installed
+      options:
+        - Cloned the repo and ran install.sh
+        - Cloned the repo and run the tools from the repo root
+        - Installed as a plugin from the marketplace
+        - Copied individual skills by hand
+        - Other
+    validations:
+      required: true

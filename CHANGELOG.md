@@ -4,7 +4,7 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.0] 2026-08-27
 
 ### Fixed
 
@@ -40,6 +40,11 @@ fix has a test pinning it, in `tests/test_locales.py`.
   Yeti, SeznamBot, PetalBot and Applebot, each with what blocking it costs in its
   market. Applebot is distinguished from Applebot-Extended, which is the same trap
   as Google-Extended.
+- **`install.sh` installed 26 skills that call a tool layer it did not install.**
+  Every measured command in every skill failed with "No module named seo_tools"
+  straight after a clean install. The installer now places `seo_tools` and
+  `seo.py` beside the skills, prints the exact command to run, and offers
+  `--skills-only` for anyone who genuinely wants the prose alone.
 
 ### Added
 

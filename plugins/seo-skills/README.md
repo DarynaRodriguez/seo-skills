@@ -245,14 +245,30 @@ cd seo-skills
 
 `install.sh` detects your agent and copies the skills into place:
 `~/.claude/skills/` for Claude Code, `~/.codex/skills/` for Codex, or a directory
-you name. Pass `--target <dir>` to override, `--link` to symlink instead of copy
-so `git pull` updates the skills in place.
+you name. It also installs the tool layer next to them, because a skill that
+tells you to run a command you do not have is worse than no skill. The installer
+prints the exact path, and the first thing to run is:
+
+```bash
+python ~/.claude/seo-skills-tools/seo.py doctor
+```
+
+Flags: `--target <dir>` to choose the location, `--link` to symlink instead of
+copy so `git pull` updates everything in place, `--list` to preview, and
+`--skills-only` if you genuinely want the prose without the tools.
 
 ### ChatGPT Work
 
 Skills are supported on Work accounts. Upload the `skills/` directory contents,
 or point the workspace at this repo. Consumer ChatGPT has no Skills support, so
 paste an individual `SKILL.md` into the conversation instead.
+
+The tool layer needs somewhere to run shell commands, which browser ChatGPT does
+not have. Two options: run the commands on your own machine and paste the
+`--json` output in, or use Codex, which reads `AGENTS.md` and runs them directly.
+`gsc` is the exception and works anywhere, because it reads a file you upload
+rather than the network. Details in
+[`docs/execution-layer.md`](docs/execution-layer.md).
 
 ---
 

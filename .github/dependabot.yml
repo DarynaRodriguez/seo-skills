@@ -1,0 +1,11 @@
+version: 2
+updates:
+  # The pack has no runtime dependencies on purpose, so there is nothing to
+  # update there. GitHub Actions is the one place versions do drift, and a
+  # deprecated runner shows up as a warning nobody reads until it fails.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "ci:"
