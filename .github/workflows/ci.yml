@@ -131,6 +131,17 @@ jobs:
           print('meta measured:', data['title']['px'], 'px')
           "
 
+  security:
+    name: security regressions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: SSRF guard, decompression bombs, credential redaction
+        run: python -m unittest tests.test_security -v
+
   secrets:
     name: secret scan
     runs-on: ubuntu-latest

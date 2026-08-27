@@ -24,7 +24,7 @@ from . import (
 )
 from .fetching import DEFAULT_TIMEOUT, DEFAULT_USER_AGENT, fetch, public_summary
 from .robots import AI_AGENTS, RobotsTxt, robots_url_for
-from .safety import UrlNotAllowed, normalise_url, validate_url
+from .safety import UrlNotAllowed, normalise_url, redact, validate_url
 from .store import Store, default_home
 
 EXIT_OK = 0
@@ -37,9 +37,9 @@ def _fetch_or_die(url: str, args) -> Dict[str, object]:
     try:
         result = fetch(url, timeout=args.timeout, user_agent=args.user_agent)
     except UrlNotAllowed as exc:
-        _fail("refused to fetch {}: {}".format(url, exc), args)
+        _fail("refused to fetch {}: {}".format(redact(url), exc), args)
     if not result.get("ok"):
-        _fail("could not fetch {}: {}".format(url, result.get("error")), args, result)
+        _fail("could not fetch {}: {}".format(redact(url), result.get("error")), args, result)
     return result
 
 
@@ -47,6 +47,10 @@ def _fail(message: str, args, payload: Optional[Dict[str, object]] = None) -> No
     body = {"ok": False, "error": message}
     if payload:
         body.update({k: v for k, v in payload.items() if k != "body"})
+        # The fetch result carries the URL as given, which may hold credentials.
+        for key in ("url", "final_url"):
+            if isinstance(body.get(key), str):
+                body[key] = redact(body[key])
     if getattr(args, "json", False):
         output.emit_json(body)
     else:

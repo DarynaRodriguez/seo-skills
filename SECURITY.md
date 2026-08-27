@@ -28,3 +28,16 @@ a public repo, and treat a committed profile as published.
 redirects, or de-indexing is written to stop at a recommendation and require a
 named human. If you wire one into an automated pipeline that publishes without
 review, that is your risk, and `PRINCIPLES.md` says why we think it is a bad idea.
+
+## What the tools defend against, and what they do not
+
+`docs/security.md` is the detail: the SSRF guard and every notation it refuses,
+the decompression caps, XML handling, why no credential can reach an error
+message, the prompt-injection rule for fetched content, and an honest list of what
+is out of scope, DNS rebinding included.
+
+Run the security regressions with:
+
+```bash
+python -m unittest tests.test_security -v
+```

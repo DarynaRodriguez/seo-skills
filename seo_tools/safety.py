@@ -10,6 +10,7 @@ second.
 from __future__ import annotations
 
 import ipaddress
+import re
 import socket
 from typing import List, Tuple
 from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
@@ -28,6 +29,26 @@ BLOCKED_HOSTS = ("localhost", "metadata.google.internal")
 # Cloud instance metadata. Link-local covers 169.254.169.254 already, but naming
 # these makes the intent legible to anyone reading a denial.
 METADATA_ADDRESSES = ("169.254.169.254", "fd00:ec2::254", "100.100.100.200")
+
+# Any C0 control character, DEL, or a Unicode line or paragraph separator. The
+# null byte matters most: getaddrinfo truncates at it, so a hostname carrying one
+# is checked as its prefix and written as the whole string. CR and LF are the
+# classic request-smuggling shapes.
+CONTROL_CHARS = re.compile("[" + "".join(chr(c) for c in list(range(0x20)) + [0x7f]) + "\u2028\u2029]")
+
+# Hostnames that are a number in disguise. Resolvers disagree about these:
+# getaddrinfo on macOS accepts octal and short forms that fail on Windows, so
+# leaving it to the resolver means the guard works by accident on one platform
+# and not at all on another. CI caught exactly that, on 0177.0.0.1. If a host
+# looks numeric it has to parse as a valid address or be refused, because there
+# is no way to know which interpretation the connection will use.
+NUMERIC_HOST = re.compile(
+    r"^(?:"
+    r"[0-9]+"                # a bare integer, 2130706433
+    r"|0[xX][0-9a-fA-F]+"    # hex, 0x7f000001
+    r"|[0-9.]+"              # dotted numeric: octal 0177.0.0.1, short form 127.1
+    r")$"
+)
 
 # Query parameters that identify a campaign, not a page. Stripped when
 # normalising so the same page tracked twice matches itself.
@@ -63,6 +84,17 @@ def _is_public_address(raw: str) -> bool:
         return False
     if raw in METADATA_ADDRESSES:
         return False
+
+    # Judge an IPv4-mapped IPv6 address as its IPv4 form. Python 3.13 taught
+    # is_private and is_loopback to look through the mapping; earlier versions do
+    # not, so ::ffff:127.0.0.1 is classified differently depending on the
+    # interpreter. Unmapping here makes every version agree, and agreeing is the
+    # point: a guard that changes behaviour with the runtime is not one.
+    mapped = getattr(addr, "ipv4_mapped", None)
+    if mapped is not None:
+        addr = mapped
+        if str(addr) in METADATA_ADDRESSES:
+            return False
     return not (
         addr.is_private
         or addr.is_loopback
@@ -70,6 +102,11 @@ def _is_public_address(raw: str) -> bool:
         or addr.is_multicast
         or addr.is_reserved
         or addr.is_unspecified
+        # is_global additionally excludes shared address space (100.64.0.0/10,
+        # carrier-grade NAT), benchmarking and documentation ranges. Kept
+        # alongside the explicit checks rather than replacing them, because
+        # is_global reports multicast as global.
+        or not addr.is_global
     )
 
 
@@ -103,6 +140,14 @@ def validate_url(url: str, allow_private: bool = False) -> str:
     """
     if not isinstance(url, str) or not url.strip():
         raise UrlNotAllowed("empty URL")
+    found = CONTROL_CHARS.search(url)
+    if found:
+        raise UrlNotAllowed(
+            "URL contains a control character ({!r}), which is refused because the "
+            "resolver and the request would disagree about the hostname".format(
+                found.group(0)
+            )
+        )
     parts = urlsplit(url.strip())
 
     if parts.scheme.lower() not in ALLOWED_SCHEMES:
@@ -126,7 +171,14 @@ def validate_url(url: str, allow_private: bool = False) -> str:
     try:
         ipaddress.ip_address(host)
     except ValueError:
-        pass
+        # Not a valid address. If it nonetheless looks like a number, refuse it
+        # rather than handing an ambiguous string to the resolver.
+        if NUMERIC_HOST.match(host):
+            raise UrlNotAllowed(
+                "hostname {!r} looks like a numeric address but is not a valid one. "
+                "Resolvers disagree about forms like this, so it is refused rather "
+                "than guessed at.".format(host)
+            )
     else:
         if not allow_private and not _is_public_address(host):
             raise UrlNotAllowed("address {} is not a public address".format(host))
@@ -170,3 +222,24 @@ def normalise_url(url: str) -> str:
         path = path.rstrip("/") or "/"
 
     return urlunsplit((scheme, host, path, query, ""))
+
+
+def redact(url: str) -> str:
+    """A URL safe to print. Strips any userinfo so a password cannot reach a log.
+
+    Error messages echo the URL they refused, which is useful, and a URL carrying
+    credentials is exactly the case where echoing it is harmful. Redacting is
+    cheaper than remembering not to print it.
+    """
+    if not isinstance(url, str):
+        return "<not a string>"
+    try:
+        parts = urlsplit(url)
+    except ValueError:
+        return "<unparseable URL>"
+    if not (parts.username or parts.password):
+        return url
+    host = parts.hostname or ""
+    if parts.port:
+        host = "{}:{}".format(host, parts.port)
+    return urlunsplit((parts.scheme, "<redacted>@" + host, parts.path, parts.query, parts.fragment))
