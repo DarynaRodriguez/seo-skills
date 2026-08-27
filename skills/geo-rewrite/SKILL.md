@@ -147,6 +147,39 @@ instead, which works from any directory. If anything errors, run
    the buyer does not ask, or duplicates another page on the site, say so and
    stop. That finding goes to `/cannibalisation-audit` or `/content-decay`.
 
+### Close the gaps a wrong answer would fill
+
+A vague page does not produce a vague answer. It produces a confident answer built
+from somebody else's specifics.
+
+Ahrefs invented a brand, planted three contradicting accounts of it on a blog, a
+Reddit AMA and a Medium article, then put 56 false-premise questions to eight
+platforms. Five of the eight trusted the planted third-party sources over the
+brand's own FAQ. Perplexity failed roughly 40% of the questions in the first
+phase. ChatGPT stayed under 7% and cited the official FAQ in 84% of its answers
+(Ahrefs, published 10 December 2025, updated 2 July 2026).
+
+The lesson is not that one platform is better. It is that the official page won
+where it gave a specific answer and lost where it gave a general one. So:
+
+10. **List the questions a buyer asks that the site answers only vaguely.** The
+    ones that matter are the ones with a factual answer somebody could get wrong:
+    certifications and standards held, where data is stored, which systems are
+    integrated and to what depth, implementation time, pricing structure, security
+    posture, who owns the contract. Ask the profile's named owner for each answer.
+
+11. **Answer each one on the site, with the specifics that make it unforgeable.**
+    A number, a date, a named standard, a named system, a named person or team.
+    "Enterprise-grade security" loses to a planted specific. "SOC 2 Type II, most
+    recent report dated <date>, available under NDA" does not. Where the honest
+    answer is a range or a "it depends", write the range and what it depends on.
+
+12. **Check what the engines currently say, before and after.** Run
+    `/ai-visibility-audit` on the same questions. If an answer is already wrong,
+    publishing the correct specific version is step one, not the whole job: ask
+    the source to correct it too, and record whether it did. Nothing here can
+    force a model to update.
+
 ## Output
 
 **Header**
@@ -193,6 +226,13 @@ proof, question heading, external citation, freshness, structured data match.
   author, rating, review or FAQ.
 - Never invent a statistic, a customer name, a case-study outcome or an external
   citation to fill a proof gap. Cut the claim instead.
+- Never invent the specifics that close an information gap. A fabricated
+  certification date is worse than the vague sentence it replaced. If the owner
+  cannot supply the fact, the gap stays open and the output says which facts are
+  missing and who was asked.
+- Never claim publishing a correction will change what an engine says. It removes
+  the reason for the wrong answer. Whether the answer changes, and when, is
+  outside anyone's control.
 - Never break the profile's product vocabulary, spelling variant, banned words or
   banned characters in exchange for extractability.
 - Never publish machine-translated copy as native-language content.

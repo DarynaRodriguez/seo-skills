@@ -13,6 +13,14 @@ brand not in that set. Your edge is refusing the default assumption that every
 citation gap is a content gap. Most are not. A competitor cited from a review
 directory is a listings problem, and writing another blog post will not touch it.
 
+Why the off-site half carries the weight: across 75,000 brands, branded web
+mentions correlated 0.664 with appearing in AI Overviews, against 0.326 for domain
+rating, 0.295 for referring domains and 0.218 for backlinks (Ahrefs, Spearman,
+26 May 2025). Carry two caveats with that number. It is rank correlation, not
+causation, and the sample was filtered to domains above DR 40 with keywords over
+800 monthly searches, so it describes established brands rather than new ones.
+Treat it as the reason this skill exists, not as a promise.
+
 ## Step 0: Load the profile
 
 Read the site profile before anything else:
@@ -62,7 +70,16 @@ result. Full tool list: `docs/data-sources.md`.
    Keep engines separate: the cited set for the same question differs sharply
    between them, and merging them hides the one engine you can actually influence.
 
-3. **Classify every cited source into exactly one of four types.** The type
+3. **Record the unlinked mentions too, and do not score them as failures.** Across
+   31,000 brand mentions, only about 28% carried a link, and the rate ranges from
+   roughly 11% on AI Overviews to 52% on Perplexity (Ahrefs, 26 November 2025).
+   So a brand named in an answer without a link is the normal case, not a near
+   miss. It still moves the buyer, who searches the name afterwards, and it still
+   puts the brand next to the topic on a page an engine has read. Report mentions
+   and citations as two columns. A skill that counts only citations is reporting
+   on under a third of what happened.
+
+4. **Classify every cited source into exactly one of four types.** The type
    determines who owns the fix, so this is the step that makes the audit useful.
 
    - **Owned.** The brand's own domain and subdomains. The fix is the page:
@@ -86,37 +103,37 @@ result. Full tool list: `docs/data-sources.md`.
      customer. If honest participation is not possible, the entry is recorded as
      no action available.
 
-4. **Mark whether the brand appears in each cited source.** Three states, not two:
+5. **Mark whether the brand appears in each cited source.** Three states, not two:
    cited and accurate, cited and wrong or stale, absent. A wrong entry on a
    heavily cited reference site is worse than absence, because the engine repeats
    it, and it is usually the fastest thing on the list to fix.
 
-5. **Read what the citation says about us.** Where the brand is present, pull the
+6. **Read what the citation says about us.** Where the brand is present, pull the
    page content and quote the sentence the engine is most likely to lift. An
    outdated feature list, an old price, a wrong category or a two-star average is
    the finding. Record it verbatim: paraphrase loses the defect.
 
-6. **Diagnose the gap per prompt, in one of five words.** `page` (we have no page
+7. **Diagnose the gap per prompt, in one of five words.** `page` (we have no page
    answering this question), `extraction` (we have the page and it cannot be
    quoted), `listing` (a reference source decides this answer and we are not in
    it or are wrong in it), `authority` (editorial sources decide it and we have no
    coverage), `access` (the engine cannot fetch our page at all). Only the first
    two are content work. Say which one it is before proposing anything.
 
-7. **Compare to the competitor pattern.** For each prompt, note which competitor
+8. **Compare to the competitor pattern.** For each prompt, note which competitor
    is cited and from which source type. A competitor appearing through three
    reference sites and no owned pages is telling you where their visibility comes
    from, and it is not their blog.
 
-8. **Rank by yield, not by effort.** Order actions by how many tracked prompts the
+9. **Rank by yield, not by effort.** Order actions by how many tracked prompts the
    source touches, times how correctable it is. A single directory entry that
    appears across eight prompts outranks eight page rewrites.
 
-9. **Assign an owner and an honest difficulty to every row.** Difficulty is
+10. **Assign an owner and an honest difficulty to every row.** Difficulty is
    `same day`, `weeks`, `quarters`, or `not in our control`. An editorial mention
    is not a task with a due date, and labelling it one is how these plans die.
 
-10. **Say the limit out loud in the deliverable.** No work in this audit
+11. **Say the limit out loud in the deliverable.** No work in this audit
     guarantees a citation. Engines choose sources by their own criteria, they
     change those criteria without notice, and a source cited this month may not be
     next month. The work raises the chance of being the source that is available

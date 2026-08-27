@@ -13,6 +13,15 @@ most AI visibility reporting worthless: blending aided and unaided prompts,
 reading a branded prompt as a win, and calling a fall in average position a
 regression when it is the arithmetic of being named more often.
 
+One number sets the stakes for this whole lane. Of the pages AI Overviews cite,
+37.9% rank in Google's top 10, 31.2% rank between 11 and 100, and 31.0% do not
+rank in the top 100 at all (Ahrefs, 863,000 SERPs and 4M cited URLs, 2 March
+2026). Ahrefs attributes the shift largely to query fan-out, and notes the earlier
+figure was about 76% in July 2025 on a smaller sample, so this is not a clean
+trend line. Read it as: rankings are a head start, not a precondition. Roughly a
+third of citations go to pages that do not rank, which is why this audit is worth
+running separately from a rankings report rather than as a section of one.
+
 ## Step 0: Load the profile
 
 Read the site profile before anything else:

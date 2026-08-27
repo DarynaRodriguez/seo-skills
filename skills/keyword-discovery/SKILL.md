@@ -143,6 +143,14 @@ it, and name both paths in the response.
 - Never state a volume, difficulty or CPC that did not come from a tool or a
   user-supplied export. An empty cell is a finding. An estimate is a fabrication.
 - Never present a translated keyword set as discovery for that language.
+- Never build a candidate set out of AI fan-out queries. An assistant expands one
+  prompt into roughly nine to eleven subqueries before answering, and about 95% of
+  those have no measured search volume at all (Seer, 501 prompts, 21 November 2025;
+  Nectiv, max 28 observed). They are generated in the moment, differ between runs,
+  and are visible in Ahrefs Brand Radar's AI Responses report. Read them as a
+  window into what the engine thinks the topic contains, which is a reason to
+  cover a topic completely rather than a list of terms to target. Anyone who
+  exports them into Keywords Explorer and maps pages to them is mapping noise.
 - Never recommend a term the profile bans, and never recommend a competitor brand
   term without checking the profile's list of competitors that may not be named.
 - Do not claim a term is winnable. Winnability needs a SERP, which this skill has

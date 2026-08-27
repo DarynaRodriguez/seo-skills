@@ -57,6 +57,32 @@ a law: state them in the output so the reader can change them.
 | Existing asset proximity | P | 10 | No relevant page exists | A live page already ranks or nearly ranks |
 | Strategic value | S | 15 | Nice to have | Category, comparison or alternative term the sales motion needs |
 
+### The click test, applied before the score
+
+Run this on every candidate before scoring it, because it changes what the score
+means rather than adjusting it. Look at the live result page and ask whether an
+assistant's answer already settles the question. If it does, the term can still be
+worth targeting, but not for clicks.
+
+Two figures set the expectation. AI Overviews appear on 57.9% of question queries
+against 15.5% of non-question queries, and on 46.4% of queries of seven words or
+more (Ahrefs, 146M SERPs, 10 November 2025). And 99.9% of the keywords that
+trigger them carry an informational intent label. So the absorption risk sits
+almost entirely on the informational end, and transactional terms are largely
+insulated.
+
+Record the verdict in a column, not in the score:
+
+| Verdict | Meaning | What success is |
+|---------|---------|-----------------|
+| `click` | The answer needs the page: a tool, a login, a quote, a document, a decision the reader must make | Sessions and pipeline |
+| `citation` | The answer is complete in the result page | Being the cited source, measured by `/ai-visibility-audit`, not by traffic |
+| `both` | The answer opens a next step it cannot complete | Sessions, and citation as the leading indicator |
+
+A `citation` term with high strategic value is still worth briefing. What changes
+is the metric you promise, and promising traffic for one is the most common way an
+otherwise sound keyword plan loses credibility six months later.
+
 `Score = 10D + 25Q + 20F + 20A + 10P + 15S`, maximum 100.
 
 Scoring rules that make the weights behave:
