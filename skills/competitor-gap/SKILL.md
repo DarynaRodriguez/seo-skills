@@ -31,8 +31,8 @@ not as the answer.
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | Who actually competes for our keywords | `mcp__Ahrefs__site-explorer-organic-competitors` | Search five of the site's core terms manually, record which domains recur, and label the set observed rather than measured |
 | Each competitor's ranking keywords | `mcp__Ahrefs__site-explorer-organic-keywords` | Ask for an Ahrefs or Semrush export per competitor |
 | Our own ranking keywords | `mcp__Ahrefs__site-explorer-organic-keywords` on the primary domain | Ask for our own organic export, plus a Search Console export for truth |
@@ -43,6 +43,13 @@ not as the answer.
 
 Ahrefs positions and traffic are modelled. Search Console wins when the two
 disagree. Full tool list: `docs/data-sources.md`.
+
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
 
 ## Procedure
 

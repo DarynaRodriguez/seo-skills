@@ -38,8 +38,8 @@ correct behaviour as a defect:
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | Every URL the crawler found, with status, canonical and robots directives | `mcp__Ahrefs__site-audit-page-explorer` | Ask for a Screaming Frog or Sitebulb export including indexability columns |
 | Which audit project and how fresh the crawl is | `mcp__Ahrefs__site-audit-projects` | Ask for the crawl date with the export |
 | Issue counts for noindex, blocked and canonical classes | `mcp__Ahrefs__site-audit-issues` | Derive the classes from the export |
@@ -53,6 +53,13 @@ absence proves nothing on its own, because a page can be indexed and never
 impressed. Say which of the two you are asserting. Full tool list:
 `docs/data-sources.md`.
 
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
+
 ## Tools
 
 The measured values below come from the local tools, not from reading the
@@ -62,6 +69,7 @@ page by eye. No API key, no install, no network beyond the page itself:
 |---------------------------------------------------|---------------------------------------------------|
 | Discover the sitemaps and count what they declare | `python -m seo_tools sitemap <url> --expand --json` |
 | Check one URL for noindex, canonical and status   | `python -m seo_tools page <url> --json` |
+| Compare what the crawl found against what the sitemaps declare | `python -m seo_tools crawl <export.csv> --json` |
 
 Every command takes `--json`, which is the form to use here. Exit code 0
 means it answered, 1 means it could not. Run these from the pack root; if

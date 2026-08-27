@@ -4,6 +4,45 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+Data providers are now swappable. You still cannot do this work without data, and
+the pack says so plainly, but which tool supplies it is your choice.
+
+- **`seo_tools crawl`**, a thirteenth command that reads a crawl export from
+  Screaming Frog, Sitebulb, Semrush Site Audit, Ahrefs Site Audit or a
+  hand-built spreadsheet, and normalises all of them onto one row shape. Every
+  analysis reads that shape, so adding an exporter means adding column aliases
+  rather than code. Answers on its own, with no API and no network: status
+  distribution, broken URLs ordered by inlinks so severity is visible, redirect
+  chains, duplicate titles, descriptions and H1s, missing fields, canonicals
+  pointing elsewhere, orphans, and thin pages against a threshold you pass.
+  Duplicates and missing-field counts deliberately ignore non-indexable pages,
+  because a duplicate title on a noindexed thank-you page competes with nothing.
+- `docs/data-sources.md` rewritten around **12 data needs** rather than two
+  vendors. Each need lists which skills use it and which providers serve it,
+  including Semrush, Screaming Frog, Sitebulb, Search Console and a plain CSV.
+  Says which stack the pack is written against and why, without pretending the
+  alternatives are worse, and carries the traps that matter when switching, such
+  as Keyword Difficulty not being comparable between vendors.
+- Profile section 11, **Data providers**, where you name what serves each need.
+  Skills read it at Step 0. Writing `none` is a supported answer and a better one
+  than naming a tool you do not have, because it makes the skill report a gap.
+- All 26 skills: the Data table column is now "Our stack" rather than "Live
+  tool", and each table carries a note that the middle column is swappable. Six
+  skills gained the `crawl` command in their Tools table.
+- `--columns` on `crawl`, matching the flag on `gsc`, so an exporter nobody has
+  heard of still works: `--columns url,status,title,-,canonical`.
+- 25 tests for the crawl layer, including one class asserting that two different
+  exporters describing the same defect produce the same finding.
+
+### Fixed
+
+- `ci`: bumped `actions/checkout` to v7 and `actions/setup-python` to v7. Both
+  targeted the deprecated Node 20 runner.
+
 ## [0.3.0] 2026-08-27
 
 ### Fixed

@@ -27,12 +27,19 @@ the answer, so ask rather than assume.
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | Primary and secondary keywords for the page | `.seo/keyword-map.csv`, or `mcp__Ahrefs__keywords-explorer-overview` | Ask which keyword the page targets and mark secondaries as user-supplied |
 | Real questions readers ask on the topic | `mcp__Ahrefs__gsc-keywords`, `mcp__Ahrefs__keywords-explorer-search-suggestions` | Ask the user for the questions sales and support actually hear, and label the source |
 | Section structure of the pages that rank | `mcp__Ahrefs__serp-overview` then read the top pages, or `/serp-analysis` | Ask for a pasted top 10, then read those pages directly |
 | Existing headings on a page being restructured | `mcp__Ahrefs__site-audit-page-content`, or a fetch | Ask the user to paste the current headings |
+
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
 
 ## Tools
 

@@ -29,8 +29,8 @@ does not mention, report the contradiction rather than silently adopting either.
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | The URL list | `sitemap.xml` and any child sitemaps, fetched directly | Same: the sitemap is public. If it is missing, crawl the nav and footer to depth 3 and say the list is partial |
 | Crawl detail per URL: status, indexability, canonical, depth, inlinks | `mcp__Ahrefs__site-audit-page-explorer` | Read pages directly and record `indexable` as `unknown` unless the meta robots tag is visible |
 | Pages Ahrefs has seen, including ones absent from the sitemap | `mcp__Ahrefs__site-explorer-crawled-pages` | Skip. Orphan detection then rests on internal links only, and the summary says so |
@@ -42,6 +42,13 @@ Search Console is the only source of truth for what the site actually receives. 
 organic traffic is a model: it never fills a `clicks_28d` cell. State the date every
 pull was taken, in the summary header, once.
 
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
+
 ## Tools
 
 The measured values below come from the local tools, not from reading the
@@ -50,6 +57,7 @@ page by eye. No API key, no install, no network beyond the page itself:
 | Need                                               | Command                                                        |
 |----------------------------------------------------|----------------------------------------------------------------|
 | Sitemaps, index files and the URL set they declare | `python -m seo_tools sitemap <url> --expand --limit 5000 --json` |
+| Turn a crawl export into the URL inventory, whoever produced it | `python -m seo_tools crawl <export.csv> --json` |
 
 Every command takes `--json`, which is the form to use here. Exit code 0
 means it answered, 1 means it could not. Run these from the pack root; if

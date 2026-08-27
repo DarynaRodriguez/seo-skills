@@ -31,14 +31,21 @@ language values from there, never from a guess at the brand's formatting.
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | What the page actually contains | `mcp__Ahrefs__site-audit-page-content`, or a fetch of the URL | Ask the user to paste the page copy, headings, author, dates and any FAQ |
 | Existing markup and head contents | A fetch of the URL, or `mcp__Ahrefs__site-audit-page-explorer` | Ask the user to paste the current JSON-LD blocks |
 | Structured-data errors already flagged | `mcp__Ahrefs__site-audit-issues` | Ask the user to run the Rich Results Test and paste the errors |
 | Which pages of each type exist | `/site-inventory`, `mcp__Ahrefs__site-explorer-crawled-pages` | Ask for a page list grouped by template |
 
 Copy-paste blocks with placeholder values: `references/schema-recipes.md`.
+
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
 
 ## The hard rule
 

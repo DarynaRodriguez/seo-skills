@@ -36,8 +36,8 @@ Pull these out before touching a tool:
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | Many pages over time, to find the decliners | `mcp__Ahrefs__gsc-pages-history` | Ask for a Search Console page export for two comparable periods |
 | One page's full history, to date the break | `mcp__Ahrefs__gsc-page-history` | Work from the export and say the break date is approximate |
 | Position history for the page's queries | `mcp__Ahrefs__gsc-positions-history` | State that the position path is unknown |
@@ -50,6 +50,13 @@ Never invent a metric. Every number carries its source and the date it was pulle
 Search Console is truth for received traffic; the Ahrefs page trend is a model,
 label it. Full tool list: `docs/data-sources.md`.
 
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
+
 ## Tools
 
 The measured values below come from the local tools, not from reading the
@@ -59,6 +66,7 @@ page by eye. No API key, no install, no network beyond the page itself:
 |------------------------------------------------------|----------------------------------------------------------------------------------|
 | Join two exports and rank what lost clicks           | `python -m seo_tools gsc <now.csv> --compare <before.csv> --dimension page --json` |
 | Check whether a decayed page changed on the way down | `python -m seo_tools drift <url> --json` |
+| Word counts and thin pages across the site, from a crawl export | `python -m seo_tools crawl <export.csv> --json` |
 
 Every command takes `--json`, which is the form to use here. Exit code 0
 means it answered, 1 means it could not. Run these from the pack root; if

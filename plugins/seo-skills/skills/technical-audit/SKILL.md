@@ -36,8 +36,8 @@ changes which findings are real:
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | Which crawls exist and how fresh they are | `mcp__Ahrefs__site-audit-projects` | Ask for a Screaming Frog or Sitebulb export plus the crawl date |
 | Issue inventory by severity | `mcp__Ahrefs__site-audit-issues` | Work from the supplied crawl export, and say the severity model is the crawler's, not yours |
 | Per-URL status, canonical, title, headings, depth | `mcp__Ahrefs__site-audit-page-explorer` | Fetch the sample URLs directly and read the head, and state the sample size |
@@ -50,6 +50,13 @@ changes which findings are real:
 Never invent a metric. Every number carries its source and the date it was pulled.
 Search Console is the only truth for received traffic; Ahrefs organic traffic is a
 model, so label it an estimate. Full tool list: `docs/data-sources.md`.
+
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
 
 ## Tools
 
@@ -64,6 +71,7 @@ page by eye. No API key, no install, no network beyond the page itself:
 | Crawler access, including the AI crawlers       | `python -m seo_tools robots <url> --json` |
 | Snapshot a page before a release                | `python -m seo_tools baseline <url> --label "pre-release"` |
 | Ask what changed since that snapshot            | `python -m seo_tools drift <url> --json` |
+| Read a crawl export from any tool, and get the site-level findings | `python -m seo_tools crawl <export.csv> --json` |
 
 Every command takes `--json`, which is the form to use here. Exit code 0
 means it answered, 1 means it could not. Run these from the pack root; if

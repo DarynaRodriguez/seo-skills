@@ -37,8 +37,8 @@ Pull these out before touching a tool. The first row is the report's spine:
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | Site totals over time: clicks, impressions, CTR, position | `mcp__Ahrefs__gsc-performance-history` | Ask for a Search Console performance export covering both comparison windows |
 | Page-level winners and losers | `mcp__Ahrefs__gsc-pages` | Ask for a page export for both windows |
 | Query-level detail, and the brand and non-brand split | `mcp__Ahrefs__gsc-keywords` | Ask for a query export; without it, say the brand split could not be made |
@@ -54,6 +54,13 @@ names rather than pasting raw rows. Never invent a metric. Search Console is tru
 for clicks, impressions, CTR and position; Ahrefs organic traffic and traffic value
 are models. Ahrefs monetary values are USD cents, divide by 100 to display. Full
 tool list: `docs/data-sources.md`.
+
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
 
 ## Tools
 

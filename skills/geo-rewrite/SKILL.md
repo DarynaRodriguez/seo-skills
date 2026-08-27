@@ -33,8 +33,8 @@ claims we may not make stay out, whatever it would do for extractability. Sectio
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | The page as a crawler receives it | `mcp__Ahrefs__site-audit-page-content` | Fetch the URL and read the raw HTML, and say whether you saw rendered or raw |
 | Whether the page is retrieved but not cited | Peec `get_url_report`, `get_url_content` | Ask for the AI-visibility read from `/ai-visibility-audit`, or state that citation status is unknown |
 | The questions the engines are actually asked | Peec `list_prompts`, `get_chats_report` | Use the profile's jobs-to-be-done and Search Console questions |
@@ -44,6 +44,13 @@ claims we may not make stay out, whatever it would do for extractability. Sectio
 Every number that enters the rewritten copy carries a source the page can show.
 An unsourced statistic is not a proof point, it is a liability. Full tool list:
 `docs/data-sources.md`.
+
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
 
 ## Tools
 

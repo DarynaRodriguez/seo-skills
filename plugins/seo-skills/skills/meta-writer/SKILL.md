@@ -32,14 +32,21 @@ words, banned characters, claims that are not signed off.
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | Which pages get impressions and how they click | `mcp__Ahrefs__gsc-pages` | Ask for a Search Console pages export, or work from a URL list the user names and say prioritisation is unranked |
 | The site's own CTR curve by position | `mcp__Ahrefs__gsc-ctr-by-position` | State that under-performance is judged against no baseline, and rank by impressions alone |
 | Queries a page actually gets, for phrasing | `mcp__Ahrefs__gsc-keywords` | Ask for a query export, or use the mapped keyword from `.seo/keyword-map.csv` |
 | Current title and description on the page | `mcp__Ahrefs__site-audit-page-content`, or a fetch of the URL | Ask the user to paste the current title and description |
 | How competing snippets read for the query | `mcp__Ahrefs__serp-overview` | Ask for a pasted top 10 with date and country |
 | Target keyword per page | `.seo/keyword-map.csv` from `/keyword-page-mapping` | Ask which keyword each page targets, one per page |
+
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
 
 ## Tools
 

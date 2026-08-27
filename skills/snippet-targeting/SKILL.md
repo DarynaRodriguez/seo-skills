@@ -27,13 +27,20 @@ the answer, so ask rather than assume.
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | Whether the query has a snippet, and who holds it | `mcp__Ahrefs__serp-overview` | Ask the user to search the query and paste the result with date and country, then say the check is a sample of one |
 | People-also-ask questions on the query | The live SERP via `/serp-analysis`, or `mcp__Ahrefs__serp-overview` features | Ask the user to expand the PAA box and paste the questions with the date |
 | Question queries the site already receives | `mcp__Ahrefs__gsc-keywords` filtered to question terms | Ask for a Search Console query export, or take questions from sales and support and label the source |
 | Whether the page currently ranks in the top 10 | `mcp__Ahrefs__gsc-page-history`, `mcp__Ahrefs__site-explorer-organic-keywords` | Ask for the current position, and note that a page outside the top 10 rarely wins a snippet |
 | The page copy to place the block into | `mcp__Ahrefs__site-audit-page-content`, or a fetch | Ask the user to paste the section |
+
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
 
 ## Tools
 

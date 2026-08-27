@@ -31,8 +31,8 @@ corrupts every downstream skill, so an honest `<unknown>` beats a plausible fill
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | Homepage and key page copy, nav, footer | Fetch tool on the live URLs | Ask the user to paste the homepage copy and 3 key page URLs with their headings |
 | Which keywords the domain already ranks for | `mcp__Ahrefs__site-explorer-organic-keywords` | Ask which queries the team believes they rank for, label as user-supplied |
 | Who competes for the same keywords | `mcp__Ahrefs__site-explorer-organic-competitors` | Ask the user to name 3 to 5 competitors, mark the list as unverified |
@@ -44,6 +44,13 @@ Ahrefs monetary values are USD cents, divide by 100 to display. Peec `visibility
 `share_of_voice` and `retrieved_percentage` are 0 to 1 ratios, multiply by 100 for
 display. Record no metric in the profile that a tool did not return. The profile is
 a settings file, not a report: it holds names, rules and priorities, not figures.
+
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
 
 ## Procedure
 

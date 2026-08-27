@@ -48,8 +48,8 @@ any content finding will.
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | Which projects exist, and their configuration | Peec `list_projects`, `get_project_profile` | Ask which engines, locales and competitors are tracked, and record the answer in the output |
 | The tracked prompt set, with topics | Peec `list_prompts`, `list_topics` | Ask for the prompt list, or take the profile's prompts and label the panel as untracked |
 | Visibility, share of voice, sentiment, average position | Peec `get_brand_report` | Ahrefs `mcp__Ahrefs__brand-radar-mentions-overview`, `mcp__Ahrefs__brand-radar-sov-overview`; with neither, run prompts by hand and label a sample of one |
@@ -68,6 +68,13 @@ problem, not a rounding artefact. `position` is a rank, lower is better.
 **IDs are opaque.** Copy every `pr_`, `to_` and `tg_` identifier verbatim from the
 tool result that produced it. Never shorten, complete or reconstruct one from
 memory: a guessed ID is an invented ID. Full tool list: `docs/data-sources.md`.
+
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
 
 ## Tools
 

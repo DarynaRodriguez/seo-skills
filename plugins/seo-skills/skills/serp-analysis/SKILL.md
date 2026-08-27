@@ -31,8 +31,8 @@ the results.
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | Who ranks now, positions, SERP features | `mcp__Ahrefs__serp-overview` | Ask the user to paste the top 10 with the date and the country they searched from, and treat it as one sample |
 | Ranking page's traffic and keyword spread | `mcp__Ahrefs__site-explorer-top-pages` | Ask for an export, or judge from page content alone and say traffic is unknown |
 | Competing domain's authority and size | `mcp__Ahrefs__site-explorer-metrics`, `mcp__Ahrefs__site-explorer-domain-rating` | State that the authority gap is unmeasured |
@@ -44,6 +44,13 @@ the results.
 Ahrefs difficulty and traffic figures are models. Label them estimates. Search
 Console is the only source of truth for what the site actually receives. Full tool
 list: `docs/data-sources.md`.
+
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
 
 ## Procedure
 
