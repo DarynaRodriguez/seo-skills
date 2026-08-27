@@ -343,11 +343,29 @@ def compare(baseline: Dict[str, object], current: Dict[str, object]) -> Dict[str
         "url": current.get("url") or baseline.get("url"),
         "baseline_id": baseline.get("baseline_id"),
         "baseline_captured_at": baseline.get("captured_at"),
+        # The label says why the snapshot was taken, which is most of its value
+        # six weeks later. A caller should not have to open the database for it.
+        "baseline_label": baseline.get("label"),
         "changes": changes,
         "counts": counts,
         "total_changes": len(changes),
         "verdict": _verdict(counts),
+        # A stable token beside the sentence. The sentence is for a person and
+        # its wording may improve; anything matching on the outcome should read
+        # this, so two callers cannot disagree about the mapping.
+        "verdict_code": _verdict_code(counts),
     }
+
+
+def _verdict_code(counts: Dict[str, int]) -> str:
+    """One of: regression, review, changed, unchanged. Closed set, stable wording."""
+    if counts.get("critical"):
+        return "regression"
+    if counts.get("warning"):
+        return "review"
+    if counts.get("info"):
+        return "changed"
+    return "unchanged"
 
 
 def _verdict(counts: Dict[str, int]) -> str:

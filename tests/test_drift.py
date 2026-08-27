@@ -190,3 +190,44 @@ class TestStore(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class TestOutputIsSelfSufficient(unittest.TestCase):
+    """A caller must not need the database to fill in what the contract asks for.
+
+    A live agent run had to open baselines.db directly to get the label, and had
+    to invent its own mapping from the verdict sentence to an enum. Both were the
+    tool withholding something, so both are returned now.
+    """
+
+    def test_the_label_comes_back_with_the_comparison(self):
+        baseline = baseline_from(BEFORE_HTML)
+        result = compare(baseline, snapshot(BEFORE_HTML))
+        self.assertIn("baseline_label", result)
+
+    def test_a_stable_code_accompanies_the_sentence(self):
+        cases = (
+            (BEFORE_HTML, "unchanged"),
+            (BEFORE_HTML.replace("<h2>Plans</h2>", "<h2>Packages</h2>"), "changed"),
+            (BEFORE_HTML.replace("<h1>Pricing</h1>", "<h1>Plans</h1>"), "review"),
+            (BEFORE_HTML.replace("<head>", '<head><meta name="robots" content="noindex">'), "regression"),
+        )
+        baseline = baseline_from(BEFORE_HTML)
+        for html, expected in cases:
+            with self.subTest(expected=expected):
+                result = compare(baseline, snapshot(html))
+                self.assertEqual(result["verdict_code"], expected)
+                # The sentence is for a person and may be reworded; the code is
+                # what anything matching on the outcome should read.
+                self.assertTrue(result["verdict"])
+
+    def test_the_code_set_is_closed(self):
+        baseline = baseline_from(BEFORE_HTML)
+        for html in (BEFORE_HTML, BEFORE_HTML.replace("Pricing", "Plans")):
+            result = compare(baseline, snapshot(html))
+            self.assertIn(
+                result["verdict_code"], {"regression", "review", "changed", "unchanged"}
+            )
+
+
+if __name__ == "__main__":
+    unittest.main()

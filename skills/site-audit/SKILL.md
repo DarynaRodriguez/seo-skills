@@ -89,6 +89,21 @@ the fan-out and can be aggregated:
    Create `pages/`, `ai-access/` and `drift/` inside it. Every agent writes there
    and nowhere else, which is what makes the aggregation possible.
 
+   **Pass every agent these inputs, by name, every time.** Two are paths the
+   agents cannot derive, and an agent that guesses either dies on its first
+   command or returns a wrong answer wearing the shape of a right one:
+
+   | Input | Value |
+   |-------|-------|
+   | `pack_root` | Absolute path to the directory holding `seo.py`. Without it `python -m seo_tools` fails, because that form resolves only from the pack root |
+   | `output_dir` | The audit directory you just created |
+   | `home` | The baseline store, for `seo-drift-watcher` only. Without it `drift` reads a different store, finds no baseline, and reports a coverage gap indistinguishable from the truth |
+   | `profile_path` | The profile, or the word `none` |
+
+   Per-agent, add the URL or export path, the market, and `clicks_28d` where you
+   have it. Where you do not, say so rather than omitting it: an agent told
+   nothing about clicks records the gap, an agent told a zero reports a lie.
+
 2. **Run the crawl analyst first, alone.** It produces the site-level findings and
    the page set. Nothing else can start until you know which pages matter, and
    guessing the page set is how an audit ends up either too shallow or unfinished.
@@ -102,14 +117,14 @@ the fan-out and can be aggregated:
    cheap: two tool calls each.
 
 4. **Fan out the page auditors, all at once.** One agent per URL on the page set,
-   in a single batch so they run concurrently. Pass each one its URL, the output
-   directory, the profile path, and its clicks if you have them. Ten to thirty
-   agents. If the page set is larger than fifty, the crawl analyst did not narrow
+   in a single batch so they run concurrently. Pass each one its URL plus the
+   inputs from step 1. Ten to thirty agents. If the page set is larger than fifty, the crawl analyst did not narrow
    it enough: go back rather than launching a hundred agents.
 
 5. **Fan out the drift watchers for any URL that already has a baseline.** Check
-   with `history` before launching one: an agent that finds no baseline is a
-   wasted turn. These answer "what changed", which is a cheaper question than
+   with `history` before launching one, passing the same `home`: an agent that
+   finds no baseline is a wasted turn, and one given the wrong `home` reports a
+   false gap rather than a real one. These answer "what changed", which is a cheaper question than
    "what is wrong" and often names the cause outright.
 
 6. **Read the files, not the replies.** The agents' replies are summaries for you.
@@ -175,6 +190,8 @@ Write the aggregate to `.seo/audit-<date>/report.md` alongside the agent files.
   check suite; changing the scale afterwards makes the ranking meaningless.
 - **Never promise a traffic recovery from a fix list.** Describe what is broken and
   what it costs, not what fixing it will earn.
+- **Never launch an agent without `pack_root`.** It cannot derive the path, and
+  the failure is silent: an empty audit reads exactly like a clean one.
 - **A named human approves anything destructive.** This skill produces a plan.
   Redirects, noindex changes and template edits are decisions with an owner.
 
