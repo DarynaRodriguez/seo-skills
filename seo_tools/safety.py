@@ -10,6 +10,7 @@ second.
 from __future__ import annotations
 
 import ipaddress
+import re
 import socket
 from typing import List, Tuple
 from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
@@ -28,6 +29,12 @@ BLOCKED_HOSTS = ("localhost", "metadata.google.internal")
 # Cloud instance metadata. Link-local covers 169.254.169.254 already, but naming
 # these makes the intent legible to anyone reading a denial.
 METADATA_ADDRESSES = ("169.254.169.254", "fd00:ec2::254", "100.100.100.200")
+
+# Any C0 control character, DEL, or a Unicode line or paragraph separator. The
+# null byte matters most: getaddrinfo truncates at it, so a hostname carrying one
+# is checked as its prefix and written as the whole string. CR and LF are the
+# classic request-smuggling shapes.
+CONTROL_CHARS = re.compile("[" + "".join(chr(c) for c in list(range(0x20)) + [0x7f]) + "\u2028\u2029]")
 
 # Query parameters that identify a campaign, not a page. Stripped when
 # normalising so the same page tracked twice matches itself.
@@ -70,6 +77,11 @@ def _is_public_address(raw: str) -> bool:
         or addr.is_multicast
         or addr.is_reserved
         or addr.is_unspecified
+        # is_global additionally excludes shared address space (100.64.0.0/10,
+        # carrier-grade NAT), benchmarking and documentation ranges. Kept
+        # alongside the explicit checks rather than replacing them, because
+        # is_global reports multicast as global.
+        or not addr.is_global
     )
 
 
@@ -103,6 +115,14 @@ def validate_url(url: str, allow_private: bool = False) -> str:
     """
     if not isinstance(url, str) or not url.strip():
         raise UrlNotAllowed("empty URL")
+    found = CONTROL_CHARS.search(url)
+    if found:
+        raise UrlNotAllowed(
+            "URL contains a control character ({!r}), which is refused because the "
+            "resolver and the request would disagree about the hostname".format(
+                found.group(0)
+            )
+        )
     parts = urlsplit(url.strip())
 
     if parts.scheme.lower() not in ALLOWED_SCHEMES:
@@ -170,3 +190,24 @@ def normalise_url(url: str) -> str:
         path = path.rstrip("/") or "/"
 
     return urlunsplit((scheme, host, path, query, ""))
+
+
+def redact(url: str) -> str:
+    """A URL safe to print. Strips any userinfo so a password cannot reach a log.
+
+    Error messages echo the URL they refused, which is useful, and a URL carrying
+    credentials is exactly the case where echoing it is harmful. Redacting is
+    cheaper than remembering not to print it.
+    """
+    if not isinstance(url, str):
+        return "<not a string>"
+    try:
+        parts = urlsplit(url)
+    except ValueError:
+        return "<unparseable URL>"
+    if not (parts.username or parts.password):
+        return url
+    host = parts.hostname or ""
+    if parts.port:
+        host = "{}:{}".format(host, parts.port)
+    return urlunsplit((parts.scheme, "<redacted>@" + host, parts.path, parts.query, parts.fragment))

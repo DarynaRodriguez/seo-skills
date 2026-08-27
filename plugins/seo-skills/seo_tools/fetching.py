@@ -13,6 +13,7 @@ import zlib
 from email.message import Message
 from typing import Dict, List
 from urllib import request as urlrequest
+from http.client import HTTPException
 from urllib.error import HTTPError, URLError
 from urllib.parse import urljoin
 
@@ -24,6 +25,9 @@ DEFAULT_USER_AGENT = (
 DEFAULT_TIMEOUT = 20.0
 MAX_REDIRECTS = 10
 MAX_BYTES = 8 * 1024 * 1024
+# The ceiling after decompression. A capped download is not a cap on memory:
+# gzip ratios above 1000 to 1 are trivial to produce.
+MAX_DECOMPRESSED = 32 * 1024 * 1024
 
 _META_CHARSET = re.compile(
     rb"<meta[^>]+charset\s*=\s*[\"\']?\s*([a-zA-Z0-9_.:-]+)", re.I
@@ -35,18 +39,31 @@ class FetchError(RuntimeError):
 
 
 def _decompress(body: bytes, encoding: str) -> bytes:
+    """Decompress a response body, refusing to expand past MAX_DECOMPRESSED.
+
+    The download is capped at MAX_BYTES, which does nothing on its own: gzip
+    reaches ratios above 1000 to 1, so a compliant 8 MB response can expand to
+    gigabytes and exhaust memory. Both paths therefore read incrementally and
+    stop at the cap rather than calling read() with no argument.
+    """
     encoding = (encoding or "").lower().strip()
     if not body:
         return body
     try:
         if encoding == "gzip":
-            return gzip.GzipFile(fileobj=io.BytesIO(body)).read()
+            stream = gzip.GzipFile(fileobj=io.BytesIO(body))
+            out = stream.read(MAX_DECOMPRESSED + 1)
+            return out[:MAX_DECOMPRESSED]
         if encoding == "deflate":
-            try:
-                return zlib.decompress(body)
-            except zlib.error:
-                return zlib.decompress(body, -zlib.MAX_WBITS)
-    except (OSError, zlib.error):
+            for wbits in (zlib.MAX_WBITS, -zlib.MAX_WBITS):
+                try:
+                    machine = zlib.decompressobj(wbits)
+                    out = machine.decompress(body, MAX_DECOMPRESSED)
+                    return out[:MAX_DECOMPRESSED]
+                except zlib.error:
+                    continue
+            return body
+    except (OSError, zlib.error, EOFError):
         # A server that mislabels its encoding is a finding, not a crash.
         return body
     return body
@@ -145,7 +162,9 @@ def fetch(
                 raw = b""
             finally:
                 exc.close()
-        except (URLError, OSError, ValueError) as exc:
+        except (URLError, OSError, ValueError, HTTPException) as exc:
+            # HTTPException covers http.client.InvalidURL, which is not a
+            # ValueError and previously escaped as a traceback.
             reason = getattr(exc, "reason", exc)
             return {
                 "ok": False,
