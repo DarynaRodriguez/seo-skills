@@ -46,6 +46,22 @@ class TestSsrfGuard(unittest.TestCase):
         self.assertTrue(validate_url("http://93.184.216.34/"))
         self.assertTrue(validate_url("https://example.com/"))
 
+    def test_ipv4_mapped_ipv6_is_judged_as_its_ipv4_form(self):
+        # Python 3.13 taught is_private and is_loopback to look through the
+        # mapping; 3.9 does not, so this was classified differently depending on
+        # the interpreter. CI caught it on 3.9 only.
+        from seo_tools.safety import _is_public_address
+
+        for mapped, public in (
+            ("::ffff:127.0.0.1", False),
+            ("::ffff:7f00:1", False),
+            ("::ffff:10.0.0.1", False),
+            ("::ffff:169.254.169.254", False),
+            ("::ffff:8.8.8.8", True),
+        ):
+            with self.subTest(address=mapped):
+                self.assertIs(_is_public_address(mapped), public)
+
     def test_shared_address_space_is_not_public(self):
         # is_private is False for 100.64.0.0/10, so the explicit range list
         # missed it. is_global catches it.

@@ -84,6 +84,17 @@ def _is_public_address(raw: str) -> bool:
         return False
     if raw in METADATA_ADDRESSES:
         return False
+
+    # Judge an IPv4-mapped IPv6 address as its IPv4 form. Python 3.13 taught
+    # is_private and is_loopback to look through the mapping; earlier versions do
+    # not, so ::ffff:127.0.0.1 is classified differently depending on the
+    # interpreter. Unmapping here makes every version agree, and agreeing is the
+    # point: a guard that changes behaviour with the runtime is not one.
+    mapped = getattr(addr, "ipv4_mapped", None)
+    if mapped is not None:
+        addr = mapped
+        if str(addr) in METADATA_ADDRESSES:
+            return False
     return not (
         addr.is_private
         or addr.is_loopback
