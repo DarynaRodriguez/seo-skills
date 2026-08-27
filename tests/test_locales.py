@@ -225,3 +225,92 @@ class TestRegionalCrawlers(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestExtractedWidths(unittest.TestCase):
+    """Cyrillic, Greek and Hebrew come from the font, not from a default.
+
+    Before this, every glyph in those scripts fell through to DEFAULT_WIDTH of
+    556. Cyrillic Sha is 917, so a Russian title was under-measured by up to 65%
+    per wide character.
+    """
+
+    def test_cyrillic_is_not_measured_at_the_default(self):
+        from seo_tools.typography import DEFAULT_WIDTH, char_units
+
+        self.assertEqual(char_units("Ш"), 917)
+        self.assertEqual(char_units("ж"), 669)
+        self.assertNotEqual(char_units("Ш"), DEFAULT_WIDTH)
+
+    def test_greek_and_hebrew_are_tabulated(self):
+        from seo_tools.typography import EXTRA_WIDTHS
+
+        self.assertIn("ω", EXTRA_WIDTHS)
+        self.assertIn("א", EXTRA_WIDTHS)
+
+    def test_the_sharp_s_error_the_font_caught(self):
+        # The hand-written table said 556. The font says 611. This matters for
+        # every German title containing one.
+        from seo_tools.typography import char_units
+
+        self.assertEqual(char_units("ß"), 611)
+
+    def test_a_wide_cyrillic_title_is_measured_wider_than_a_narrow_one(self):
+        from seo_tools.typography import measure_px
+
+        self.assertGreater(measure_px("ШШШШ", 20), measure_px("iiii", 20) * 3)
+
+    def test_cyrillic_text_gets_its_own_method_label(self):
+        from seo_tools.typography import measure_title
+
+        method = measure_title("Закупочное программное обеспечение")["method"]
+        self.assertIn("extracted from the font", method)
+        self.assertNotIn("UNRELIABLE", method)
+
+
+class TestUnmeasurableScripts(unittest.TestCase):
+    """Scripts where summing per-character widths is the wrong measurement.
+
+    Arabic is cursive, so letters join and change form. The Indic scripts form
+    conjuncts and reorder vowel signs, and Arial has no Devanagari at all. A
+    number for either is not a rough estimate, it is wrong, so the pack says so
+    rather than producing a verdict.
+    """
+
+    def test_arabic_and_devanagari_are_flagged(self):
+        from seo_tools.typography import unmeasurable_scripts
+
+        self.assertEqual(
+            [b["script"] for b in unmeasurable_scripts("برمجيات المشتريات")], ["Arabic"]
+        )
+        self.assertEqual(
+            [b["script"] for b in unmeasurable_scripts("खरीद सॉफ्टवेयर")], ["Devanagari"]
+        )
+
+    def test_latin_cyrillic_and_cjk_are_not_flagged(self):
+        from seo_tools.typography import unmeasurable_scripts
+
+        for text in ("Procurement software", "Закупочное ПО", "調達ソフトウェア", "조달 소프트웨어"):
+            with self.subTest(text=text):
+                self.assertEqual(unmeasurable_scripts(text), [])
+
+    def test_the_method_says_unreliable_and_gives_the_reason(self):
+        from seo_tools.typography import measure_title
+
+        method = measure_title("برمجيات المشتريات")["method"]
+        self.assertIn("UNRELIABLE", method)
+        self.assertIn("cursive", method)
+
+    def test_no_truncation_verdict_is_issued_on_an_unreliable_width(self):
+        # A pass or fail on a number that does not mean what it looks like is
+        # worse than no verdict.
+        long_arabic = "برمجيات المشتريات للمؤسسات " * 6
+        checks = {f["check"] for f in check_meta({"title": long_arabic, "meta_description": "x" * 200, "h1": []})}
+        self.assertIn("title.width_unmeasurable", checks)
+        self.assertNotIn("title.too_wide", checks)
+        self.assertNotIn("title.short", checks)
+
+    def test_a_measurable_script_still_gets_a_verdict(self):
+        checks = {f["check"] for f in check_meta({"title": "Ш" * 40, "meta_description": "x" * 200, "h1": []})}
+        self.assertIn("title.too_wide", checks)
+        self.assertNotIn("title.width_unmeasurable", checks)

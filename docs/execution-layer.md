@@ -208,12 +208,31 @@ that names one of those markets should read those rows first. Applebot is listed
 separately from Applebot-Extended, because one governs search visibility and the
 other only training, which is the same trap as Google-Extended.
 
-What is still Latin-centric and should be treated with care: the Arial width table
-covers Latin, Greek-adjacent punctuation and common accents. Cyrillic, Greek,
-Hebrew, Arabic and Indic characters fall through to a default width, so widths in
-those scripts are cruder than the CJK and Latin cases. If that matters for your
-market, add the metrics for your script to `ARIAL` in `seo_tools/typography.py`
-and send a pull request.
+Cyrillic, Greek and Hebrew are measured from real font metrics, extracted by
+`scripts/extract_font_widths.py` rather than transcribed by hand. Those three
+scripts render one glyph per codepoint with a fixed advance, which is the
+condition under which summing per-character widths means anything. Running that
+script with `--verify` also checks the hand-written Latin table against the font;
+it found one error, a sharp s recorded as 556 when the font says 611.
+
+Two script families are **not** measurable this way, and the tools say so instead
+of producing a number. Arabic is cursive: letters join and change form depending
+on their neighbours, so an isolated codepoint's advance is not what renders. The
+Indic scripts form conjuncts and reorder vowel signs, and Arial contains no
+Devanagari at all, so anything measured there belongs to a substituted font. For
+text in either, `method` begins with `UNRELIABLE`, the width is labelled a floor
+rather than an estimate, and `page` and `meta` emit `title.width_unmeasurable`
+instead of a truncation verdict. A pass or fail on a number that does not mean
+what it looks like is worse than no verdict.
+
+To add a script, regenerate the table from a font that contains it:
+
+```bash
+python3 scripts/extract_font_widths.py --font /path/to/arial.ttf --write-module
+```
+
+Liberation Sans is metrically identical to Arial and openly licensed, so it
+produces the same table if you would rather not read a proprietary font.
 
 ## Using it from an agent
 

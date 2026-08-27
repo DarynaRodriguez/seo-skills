@@ -18,7 +18,9 @@ they can be corrected in one place when they move.
 from __future__ import annotations
 
 import unicodedata
-from typing import Dict
+from typing import Dict, List
+
+from ._widths import EXTRA_WIDTHS
 
 # Arial advance widths, units per 1000 em. These are the font metrics, not a guess.
 ARIAL: Dict[str, int] = {
@@ -46,12 +48,39 @@ ARIAL: Dict[str, int] = {
     "“": 333, "”": 333,  # double quotes
     "…": 1000,  # ellipsis
     " ": 278,   # non-breaking space
-    "ä": 556, "ö": 556, "ü": 556, "ß": 556,
+    "ä": 556, "ö": 556, "ü": 556, "ß": 611,
     "Ä": 667, "Ö": 778, "Ü": 722,
     "é": 556, "è": 556, "á": 556, "ú": 556,
     "ó": 556, "í": 278, "ñ": 556,
 }
 DEFAULT_WIDTH = 556  # a lowercase-letter width, for anything not tabulated
+
+# Cyrillic, Greek and Hebrew, extracted from the font by
+# scripts/extract_font_widths.py rather than transcribed by hand. Those three
+# scripts render one glyph per codepoint with a fixed advance, which is the
+# condition under which summing per-character widths means anything.
+WIDTHS: Dict[str, int] = dict(ARIAL)
+WIDTHS.update(EXTRA_WIDTHS)
+
+# Scripts where per-character measurement does not apply, and why. Arabic is
+# cursive: letters change shape and join depending on their neighbours, so an
+# isolated codepoint's advance is not what renders. The Indic scripts form
+# conjuncts and reorder vowel signs, and Arial contains no Devanagari at all, so
+# any width measured there belongs to whatever font the browser substituted.
+UNMEASURABLE_RANGES = (
+    ("Arabic", 0x0600, 0x06FF, "cursive, letters join and change form"),
+    ("Arabic", 0x0750, 0x077F, "cursive, letters join and change form"),
+    ("Syriac", 0x0700, 0x074F, "cursive, letters join and change form"),
+    ("Devanagari", 0x0900, 0x097F, "conjuncts and reordered vowel signs, and absent from Arial"),
+    ("Bengali", 0x0980, 0x09FF, "conjuncts and reordered vowel signs"),
+    ("Gurmukhi", 0x0A00, 0x0A7F, "conjuncts and reordered vowel signs"),
+    ("Gujarati", 0x0A80, 0x0AFF, "conjuncts and reordered vowel signs"),
+    ("Tamil", 0x0B80, 0x0BFF, "conjuncts and reordered vowel signs"),
+    ("Telugu", 0x0C00, 0x0C7F, "conjuncts and reordered vowel signs"),
+    ("Thai", 0x0E00, 0x0E7F, "stacked marks and no word spacing"),
+    ("Khmer", 0x1780, 0x17FF, "stacked subscripts"),
+    ("Myanmar", 0x1000, 0x109F, "stacked medials"),
+)
 
 # Rendering sizes Google uses on desktop results.
 TITLE_FONT_PX = 20
@@ -90,6 +119,11 @@ WIDE_SCRIPTS_NOTE = (
     "widths. Rougher than the Latin case, because Google renders CJK in a different "
     "font. Estimate, not a render."
 )
+CYRILLIC_GREEK_HEBREW_NOTE = (
+    "Arial advance widths, including the Cyrillic, Greek or Hebrew glyphs in this "
+    "text, extracted from the font rather than transcribed. Same confidence as the "
+    "Latin case. Estimate, not a render."
+)
 
 
 def char_units(char: str) -> int:
@@ -105,16 +139,51 @@ def char_units(char: str) -> int:
         return 0
     if unicodedata.east_asian_width(char) in ("W", "F"):
         return FULLWIDTH_UNITS
-    return ARIAL.get(char, DEFAULT_WIDTH)
+    return WIDTHS.get(char, DEFAULT_WIDTH)
 
 
 def has_wide_characters(text: str) -> bool:
     return any(unicodedata.east_asian_width(c) in ("W", "F") for c in text or "")
 
 
+def unmeasurable_scripts(text: str) -> List[Dict[str, str]]:
+    """Scripts present in `text` whose width cannot be summed per character.
+
+    Returned rather than silently absorbed, because a number produced for a
+    cursive or conjunct-forming script is not a rough estimate, it is the wrong
+    measurement. The caller has to be able to say so.
+    """
+    found: Dict[str, str] = {}
+    for char in text or "":
+        code = ord(char)
+        for name, low, high, reason in UNMEASURABLE_RANGES:
+            if low <= code <= high:
+                found.setdefault(name, reason)
+    return [{"script": name, "reason": reason} for name, reason in sorted(found.items())]
+
+
 def method_for(text: str) -> str:
     """The method label to carry with a measurement of this text."""
-    return WIDE_SCRIPTS_NOTE if has_wide_characters(text) else LATIN_SCRIPTS_NOTE
+    blocked = unmeasurable_scripts(text)
+    if blocked:
+        detail = "; ".join("{} ({})".format(b["script"], b["reason"]) for b in blocked)
+        return (
+            "UNRELIABLE for this text. Width cannot be summed per character for: "
+            "{}. The number below is a floor, not an estimate: treat character "
+            "count and a visual check as the real test.".format(detail)
+        )
+    if has_wide_characters(text):
+        return WIDE_SCRIPTS_NOTE
+    return CYRILLIC_GREEK_HEBREW_NOTE if _has_extra_script(text) else LATIN_SCRIPTS_NOTE
+
+
+def _has_extra_script(text: str) -> bool:
+    """Whether the text uses one of the scripts taken from the extracted table."""
+    return any(
+        char in EXTRA_WIDTHS
+        for char in text or ""
+        if char not in ARIAL
+    )
 
 
 def measure_px(text: str, font_px: int) -> float:
