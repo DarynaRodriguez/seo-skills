@@ -14,16 +14,21 @@ you are blunt about it.
 
 ## Invoking the tools
 
-Every command below is written as `python -m seo_tools <command>`, which only
-resolves when the working directory is the pack root. It will not be, in most
-runs. If it reports `No module named seo_tools`, use the launcher instead, which
-works from anywhere:
+Use the launcher, with the absolute `pack_root` the orchestrator passes. It works
+from any working directory, which matters because yours is never the pack root:
 
-    python <pack-root>/seo.py <command> ...
+    python "<pack_root>/seo.py" <command> ...
 
-The orchestrator passes the pack root. If it did not, say so and stop rather than
-guessing at a path: a wrong path produces an empty audit that looks like a clean
-one.
+If `pack_root` was not supplied, say so and stop rather than guessing at a path:
+a wrong path produces an empty audit that looks like a clean one.
+
+Two notes on the command itself:
+
+- If `python` is not on the path, use `python3`. Both work; the launcher needs
+  3.9 or newer and nothing else.
+- On Windows, prefix the command with `PYTHONIOENCODING=utf-8` or set it in the
+  environment first. Without it a non-English page comes back as mojibake, and
+  the failure looks like an encoding fault on the site rather than in your shell.
 
 ## Severities
 
@@ -35,17 +40,23 @@ is the whole point.
 ## What to run
 
 ```bash
-python -m seo_tools robots <url> --json
-python -m seo_tools page <url> --json
+python "<pack_root>/seo.py" robots <url> --json
+python "<pack_root>/seo.py" page <url> --json
 ```
 
 The first returns a verdict per crawler with the rule that decided it. The second
 tells you whether the content is in the served HTML or arrives with JavaScript.
-Add the sitemap check when you are checking a whole market rather than one page:
+
+Add the sitemap check only when you were given a site or a market root rather
+than a single content URL:
 
 ```bash
-python -m seo_tools sitemap <url> --expand --json
+python "<pack_root>/seo.py" sitemap <url> --expand --json
 ```
+
+One page is the default reading. If you were handed one URL and no instruction to
+cover a market, you are checking that page: leave `sitemaps_reachable` null and
+say in `notes` that you read it as a single-page check.
 
 ## The distinction that matters most
 
@@ -70,10 +81,16 @@ is irrelevant there.
 ## The third failure mode, and the one most often missed
 
 A page can pass robots.txt cleanly and still be excluded, because `noindex` is a
-different mechanism. `page --json` already returns `meta_robots`,
-`meta_robots_directives`, and the response headers include `x-robots-tag`. Read
-all three. A report saying "reachable" about a `noindex` page is wrong about the
-only thing anyone asked.
+different mechanism. `page --json` returns `meta_robots` and
+`meta_robots_directives` for the tag, and `fetch.headers` carries `x-robots-tag`
+for the header. Read all three.
+
+`x-robots-tag` is on the whitelist of headers that block keeps, so a missing key
+there means the server sent no such header, not that the pack dropped it. That is
+worth knowing before you report an absence as an absence.
+
+A report saying "reachable" about a `noindex` page is wrong about the only thing
+anyone asked.
 
 There are therefore three ways this page can fail, and you check each:
 
@@ -134,20 +151,31 @@ The verdict, in priority order. Take the first that applies:
 | `reachable but empty` | Nothing blocked, but `requires_js` is true |
 | `reachable` | None of the above |
 
-Five notes on the rest, each of which caused a wrong guess in a live run:
+Six notes on the rest, each of which caused a wrong guess in a live run:
 
-- **`allow_is_implicit`** is true when no robots.txt group matches the crawler at
-  all, and false when an explicit `Allow:` matched. The distinction matters: an
-  implicit allow disappears the moment somebody adds a broad `Disallow` group, so
-  it is a weaker pass and the reader should know which they have.
+- **`checked_at` is the tool's `checked_at`, copied.** Every command stamps its
+  JSON with a full ISO 8601 instant, so you never generate this and never fall
+  back to a date.
+- **`allow_is_implicit` is the tool's `allow_is_implicit`, copied**, not inferred
+  from the `reason` sentence. It is true when nothing matched the crawler and
+  false when a rule decided. Read the field: a run that string-matched the prose
+  instead was one rewording away from being silently wrong on every crawler. The
+  distinction matters because an implicit allow disappears the moment somebody
+  adds a broad `Disallow` group, so it is a weaker pass and the reader should
+  know which they have. The site-level counterpart is `implicit_allow_count`
+  against `allowed_count`: when those two are equal, every pass on the site is
+  implicit and one edit to robots.txt blocks everything. Say so.
+- **`noindex` and `x_robots_tag` you derive**, from `meta_robots_directives` and
+  from `fetch.headers` respectively. No single field answers either.
 - **`matched_rules`** is `{}` when nothing matched. That is the normal case on a
   permissive site, not a gap.
-- **`sitemaps_reachable`** is `null` when you did not run the sitemap check. Only
-  run it when checking a market rather than one page; do not spend a turn filling
-  a field.
+- **`sitemaps_reachable`** is `null` when you did not run the sitemap check.
 - **`regional_engines_checked`** lists the regional engines whose verdict you
-  actually read, which is the ones the profile's markets make relevant. Empty is
-  correct when no profile named one.
+  actually read. `robots` returns all of them on every run, so the question is
+  which you read on purpose, not which the tool covered. Read the ones the
+  profile's markets make relevant; with no profile but a `market` input, read the
+  engines that lead that market and list them. Empty is correct only when you had
+  neither.
 - **`notes`** takes anything a reader needs that no field holds, including
   findings outside your remit that you noticed in the same fetch. Say they are
   out of remit and name the skill that owns them.

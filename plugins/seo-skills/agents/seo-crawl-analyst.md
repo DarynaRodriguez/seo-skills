@@ -19,16 +19,21 @@ export and the site profile.
 
 ## Invoking the tools
 
-Every command below is written as `python -m seo_tools <command>`, which only
-resolves when the working directory is the pack root. It will not be, in most
-runs. If it reports `No module named seo_tools`, use the launcher instead, which
-works from anywhere:
+Use the launcher, with the absolute `pack_root` the orchestrator passes. It works
+from any working directory, which matters because yours is never the pack root:
 
-    python <pack-root>/seo.py <command> ...
+    python "<pack_root>/seo.py" <command> ...
 
-The orchestrator passes the pack root. If it did not, say so and stop rather than
-guessing at a path: a wrong path produces an empty audit that looks like a clean
-one.
+If `pack_root` was not supplied, say so and stop rather than guessing at a path:
+a wrong path produces an empty audit that looks like a clean one.
+
+Two notes on the command itself:
+
+- If `python` is not on the path, use `python3`. Both work; the launcher needs
+  3.9 or newer and nothing else.
+- On Windows, prefix the command with `PYTHONIOENCODING=utf-8` or set it in the
+  environment first. Without it a non-English export comes back as mojibake, and
+  the failure looks like a broken CSV rather than a shell setting.
 
 ## Severities
 
@@ -40,7 +45,7 @@ is the whole point.
 ## What to run
 
 ```bash
-python -m seo_tools crawl <export.csv> --json
+python "<pack_root>/seo.py" crawl <export.csv> --json
 ```
 
 It recognises Screaming Frog, Sitebulb, Semrush Site Audit and Ahrefs Site Audit
@@ -49,21 +54,26 @@ it tells you to name the columns positionally, and the canonical names are in
 `docs/data-sources.md`.
 
 ```bash
-python -m seo_tools crawl <export.csv> --columns url,status,title,-,canonical --json
+python "<pack_root>/seo.py" crawl <export.csv> --columns url,status,title,-,canonical --json
 ```
 
 If a Search Console export was supplied, run it too, so findings can be weighted
 by traffic rather than by count:
 
 ```bash
-python -m seo_tools gsc <export.csv> --json
+python "<pack_root>/seo.py" gsc <export.csv> --json
 ```
 
 ## How to read the result
 
 The tool gives you status bands, broken URLs ordered by inlinks, redirect chains,
 duplicate titles and descriptions and H1s, missing fields, canonicals pointing
-elsewhere, orphans, and thin pages. All of that is fact. Three judgements are
+elsewhere, orphans, and thin pages. All of that is fact.
+
+It does not measure everything. Title and description width is not a crawl check:
+if you want it, either read it from the export's own pixel-width columns where the
+exporter provides them, or hand the page to `seo-page-auditor`, which runs `meta`.
+Do not compute a width yourself, and do not present a character count as a width. Three judgements are
 yours:
 
 **Weight by traffic, not by count.** Two hundred thin pages in a legacy folder
@@ -73,13 +83,14 @@ clicks.
 
 Normalise both sides of that join before matching, or it fails quietly: Search
 Console and a crawler disagree about trailing slashes, `www`, protocol, casing
-and query strings. The pack already has the rule, so use it rather than writing
-your own:
+and query strings. The pack has a command for it, so use that rather than writing
+your own rule:
 
-    python -c "from seo_tools.safety import normalise_url; print(normalise_url('<url>'))"
+    python "<pack_root>/seo.py" normalise <url> [<url> ...] --json
 
-Then report the match rate. A join that matched 30% of rows produces a ranking
-that looks weighted and is not, which is worse than an honestly unweighted one. Where there is no traffic data, say the ordering is by strategic value
+Then put the match rate in `join_match_rate`. A join that matched 30% of rows
+produces a ranking that looks weighted and is not, which is worse than an honestly
+unweighted one. Where there is no traffic data, say the ordering is by strategic value
 and unweighted, and never imply otherwise.
 
 **Separate template problems from page problems.** If a duplicate title group
@@ -99,28 +110,61 @@ orchestrator ranks on it.
 
 ## Persistence contract
 
+`<output_dir>` and its subdirectories are created by the orchestrator before you
+start. Create them if they are missing rather than failing.
+
 Write exactly two files:
 
 `<output_dir>/crawl.json`
 
 ```json
 {
-  "export": "<path>", "exporter": "Screaming Frog", "urls": 1284,
-  "analysed_at": "<ISO date>",
+  "export": "<path>",
+  "exporter": "Screaming Frog",
+  "urls": 1284,
+  "analysed_at": "2026-08-27T14:54:13+00:00",
+  "export_date": null,
+  "export_freshness": "unknown",
   "traffic_joined": true,
+  "join_match_rate": 0.94,
+  "unweighted": false,
+  "ordering_basis": "clicks at risk",
+  "coverage": "full crawl",
+  "limitations": [],
   "site_findings": [
     {"finding": "duplicate_titles", "severity": "warning", "affected": 30,
      "clicks_at_risk": 1200, "pattern": "/solutions/*", "template_level": true,
      "detail": "one title across the whole solutions template"}
-  ],
-  "unweighted": false
+  ]
 }
 ```
+
+Every key above is one the instructions require you to communicate, so none of
+them is improvised. The four that get misfilled:
+
+- **`analysed_at` is the tool's `checked_at`, copied.** Every command stamps its
+  JSON with a full ISO 8601 instant, so you never generate this and never fall
+  back to a date. It is distinct from `export_date`, which is when the crawl ran:
+  a fresh analysis of a three-month-old export is the case that needs both.
+- **`limitations`** is where a caveat about the crawl goes, and it is the key the
+  orchestrator prints. A partial export, an unknown freshness, a missing homepage:
+  these are limitations, not site findings, and putting them in `site_findings`
+  forces a severity onto something that has none.
+- **`coverage`** is `"full crawl"` or a sentence saying what the export is missing.
+  An export with no homepage and a maximum depth of 2 is a slice, and saying so is
+  the difference between an audit and a misleading one.
+- **`ordering_basis`** is `"clicks at risk"` or `"strategic value, unweighted"`.
+  It has to agree with `unweighted`.
 
 `<output_dir>/page-set.json`
 
 ```json
-{"urls": [{"url": "...", "clicks_28d": 3140, "reason": "top traffic, canonical missing"}]}
+{
+  "selection_basis": "traffic and findings, or every indexable 200 in a small crawl",
+  "unweighted": false,
+  "urls": [{"url": "...", "clicks_28d": 3140, "reason": "top traffic, canonical missing"}],
+  "excluded": [{"url": "...", "reason": "redirect, nothing to audit"}]
+}
 ```
 
 Set `unweighted` to true and `traffic_joined` to false when no Search Console

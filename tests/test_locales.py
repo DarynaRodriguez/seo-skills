@@ -5,6 +5,7 @@ The pattern was the same each time: code that looked general because it handled
 English and German, and silently produced a wrong number or no number at all for
 everything else.
 """
+import json
 import pathlib
 import tempfile
 import unittest
@@ -223,10 +224,6 @@ class TestRegionalCrawlers(unittest.TestCase):
         self.assertFalse(robots.can_fetch("SomeOtherBot", "https://example.com/page")["allowed"])
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class TestExtractedWidths(unittest.TestCase):
     """Cyrillic, Greek and Hebrew come from the font, not from a default.
 
@@ -314,3 +311,54 @@ class TestUnmeasurableScripts(unittest.TestCase):
         checks = {f["check"] for f in check_meta({"title": "Ш" * 40, "meta_description": "x" * 200, "h1": []})}
         self.assertIn("title.too_wide", checks)
         self.assertNotIn("title.width_unmeasurable", checks)
+
+
+class TestNormaliseCommand(unittest.TestCase):
+    """The join key, exposed as a command.
+
+    A live agent was told to get this via `python -c "from seo_tools.safety
+    import normalise_url; ..."`, which fails everywhere except the pack root.
+    That is the defect the launcher exists to fix, reintroduced in a snippet, so
+    it became a command instead.
+    """
+
+    def run_cli(self, argv):
+        import io
+        from contextlib import redirect_stderr, redirect_stdout
+
+        from seo_tools.cli import main
+
+        out, err = io.StringIO(), io.StringIO()
+        code = 0
+        try:
+            with redirect_stdout(out), redirect_stderr(err):
+                code = main(argv)
+        except SystemExit as exc:
+            code = int(exc.code or 0)
+        return code, out.getvalue(), err.getvalue()
+
+    def test_variants_of_one_url_collapse_to_one_key(self):
+        code, out, _ = self.run_cli([
+            "normalise",
+            "https://Example.com/Pricing/?utm_source=news",
+            "https://example.com:443/Pricing",
+            "--json",
+        ])
+        self.assertEqual(code, 0)
+        keys = {row["normalised"] for row in json.loads(out)["urls"]}
+        self.assertEqual(len(keys), 1, "two spellings of one URL produced two keys")
+
+    def test_a_non_url_is_flagged_rather_than_returned_as_a_key(self):
+        code, out, _ = self.run_cli(["normalise", "notaurl", "--json"])
+        self.assertEqual(code, 1)
+        row = json.loads(out)["urls"][0]
+        self.assertIs(row["ok"], False)
+        self.assertIn("not a URL", row["error"])
+
+    def test_a_good_url_exits_zero(self):
+        code, _, _ = self.run_cli(["normalise", "https://example.com/a/"])
+        self.assertEqual(code, 0)
+
+
+if __name__ == "__main__":
+    unittest.main()

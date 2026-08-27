@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from urllib.parse import urlsplit
 from typing import Dict, List, Optional
 
 from . import (
@@ -548,6 +549,54 @@ def cmd_crawl(args) -> int:
     return EXIT_OK
 
 
+
+def cmd_normalise(args) -> int:
+    """Canonical form of a URL, for joining two datasets that disagree about it.
+
+    Exists as a command because the alternative was telling callers to run
+    `python -c "from seo_tools.safety import normalise_url; ..."`, which fails
+    everywhere except the pack root: the same defect the launcher exists to fix.
+    An agent joining a crawl to a Search Console export needs this and should not
+    have to reach into the package to get it.
+    """
+    rows = []
+    for url in args.urls:
+        try:
+            key = normalise_url(url)
+        except ValueError as exc:
+            rows.append({"url": url, "normalised": None, "ok": False, "error": str(exc)})
+            continue
+        # normalise_url is a key generator, not a validator, so it happily returns
+        # something for a string that is not a URL at all. Say so: a caller
+        # computing a join match rate needs to know the input was junk rather than
+        # counting it as a key that simply did not match.
+        parts = urlsplit(key)
+        if not parts.scheme or not parts.netloc:
+            rows.append({
+                "url": url,
+                "normalised": key,
+                "ok": False,
+                "error": "not a URL: no scheme or host, so this is not a usable join key",
+            })
+            continue
+        rows.append({"url": url, "normalised": key, "ok": True})
+
+    # One exit code for both output modes. The JSON caller is the one most likely
+    # to be a script testing the status rather than reading the rows, so having
+    # --json always succeed is exactly backwards.
+    code = EXIT_OK if all(r["ok"] for r in rows) else EXIT_FAILED
+
+    if args.json:
+        output.emit_json({"count": len(rows), "urls": rows})
+        return code
+    for row in rows:
+        if row["ok"]:
+            print(row["normalised"])
+        else:
+            print("could not normalise {}: {}".format(row["url"], row["error"]), file=sys.stderr)
+    return code
+
+
 def cmd_doctor(args) -> int:
     """Answer "will this work on my machine" before anyone runs a real command."""
     import platform
@@ -725,6 +774,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="name the columns positionally when the export is in a language the "
         "aliases do not cover, e.g. query,clicks,impressions,ctr,position. Use - to skip one",
     )
+
+    normalise = add(
+        "normalise",
+        cmd_normalise,
+        "Print the canonical form of one or more URLs, for joining datasets that "
+        "disagree about trailing slashes, www, casing or tracking parameters.",
+    )
+    normalise.add_argument("urls", nargs="+", help="one or more URLs")
 
     doctor = add("doctor", cmd_doctor, "Check this machine can run the tools.")
     doctor.add_argument("--offline", action="store_true", help="skip the network check")

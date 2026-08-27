@@ -6,6 +6,7 @@ is why this package runs the same on Windows as it does on a Mac.
 """
 from __future__ import annotations
 
+import datetime
 import json
 import sys
 from typing import Dict, List, Optional
@@ -26,7 +27,28 @@ def configure_stdout() -> None:
 configure_stdout()
 
 
+def checked_at() -> str:
+    """Now, as a full ISO 8601 instant in UTC.
+
+    Every report the agents write carries a "when was this true" field, and no
+    tool used to return one, so three separate live runs each invented their own:
+    one shelled out to `date`, one used the machine clock, and one would have
+    assumed midnight. A date-only value is worse than useless here because two
+    runs on one day have to be orderable.
+    """
+    return datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+
+
 def emit_json(data) -> None:
+    """Print a payload, stamped with the time it was produced.
+
+    The stamp is added here rather than in each command so that all fourteen
+    carry it and none can forget. A caller that already set `checked_at` keeps
+    its own value.
+    """
+    if isinstance(data, dict):
+        data = dict(data)
+        data.setdefault("checked_at", checked_at())
     print(json.dumps(data, indent=2, sort_keys=True, default=str, ensure_ascii=False))
 
 

@@ -13,16 +13,21 @@ agents do that. Your value is entirely in the comparison.
 
 ## Invoking the tools
 
-Every command below is written as `python -m seo_tools <command>`, which only
-resolves when the working directory is the pack root. It will not be, in most
-runs. If it reports `No module named seo_tools`, use the launcher instead, which
-works from anywhere:
+Use the launcher, with the absolute `pack_root` the orchestrator passes. It works
+from any working directory, which matters because yours is never the pack root:
 
-    python <pack-root>/seo.py <command> ...
+    python "<pack_root>/seo.py" <command> ...
 
-The orchestrator passes the pack root. If it did not, say so and stop rather than
-guessing at a path: a wrong path produces an empty audit that looks like a clean
-one.
+If `pack_root` was not supplied, say so and stop rather than guessing at a path:
+a wrong path produces an empty audit that looks like a clean one.
+
+Two notes on the command itself:
+
+- If `python` is not on the path, use `python3`. Both work; the launcher needs
+  3.9 or newer and nothing else.
+- On Windows, prefix the command with `PYTHONIOENCODING=utf-8` or set it in the
+  environment first. Without it a non-English page comes back as mojibake, and
+  the failure looks like an encoding fault on the site rather than in your shell.
 
 ## Severities
 
@@ -43,13 +48,13 @@ is the whole point.
 
 **`home` is the one input you must never default.** It is the directory holding
 the baseline database. Point at the wrong one and `drift` finds no baseline for
-the URL, and you write `verdict: "no baseline"`, which is indistinguishable from a
-correct answer. That is the worst failure available to this agent: a silently
-wrong result wearing the shape of a legitimate coverage gap. If `home` was not
-supplied, stop and say so rather than running with the default.
+the URL, so you report a coverage gap that is indistinguishable from a correct
+one. That is the worst failure available to this agent: a silently wrong result
+wearing the shape of a legitimate gap.
 
-`home` is normally the `.seo` directory beside the audit output. Pass it on every
-call:
+There is deliberately no fallback rule here. `home` and `output_dir` have no
+fixed relationship to each other, so any guess is wrong on some layout. If it was
+not supplied, stop and say so. Pass it on every call:
 
     --home "<home>"
 
@@ -60,7 +65,8 @@ python "<pack_root>/seo.py" drift <url> --home "<home>" --json
 ```
 
 If it reports no baseline for the URL, that is not a finding. It is a coverage
-gap. Write the file with `verdict: "no baseline"` and say so in your reply, then
+gap. Write the file with `verdict_code: "no_baseline"`, `verdict` set to whatever
+the tool said, `changes: []`, and `counts` all zero. Say so in your reply, then
 stop. Do not create a baseline: the orchestrator decides that, because a baseline
 taken now describes the state after whatever change is being investigated.
 
@@ -99,28 +105,33 @@ and append `-` plus the first 8 hex characters of the SHA-256 of the full path.
 
 ```json
 {
-  "url": "...", "checked_at": "<ISO date>",
-  "baseline_id": 4, "baseline_captured_at": "<ISO date>", "baseline_label": "before the migration",
+  "url": "...", "checked_at": "2026-08-27T14:54:13+00:00",
+  "baseline_id": 4, "baseline_captured_at": "2026-07-02T09:11:40+00:00", "baseline_label": "before the migration",
   "verdict_code": "regression | review | changed | unchanged | no_baseline",
   "verdict": "<the tool's verdict sentence, copied verbatim>",
   "clicks_28d": 3140,
+  "counts": {"critical": 1, "warning": 0, "info": 2},
   "changes": [
     {"rule": "canonical.changed", "severity": "critical", "before": "...", "after": "...",
      "intent": "likely_accidental", "why": "no release note mentions canonicals"}
   ],
   "escalate": ["rendering.became_client_side"],
+  "inputs_missing": [],
   "tools_failed": []
 }
 ```
 
-Four notes on filling it, each of which has caused a wrong guess:
+Five notes on filling it, each of which has caused a wrong guess:
 
 - **`verdict_code` is the tool's `verdict_code`, copied.** Do not translate the
   sentence yourself: the tool emits both, so every instance agrees.
 - **`baseline_label` is in the tool's output.** Copy it. Never open the database.
-- **`checked_at` is a full ISO 8601 timestamp**, and if you do not have a clock,
-  take it from the tool output rather than assuming midnight. A `checked_at`
-  earlier than `baseline_captured_at` makes the record contradict itself.
+- **`counts` is the tool's `counts`, copied.** The orchestrator sums these across
+  files, so a recount of your own is a chance for two agents to disagree.
+- **`checked_at` is the tool's `checked_at`, copied.** Every command stamps its
+  JSON with a full ISO 8601 instant, so there is no case where you generate this
+  or fall back to a date. A `checked_at` earlier than `baseline_captured_at`
+  makes the record contradict itself.
 - **`clicks_28d` is `null` when no click source was supplied**, never `0`. Zero
   claims nobody lands on the page, which is a claim you cannot make.
 

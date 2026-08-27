@@ -264,10 +264,20 @@ class RobotsTxt:
         return None, []
 
     def can_fetch(self, user_agent: str, url: str) -> Dict[str, object]:
-        """Whether `user_agent` may fetch `url`, and which rule decided it."""
+        """Whether `user_agent` may fetch `url`, and which rule decided it.
+
+        `allow_is_implicit` is the distinction between "nothing said no" and "a
+        rule said yes". Both come back as allowed, and only the second survives
+        someone adding a broad Disallow, so a report that does not separate them
+        calls a weak pass a strong one. It is returned as a boolean because the
+        alternative was every caller matching on the wording of `reason`, which
+        a live agent run did: one reworded sentence and every one of them is
+        silently wrong.
+        """
         if self.status in (401, 403):
             return {
                 "allowed": False,
+                "allow_is_implicit": False,
                 "reason": "robots.txt returned {}, which RFC 9309 treats as disallow all.".format(self.status),
                 "matched_group": None,
                 "matched_rule": None,
@@ -275,6 +285,7 @@ class RobotsTxt:
         if self.status >= 400:
             return {
                 "allowed": True,
+                "allow_is_implicit": True,
                 "reason": "robots.txt returned {}, treated as no restrictions.".format(self.status),
                 "matched_group": None,
                 "matched_rule": None,
@@ -289,6 +300,7 @@ class RobotsTxt:
         if not rules:
             return {
                 "allowed": True,
+                "allow_is_implicit": True,
                 "reason": "No group applies to {}.".format(user_agent),
                 "matched_group": group_name,
                 "matched_rule": None,
@@ -310,12 +322,15 @@ class RobotsTxt:
         if winner is None:
             return {
                 "allowed": True,
+                "allow_is_implicit": True,
                 "reason": "No rule in group {!r} matches {}.".format(group_name, path),
                 "matched_group": group_name,
                 "matched_rule": None,
             }
         return {
             "allowed": winner.allow,
+            # A rule decided this, in either direction.
+            "allow_is_implicit": False,
             "reason": "{}: {} in group {!r} is the longest match for {}.".format(
                 "Allow" if winner.allow else "Disallow",
                 winner.raw or "(empty)",
@@ -336,19 +351,22 @@ class RobotsTxt:
         rows = []
         for name, meta in AI_AGENTS.items():
             verdict = self.can_fetch(name, url)
-            rows.append(
+            # Spread the verdict rather than naming its keys. This used to copy
+            # four of them by hand, so `allow_is_implicit` was returned by
+            # can_fetch and silently dropped here, which is the whole failure
+            # mode: an enumerated subset that looks complete.
+            row = {"agent": name}
+            row.update(verdict)
+            row.update(
                 {
-                    "agent": name,
                     "operator": meta["operator"],
                     "purpose": meta["purpose"],
-                    "allowed": verdict["allowed"],
-                    "reason": verdict["reason"],
-                    "matched_group": verdict["matched_group"],
-                    "matched_rule": verdict["matched_rule"],
                     "cost_of_blocking": meta["cost_of_blocking"] if not verdict["allowed"] else None,
                 }
             )
+            rows.append(row)
         blocked = [r for r in rows if not r["allowed"]]
+        allowed = [r for r in rows if r["allowed"]]
         return {
             "url": url,
             "robots_status": self.status,
@@ -357,6 +375,11 @@ class RobotsTxt:
             "blocked_live_fetch": [r["agent"] for r in blocked if r["purpose"] == "live fetch"],
             "blocked_search_index": [r["agent"] for r in blocked if "search index" in str(r["purpose"])],
             "blocked_training": [r["agent"] for r in blocked if r["purpose"] == "training"],
+            # How many passes are only "nothing said no". A site where every pass
+            # is implicit is one broad Disallow away from blocking everything,
+            # and that is worth saying at the top rather than per crawler.
+            "implicit_allow_count": sum(1 for r in allowed if r["allow_is_implicit"]),
+            "allowed_count": len(allowed),
             "sitemaps": self.sitemaps,
             "rules_before_any_user_agent": self.unknown_directives,
         }

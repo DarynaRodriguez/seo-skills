@@ -5,10 +5,13 @@ feels finished and one that does not. Found in an audit: `robots ftp://...` and
 `sitemap notaurl` both crashed, because they call fetch directly rather than
 through the helper that catches a refused URL.
 """
+import datetime
 import io
+import json
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 
+from seo_tools import output
 from seo_tools.cli import main
 
 # Inputs a user will get wrong, and inputs an attacker would try.
@@ -68,6 +71,55 @@ class TestNoTracebackOnBadUrl(unittest.TestCase):
                 code, output = run([command])
                 self.assertEqual(code, 2, "{} did not report a usage error".format(command))
                 self.assertNotIn("Traceback", output)
+
+
+class TestEveryJsonPayloadIsStamped(unittest.TestCase):
+    """Reports need a "when was this true" and no tool used to supply one.
+
+    Three live agent runs each solved it differently: one shelled out to `date`,
+    one used the machine clock, one would have assumed midnight. A report whose
+    timestamp is invented is a report that cannot be ordered against the next
+    one, so the stamp is in the JSON envelope now.
+    """
+
+    def test_the_stamp_is_a_full_utc_instant_not_a_date(self):
+        stamp = output.checked_at()
+        parsed = datetime.datetime.fromisoformat(stamp)
+        self.assertIsNotNone(parsed.tzinfo, "a naive timestamp cannot be compared across machines")
+        self.assertEqual(parsed.utcoffset(), datetime.timedelta(0))
+        # Two runs on one day have to be orderable, so seconds are required.
+        self.assertRegex(stamp, r"T\d\d:\d\d:\d\d")
+
+    def test_a_dict_payload_gets_stamped(self):
+        buffer = io.StringIO()
+        with redirect_stdout(buffer):
+            output.emit_json({"count": 0})
+        self.assertIn("checked_at", json.loads(buffer.getvalue()))
+
+    def test_a_caller_that_set_it_keeps_its_own_value(self):
+        buffer = io.StringIO()
+        with redirect_stdout(buffer):
+            output.emit_json({"checked_at": "2020-01-01T00:00:00+00:00"})
+        self.assertEqual(json.loads(buffer.getvalue())["checked_at"], "2020-01-01T00:00:00+00:00")
+
+    def test_a_list_payload_is_passed_through_unchanged(self):
+        # Stamping a list would mean changing its shape, which is worse than
+        # leaving one payload unstamped.
+        buffer = io.StringIO()
+        with redirect_stdout(buffer):
+            output.emit_json([1, 2])
+        self.assertEqual(json.loads(buffer.getvalue()), [1, 2])
+
+    def test_an_offline_command_stamps_its_output(self):
+        buffer = io.StringIO()
+        code = 0
+        try:
+            with redirect_stdout(buffer):
+                code = main(["normalise", "https://example.com/a/", "--json"])
+        except SystemExit as exc:
+            code = int(exc.code or 0)
+        self.assertEqual(code, 0)
+        self.assertIn("checked_at", json.loads(buffer.getvalue()))
 
 
 if __name__ == "__main__":

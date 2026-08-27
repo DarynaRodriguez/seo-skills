@@ -52,12 +52,21 @@ skills use. The flag works before or after the command name.
 | `history <url>` | Which snapshots and comparisons are held for a URL |
 | `gsc <csv>` | What a Search Console export says, with no API access |
 | `crawl <csv>` | What a crawl export says: any exporter, no API access |
+| `normalise <url>` | The canonical form of a URL, for joining datasets that disagree about it |
 
 Shared flags: `--json`, `--timeout`, `--user-agent`, `--home`.
 
 Exit codes: `0` it answered, `1` it could not or found something critical,
 `2` the arguments were wrong. `page` and `drift` return `1` on a critical
-finding, so a release script can gate on them.
+finding, so a release script can gate on them. `--json` does not change the exit
+code: a script that only reads the status gets the same answer either way.
+
+Every `--json` payload carries `checked_at`, a full ISO 8601 instant in UTC
+saying when the answer was produced. Reports are compared against each other and
+against baselines, so a record whose timestamp was invented by whoever wrote it
+cannot be ordered against the next one. Copy the field rather than reaching for
+a clock: three separate agent runs each invented a different answer before it
+existed, and one of them would have assumed midnight.
 
 ### page
 
@@ -108,6 +117,17 @@ The output separates blocked crawlers by what blocking them costs:
 Conflating those three is the most common and most expensive mistake in this
 area. In particular, blocking `Google-Extended` does not remove you from Google
 Search or from AI Overviews, which use Googlebot. There is a test pinning that.
+
+Each verdict also carries `allow_is_implicit`: true when nothing in robots.txt
+matched the crawler at all, false when a rule decided. Both read as allowed, and
+only the second survives someone adding a broad `Disallow`, so a site whose every
+pass is implicit is one edit from blocking everything. It is a boolean because
+the alternative is matching on the wording of `reason`, which is a string meant
+for a person to read.
+
+`implicit_allow_count` and `allowed_count` are the same thing at site level.
+Equal values mean nothing on the site has been allowed deliberately. Most sites
+read 24 of 24 there, which is worth knowing but is not a finding on its own.
 
 ### baseline, drift, history
 
@@ -189,6 +209,40 @@ non-indexable pages, because a duplicate title on a noindexed thank-you page
 competes with nothing and reporting it buries the pair that does. And the
 thin-page threshold is an argument rather than a rule, because a 200-word pricing
 page can be exactly right.
+
+### normalise
+
+Two datasets describing the same page rarely spell its URL the same way. Search
+Console, a crawler and a sitemap disagree about trailing slashes, `www`, protocol,
+casing and tracking parameters, so a join on the raw string matches a fraction of
+the rows and produces a ranking that looks weighted and is not.
+
+```bash
+python -m seo_tools normalise "https://Example.com/Pricing/?utm_source=x" "https://example.com:443/Pricing"
+```
+
+Both of those return `https://example.com/Pricing`. The path keeps its casing,
+because two paths differing only in case are two URLs on most servers.
+
+A string that is not a URL comes back with `ok: false` rather than a key, because
+a caller computing a match rate needs to know an input was junk instead of
+counting it as a key that happened not to match.
+
+This exists as a command so nothing has to reach into the package. The form
+`python -c "from seo_tools.safety import normalise_url; ..."` fails everywhere
+except the pack root, which is the defect the launcher exists to fix, and an agent
+following that advice would hit it.
+
+## Paths on Windows
+
+Worth knowing before handing a path to these tools or to an agent. Git Bash shows
+paths as `/c/Users/...` and translates them to the Windows form when it invokes
+`python.exe`, so a bare command argument works either way. Inside a quoted
+`python -c` string there is no translation, and a POSIX-style path silently fails
+to resolve.
+
+Pass Windows-style paths, with forward slashes, when handing one to a tool or an
+agent: `C:/Users/you/crawls/latest.csv`. Quote anything containing a space.
 
 ## Locales
 
