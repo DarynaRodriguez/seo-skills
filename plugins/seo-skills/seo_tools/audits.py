@@ -75,7 +75,26 @@ def check_meta(page: Dict[str, object]) -> List[Finding]:
         )
     else:
         measured = typography.measure_title(str(title))
-        if measured["truncates"]:
+        blocked = typography.unmeasurable_scripts(str(title))
+        if blocked:
+            # Width cannot be summed per character for these scripts, so a
+            # truncation verdict would be a pass or fail on a number that does
+            # not mean what it looks like. Say that instead of deciding.
+            findings.append(
+                _finding(
+                    "title.width_unmeasurable",
+                    "info",
+                    "Cannot measure this title's width reliably: {}. Check it against a "
+                    "live result page instead of trusting a pixel figure.".format(
+                        ", ".join("{} is {}".format(b["script"], b["reason"]) for b in blocked)
+                    ),
+                    observed=title,
+                    chars=measured["chars"],
+                    px_floor=measured["px"],
+                    method=measured["method"],
+                )
+            )
+        elif measured["truncates"]:
             findings.append(
                 _finding(
                     "title.too_wide",
@@ -90,7 +109,11 @@ def check_meta(page: Dict[str, object]) -> List[Finding]:
                     method=measured["method"],
                 )
             )
-        if measured["px_used_pct"] is not None and measured["px_used_pct"] < typography.MIN_FILL_PCT:
+        if (
+            not blocked
+            and measured["px_used_pct"] is not None
+            and measured["px_used_pct"] < typography.MIN_FILL_PCT
+        ):
             findings.append(
                 _finding(
                     "title.short",

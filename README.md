@@ -7,7 +7,7 @@ skills, stops giving you generic SEO advice and starts doing the work: keyword
 maps, content briefs, meta copy, technical triage, cannibalisation resolution,
 and honest AI-answer visibility.
 
-Not a checklist. Twenty-six skills that each do one job, hand off to each other,
+Not a checklist. Twenty-seven skills that each do one job, hand off to each other,
 and refuse to invent a number.
 
 📋 **Copy this prompt into any AI:**
@@ -56,6 +56,7 @@ or just describe what you want and your agent picks the right one.
 - **`/indexation-check`** answers both halves of the question: what should be indexed and is not, and what is indexed and should not be.
 - **`/performance-report`** writes the monthly report you can send to a CMO unedited, brand split from non-brand, with an honest caveats section.
 - **`/drift-check`** snapshots a page before you ship and tells you exactly what changed after, classified by whether anyone would have done it on purpose.
+- **`/site-audit`** audits a whole site by running specialist agents in parallel, one per page, then ranks every finding by the clicks it puts at risk.
 
 ### 🤖 AI visibility, get cited by the answer engines
 
@@ -114,18 +115,34 @@ A filled-in worked example: [`profiles/example-b2b-saas.md`](profiles/example-b2
 
 ---
 
-## Live data, or honest blanks
+## Bring your own data
 
-The skills run on real data when a connector is there, and say so plainly when it
-is not. Two are wired in by default:
+There is no version of this that produces good output from nothing. Every skill
+answers a question that needs evidence, so plugging in data is the setup step, not
+an optional upgrade.
 
-- **Ahrefs MCP** for keywords, SERPs, Search Console, site audit, backlinks and Brand Radar.
-- **Peec AI MCP** for AI-answer visibility, citations and crawler hits.
+What is optional is **which tool**. The skills are written against 12 named data
+needs, and each need can be served by whatever you already pay for:
 
-With neither, every skill still runs. It asks for an export, works from the pages
-themselves, and writes "no volume data available for these 12 terms" instead of
-filling the column with a guess. Tool names and unit gotchas live in
-[`docs/data-sources.md`](docs/data-sources.md).
+| Need | Served by |
+|------|-----------|
+| Page content, robots, sitemaps | **this repo, free, no account** |
+| Crawl | **Screaming Frog**, Sitebulb, Semrush, Ahrefs, or any CSV |
+| Traffic | **Search Console export**, free, or Ahrefs |
+| Keywords, SERPs, backlinks | Ahrefs, Semrush, or a paste |
+| AI visibility and citations | Peec AI, Ahrefs Brand Radar, or by hand |
+
+Declare yours in profile section 11 and the skills follow it. Switching from
+Ahrefs to Semrush is a line in a profile, not a rewrite.
+
+The stack this pack is written against is Search Console, Ahrefs and Peec AI, and
+[`docs/data-sources.md`](docs/data-sources.md) says why without pretending the
+alternatives produce worse output. It also carries the traps that bite when
+switching: Keyword Difficulty is not comparable between vendors, and every
+vendor's traffic figure is a model while Search Console is what you received.
+
+Where a need has no provider, the skill says so in one line and never fills the
+gap with an estimate.
 
 ---
 
@@ -178,6 +195,38 @@ Full reference, including the deliberate limits and how to use it from ChatGPT:
 
 ---
 
+## Agents, for the work that is too big for one pass
+
+A site audit is not one job. It is the same job on thirty pages, and doing it
+sequentially is why site audits get abandoned half finished.
+
+So `/site-audit` does not audit anything itself. It fans out four specialists,
+each in its own context, each writing findings to a file so the results survive
+the fan-out and can be put back together:
+
+| Agent | Runs | Answers |
+|-------|------|---------|
+| `seo-crawl-analyst` | once, first | The site-level findings, and which pages are worth auditing individually |
+| `seo-ai-access-checker` | once per market | Can the AI and search crawlers reach these pages, and is the content in the served HTML |
+| `seo-page-auditor` | once per URL, concurrently | Everything measurable on one page |
+| `seo-drift-watcher` | once per baselined URL | What changed since the snapshot |
+
+The orchestrator then aggregates by finding rather than by page, so one template
+problem across thirty URLs is one row and not thirty, and ranks by clicks at risk
+rather than by severity. Ten rows out, the rest counted in a line.
+
+Two rules make it usable rather than impressive. The crawl analyst runs alone and
+first, because the page set is its output and a guessed page set wastes every
+agent after it. And the page set is capped: ten to thirty URLs, chosen by traffic
+and by finding. If it grows past fifty, the narrowing failed and the fix is to go
+back, not to launch a hundred agents.
+
+Agents live in `agents/`. They install alongside the skills, and
+`scripts/validate.py` checks their frontmatter, their model names, and that every
+tool command they reference actually exists.
+
+---
+
 ## What runs where
 
 | Skill | Claude.ai & Cowork | Claude Code & local agents | ChatGPT Work | ChatGPT |
@@ -207,6 +256,7 @@ Full reference, including the deliberate limits and how to use it from ChatGPT:
 | indexation-check | 🔧 | 🔧 | 🔧 | ⚠️ |
 | performance-report | 🔧 | 🔧 | 🔧 | ⚠️ |
 | drift-check | ⚠️ | ✅ | ⚠️ | ⚠️ |
+| site-audit | ⚠️ | ✅ | ⚠️ | ⚠️ |
 | **AI visibility** | | | | |
 | ai-crawler-access | ⚠️ | ✅ | ⚠️ | ⚠️ |
 | ai-visibility-audit | 🔧 | 🔧 | 🔧 | ⚠️ |

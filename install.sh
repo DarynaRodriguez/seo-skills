@@ -120,6 +120,26 @@ if [ "$WITH_TOOLS" = "yes" ]; then
   echo "  tools written to $TOOLS_DEST"
 fi
 
+# Subagents. /site-audit fans out to these, so they install alongside the skills.
+AGENTS_DEST=""
+if [ -d "$ROOT/agents" ]; then
+  if [ "$(basename "$TARGET")" = "skills" ]; then
+    AGENTS_DEST="$(dirname "$TARGET")/agents"
+  else
+    AGENTS_DEST="$TARGET/../agents"
+  fi
+  mkdir -p "$AGENTS_DEST"
+  for a in "$ROOT"/agents/*.md; do
+    [ -e "$a" ] || continue
+    if [ "$MODE" = "link" ]; then
+      ln -sf "$a" "$AGENTS_DEST/$(basename "$a")"
+    else
+      cp "$a" "$AGENTS_DEST/$(basename "$a")"
+    fi
+  done
+  echo "  $(ls "$AGENTS_DEST"/*.md 2>/dev/null | wc -l | tr -d ' ') agents written to $AGENTS_DEST"
+fi
+
 echo ""
 echo "Next:"
 echo "  1. Restart your agent so it picks up the new skills."
