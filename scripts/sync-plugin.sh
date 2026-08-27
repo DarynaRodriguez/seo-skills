@@ -11,9 +11,15 @@ cp -R "$ROOT/skills/." "$DEST/skills/"
 cp -R "$ROOT/profiles/." "$DEST/profiles/"
 cp "$ROOT/PRINCIPLES.md" "$DEST/PRINCIPLES.md"
 cp "$ROOT/README.md" "$DEST/README.md"
+# All of docs/, plus the two root files the README links to. Shipping the README
+# without them left four broken relative links inside the installed plugin.
 mkdir -p "$DEST/docs"
-cp "$ROOT/docs/data-sources.md" "$DEST/docs/data-sources.md"
-cp "$ROOT/docs/execution-layer.md" "$DEST/docs/execution-layer.md"
+cp "$ROOT"/docs/*.md "$DEST/docs/"
+cp "$ROOT/LICENSE" "$DEST/LICENSE"
+cp "$ROOT/CONTRIBUTING.md" "$DEST/CONTRIBUTING.md"
+# AGENTS.md is the file every agent reads on entering a repo, so it belongs in
+# an installed plugin as much as in the source tree.
+cp "$ROOT/AGENTS.md" "$DEST/AGENTS.md"
 
 # Subagents live at the plugin root, which is where Claude Code looks for them.
 # /site-audit fans out to these, so a plugin without them ships a skill that

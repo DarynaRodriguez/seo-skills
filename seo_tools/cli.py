@@ -24,7 +24,7 @@ from . import (
 )
 from .fetching import DEFAULT_TIMEOUT, DEFAULT_USER_AGENT, fetch, public_summary
 from .robots import AI_AGENTS, RobotsTxt, robots_url_for
-from .safety import UrlNotAllowed, normalise_url
+from .safety import UrlNotAllowed, normalise_url, validate_url
 from .store import Store, default_home
 
 EXIT_OK = 0
@@ -213,6 +213,10 @@ def cmd_schema(args) -> int:
 
 
 def cmd_robots(args) -> int:
+    # Validate what the user typed, not what robots_url_for derives from it:
+    # that helper keeps only the scheme and host, so it silently drops
+    # credentials and would accept a URL every other command refuses.
+    validate_url(args.url)
     robots_url = robots_url_for(args.url)
     result = fetch(robots_url, timeout=args.timeout, user_agent=args.user_agent)
     if not result.get("ok"):
@@ -264,6 +268,7 @@ def cmd_robots(args) -> int:
 
 
 def cmd_sitemap(args) -> int:
+    validate_url(args.url)
     discovery = sitemaps.discover(args.url)
     expanded = sitemaps.expand(discovery, limit=args.limit) if args.expand else None
     payload = {"discovery": discovery, "expanded": expanded}
@@ -733,6 +738,12 @@ def main(argv: Optional[List[str]] = None) -> int:
         parser.error("meta needs a URL, or --title and --description")
     try:
         return int(args.handler(args))
+    except UrlNotAllowed as exc:
+        # Commands that fetch through a helper already catch this. Commands that
+        # call fetch directly, robots and sitemap among them, did not, and
+        # printed a traceback at a user who mistyped a scheme. Caught here so it
+        # cannot happen again in a command added later.
+        _fail("refused to fetch: {}".format(exc), args)
     except UnicodeEncodeError:
         print(
             "Output could not be encoded. Set PYTHONIOENCODING=utf-8 and run again.",

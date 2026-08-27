@@ -48,6 +48,28 @@ jobs:
           python-version: "3.13"
       - name: Validate skills, docs and tool references
         run: python scripts/validate.py
+      - name: No broken relative links, in the repo or the plugin
+        run: |
+          python - <<'PY'
+          import pathlib, re, sys
+          bad = []
+          for root in (pathlib.Path("."), pathlib.Path("plugins/seo-skills")):
+              for f in root.rglob("*.md"):
+                  if ".git" in f.parts:
+                      continue
+                  if root == pathlib.Path(".") and "plugins" in f.parts:
+                      continue
+                  for m in re.finditer(r"\[([^\]]+)\]\(([^)]+)\)", f.read_text(encoding="utf-8")):
+                      target = m.group(2).split("#")[0].strip()
+                      if not target or target.startswith(("http", "mailto:")):
+                          continue
+                      if not (f.parent / target).resolve().exists():
+                          bad.append("{} -> {}".format(f, target))
+          for line in bad:
+              print("broken link:", line)
+          print("{} broken links".format(len(bad)))
+          sys.exit(1 if bad else 0)
+          PY
       - name: Confirm the plugin mirror carries skills, agents and tools
         shell: bash
         run: |
