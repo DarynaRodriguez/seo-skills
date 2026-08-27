@@ -36,6 +36,20 @@ METADATA_ADDRESSES = ("169.254.169.254", "fd00:ec2::254", "100.100.100.200")
 # classic request-smuggling shapes.
 CONTROL_CHARS = re.compile("[" + "".join(chr(c) for c in list(range(0x20)) + [0x7f]) + "\u2028\u2029]")
 
+# Hostnames that are a number in disguise. Resolvers disagree about these:
+# getaddrinfo on macOS accepts octal and short forms that fail on Windows, so
+# leaving it to the resolver means the guard works by accident on one platform
+# and not at all on another. CI caught exactly that, on 0177.0.0.1. If a host
+# looks numeric it has to parse as a valid address or be refused, because there
+# is no way to know which interpretation the connection will use.
+NUMERIC_HOST = re.compile(
+    r"^(?:"
+    r"[0-9]+"                # a bare integer, 2130706433
+    r"|0[xX][0-9a-fA-F]+"    # hex, 0x7f000001
+    r"|[0-9.]+"              # dotted numeric: octal 0177.0.0.1, short form 127.1
+    r")$"
+)
+
 # Query parameters that identify a campaign, not a page. Stripped when
 # normalising so the same page tracked twice matches itself.
 TRACKING_PREFIXES = ("utm_",)
@@ -146,7 +160,14 @@ def validate_url(url: str, allow_private: bool = False) -> str:
     try:
         ipaddress.ip_address(host)
     except ValueError:
-        pass
+        # Not a valid address. If it nonetheless looks like a number, refuse it
+        # rather than handing an ambiguous string to the resolver.
+        if NUMERIC_HOST.match(host):
+            raise UrlNotAllowed(
+                "hostname {!r} looks like a numeric address but is not a valid one. "
+                "Resolvers disagree about forms like this, so it is refused rather "
+                "than guessed at.".format(host)
+            )
     else:
         if not allow_private and not _is_public_address(host):
             raise UrlNotAllowed("address {} is not a public address".format(host))

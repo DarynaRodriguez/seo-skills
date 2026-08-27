@@ -188,5 +188,41 @@ class TestKnownLimits(unittest.TestCase):
             safety.resolve_host = original
 
 
+class TestNumericHostsAreRefusedByRule(unittest.TestCase):
+    """These were blocked on Windows only because the resolver happened to fail.
+
+    CI on macOS accepted `0177.0.0.1`, because getaddrinfo there parses octal and
+    short forms that Windows rejects. A guard that depends on which resolver it
+    runs against is not a guard, so an IP-shaped host now has to parse as a valid
+    address or be refused outright.
+    """
+
+    AMBIGUOUS = [
+        "http://0177.0.0.1/", "http://2130706433/", "http://0x7f000001/",
+        "http://127.1/", "http://0/", "http://1.2.3.4.5/",
+        "http://010.010.010.010/", "http://0177.1/", "http://999.999.999.999/",
+    ]
+
+    def test_refused_for_the_stated_reason_and_not_by_dns_failure(self):
+        for url in self.AMBIGUOUS:
+            with self.subTest(url=url):
+                with self.assertRaises(UrlNotAllowed) as caught:
+                    validate_url(url)
+                self.assertIn(
+                    "looks like a numeric address",
+                    str(caught.exception),
+                    "{} was refused, but by DNS failure rather than by rule, so it "
+                    "would be allowed on a platform whose resolver parses it".format(url),
+                )
+
+    def test_real_hostnames_and_valid_addresses_are_unaffected(self):
+        for url in (
+            "https://example.com/", "http://93.184.216.34/", "http://8.8.8.8/",
+            "https://cafe.ba/", "https://ab.cd/", "http://[::ffff:1.2.3.4]/",
+        ):
+            with self.subTest(url=url):
+                self.assertTrue(validate_url(url))
+
+
 if __name__ == "__main__":
     unittest.main()
