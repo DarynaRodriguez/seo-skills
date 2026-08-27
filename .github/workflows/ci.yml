@@ -22,7 +22,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python: ["3.9", "3.13"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python }}
@@ -42,7 +42,7 @@ jobs:
     name: repo contract
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
@@ -67,7 +67,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
@@ -76,7 +76,11 @@ jobs:
       - name: every command answers --help
         shell: bash
         run: |
-          for command in fetch page meta headings schema robots sitemap baseline drift history gsc doctor; do
+          # Derived from the parser rather than hardcoded, so a new command
+          # cannot be added without being smoke tested.
+          commands=$(python -c 'from seo_tools.cli import build_parser; print(" ".join(sorted(build_parser()._subparsers._group_actions[0].choices)))')
+          echo "checking: $commands"
+          for command in $commands; do
             python -m seo_tools "$command" --help > /dev/null || {
               echo "$command has no working --help"; exit 1;
             }
@@ -101,7 +105,7 @@ jobs:
     name: secret scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Scan tracked files for credentials
         shell: bash
         run: |

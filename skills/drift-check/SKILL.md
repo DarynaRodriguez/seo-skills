@@ -39,8 +39,8 @@ Three profile fields decide what is worth watching:
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | The page's current state, fully | Local tools, always available | No fallback needed. This is the one lane that never degrades |
 | Which pages deserve a baseline | `mcp__Ahrefs__gsc-pages` | Ask for a Search Console page export, or baseline the pages the profile names as commercially important |
 | Whether a change coincided with a traffic move | `mcp__Ahrefs__gsc-page-history` | Ask for two Search Console exports and run `python -m seo_tools gsc` across them |
@@ -50,6 +50,13 @@ Never invent a metric. Every number carries its source and the date it was pulle
 A drift finding is a fact about the HTML. A traffic movement is a separate fact
 from Search Console. Joining them is a judgement, and you say so when you make it.
 Full tool list: `docs/data-sources.md`.
+
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
 
 ## Tools
 

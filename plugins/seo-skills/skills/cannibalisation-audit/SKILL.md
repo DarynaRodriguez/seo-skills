@@ -36,8 +36,8 @@ Pull these out before touching a tool:
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | Queries the site receives, with clicks and position | `mcp__Ahrefs__gsc-keywords` | Ask for a Search Console query export with page dimension included |
 | Which URLs a query lands on | `mcp__Ahrefs__gsc-pages` | Ask for a Search Console export grouped by query and page |
 | Position flipping between URLs over time | `mcp__Ahrefs__gsc-keyword-history` | Ask for 16 months of query history, or state that flipping is unverified |
@@ -51,6 +51,13 @@ Never invent a metric. Every number carries its source and the date it was pulle
 Search Console is truth for received traffic; Ahrefs traffic is a model, label it.
 Full tool list: `docs/data-sources.md`.
 
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
+
 ## Tools
 
 The measured values below come from the local tools, not from reading the
@@ -59,6 +66,7 @@ page by eye. No API key, no install, no network beyond the page itself:
 | Need                                                        | Command                                     |
 |-------------------------------------------------------------|---------------------------------------------|
 | Group competing URLs per query from a Search Console export | `python -m seo_tools gsc <export.csv> --json` |
+| Duplicate titles and H1s across indexable pages, from a crawl export | `python -m seo_tools crawl <export.csv> --json` |
 
 Every command takes `--json`, which is the form to use here. Exit code 0
 means it answered, 1 means it could not. Run these from the pack root; if

@@ -103,3 +103,30 @@ Two notes for the tools, which follow from this table rather than from any defau
 - **Tracked prompt set lives in:** <Peec project, Ahrefs Brand Radar report, spreadsheet, nowhere yet>
 - **Aided prompts** (name the brand) and **unaided prompts** (do not) are counted separately. Never merged.
 - **Sources this buyer trusts:** <analyst firms, trade press, associations, review sites, communities>
+
+## 11. Data providers
+
+You cannot do this work without data. Which tool supplies it is your choice; that
+it is supplied is not. Fill this in and every skill uses what you name here
+instead of assuming a vendor.
+
+| Need | Provider | How to reach it |
+|------|----------|-----------------|
+| crawl | <Screaming Frog> | <weekly export at ~/crawls/latest.csv, read with `seo_tools crawl`> |
+| traffic | <Google Search Console> | <manual CSV export, read with `seo_tools gsc`> |
+| keywords | <Ahrefs MCP, or Semrush export, or none> | <connector, or where the export lives> |
+| serp | <Ahrefs MCP, or manual> | <if manual: paste the top 10 with date and country> |
+| backlinks | <Ahrefs MCP, or none> | <> |
+| ai-visibility | <Peec AI MCP, or none> | <if none: run the prompts by hand and record engine, locale, date> |
+| ai-citations | <Peec AI MCP, or Ahrefs Brand Radar, or none> | <> |
+| ai-crawler-hits | <Peec AI, or server logs, or none> | <> |
+| vitals | <PageSpeed Insights, or none> | <needs an API key> |
+| analytics | <GA4, or none> | <> |
+
+Write `none` where you have nothing. That is a better answer than naming a tool
+you do not really have, because it tells the skill to report a gap rather than
+attempt the work and quietly degrade.
+
+`page` and `robots-sitemap` are always available: the tools in this repo serve
+them with no account. Full provider list, per-need alternatives and the unit traps
+when switching vendor: `docs/data-sources.md`.

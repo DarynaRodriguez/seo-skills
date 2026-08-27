@@ -31,8 +31,8 @@ structure. The link list you build makes the real site match it.
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | Internal links per page, and which pages have none | `mcp__Ahrefs__site-explorer-pages-by-internal-links` | Ask for a Screaming Frog crawl exported with inlink counts, or a sitemap plus a manual check |
 | Anchor text distribution on internal links | `mcp__Ahrefs__site-explorer-linked-anchors-internal` | Ask for the crawl's anchor report, or sample the main templates by hand |
 | Where external authority actually sits | `mcp__Ahrefs__site-explorer-pages-by-backlinks` | Ask for a backlinks export, or say authority distribution is unknown and rank by traffic instead |
@@ -43,6 +43,13 @@ structure. The link list you build makes the real site match it.
 Navigation, footer and sidebar links are template links. Count them separately from
 in-body links, because they are not evidence that two pages are related.
 
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
+
 ## Tools
 
 The measured values below come from the local tools, not from reading the
@@ -51,6 +58,7 @@ page by eye. No API key, no install, no network beyond the page itself:
 | Need                                               | Command                               |
 |----------------------------------------------------|---------------------------------------|
 | Count and classify the links a page actually emits | `python -m seo_tools page <url> --json` |
+| Inlink counts and orphans across the whole site, from a crawl export | `python -m seo_tools crawl <export.csv> --json` |
 
 Every command takes `--json`, which is the form to use here. Exit code 0
 means it answered, 1 means it could not. Run these from the pack root; if

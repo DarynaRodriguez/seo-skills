@@ -37,8 +37,8 @@ intentional block is not reported as a defect.
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | Which agents actually reached the site, and when | Peec `get_agent_visits`, `list_bots` | Ask for server or CDN access logs filtered by user agent, and say which agents are unverified |
 | What a crawler receives for one page | `mcp__Ahrefs__site-audit-page-content` | Fetch the URL and read the raw response body |
 | Whether pages are reachable at all | `mcp__Ahrefs__site-explorer-crawled-pages`, `mcp__Ahrefs__site-audit-issues` | Fetch a sample of pages directly and record status codes |
@@ -48,6 +48,13 @@ intentional block is not reported as a defect.
 Every verdict in the output carries the evidence and the date it was gathered. An
 agent you did not see in a log and did not test is `unverified`, never `allowed`.
 Full tool list: `docs/data-sources.md`.
+
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
 
 ## Tools
 

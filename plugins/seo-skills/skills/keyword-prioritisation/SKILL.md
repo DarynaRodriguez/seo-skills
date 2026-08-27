@@ -31,8 +31,8 @@ priority list without a capacity number is a wish list.
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | Volume, difficulty, CPC per candidate | `mcp__Ahrefs__keywords-explorer-overview` | Use the user-supplied export, and mark the whole run as user-supplied data |
 | Our authority, for the feasibility input | `mcp__Ahrefs__site-explorer-domain-rating`, `mcp__Ahrefs__site-explorer-metrics` | Ask for the current domain rating, or drop the feasibility input and say the score is running on five axes not six |
 | Whether an asset already ranks | `mcp__Ahrefs__site-explorer-organic-keywords`, `mcp__Ahrefs__gsc-keywords` | Ask for a Search Console export, or use `.seo/pages.csv` from `/site-inventory` |
@@ -42,6 +42,13 @@ priority list without a capacity number is a wish list.
 Difficulty and traffic values are models. Never present a score as if the inputs
 were measured facts when some of them are estimates. Full tool list:
 `docs/data-sources.md`.
+
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
 
 ## The scoring model
 

@@ -38,8 +38,8 @@ From the profile, extract the seed inputs explicitly before pulling any data:
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | Phrase-match expansion of a seed | `mcp__Ahrefs__keywords-explorer-matching-terms` | Ask for a Keyword Planner or Semrush CSV export, label every figure user-supplied |
 | Semantically adjacent terms | `mcp__Ahrefs__keywords-explorer-related-terms` | Build the seed set from buyer interviews, sales call notes and site search logs, and mark it unvalidated |
 | Long-tail autocomplete phrasing | `mcp__Ahrefs__keywords-explorer-search-suggestions` | Collect autocomplete by hand in the target locale, record the date and country |
@@ -51,6 +51,13 @@ From the profile, extract the seed inputs explicitly before pulling any data:
 Never invent a metric. Every number in the output carries its source and the date
 it was pulled. Ahrefs monetary values are USD cents, divide by 100 to display.
 Full tool list: `docs/data-sources.md`.
+
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
 
 ## Procedure
 

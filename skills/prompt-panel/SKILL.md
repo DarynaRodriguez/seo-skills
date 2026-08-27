@@ -40,8 +40,8 @@ competitors that may not be named. Section 10 says where the panel currently liv
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | The existing panel and its topics | Peec `list_prompts`, `list_topics`, `get_project_profile` | Ask for the current prompt list with locales and topics, as an export or paste |
 | Tool-suggested prompts, as candidates only | Peec `list_prompt_suggestions` | Skip; suggestions are optional input, never the basis of a panel |
 | Write the panel | Peec `create_prompts`, `update_prompts`, `archive_prompts` | Return the table for the user to enter, and say nothing was written |
@@ -52,6 +52,13 @@ competitors that may not be named. Section 10 says where the panel currently liv
 Search Console anonymised queries are the closest public proxy for how people
 phrase full questions. Use them for phrasing, not for volume. Full tool list:
 `docs/data-sources.md`.
+
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
 
 ## Procedure
 

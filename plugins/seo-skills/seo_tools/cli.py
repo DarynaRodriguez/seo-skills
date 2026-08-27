@@ -12,7 +12,16 @@ import argparse
 import sys
 from typing import Dict, List, Optional
 
-from . import audits, drift as drift_rules, gsc as gsc_module, output, parsing, sitemaps, typography
+from . import (
+    audits,
+    crawl as crawl_module,
+    drift as drift_rules,
+    gsc as gsc_module,
+    output,
+    parsing,
+    sitemaps,
+    typography,
+)
 from .fetching import DEFAULT_TIMEOUT, DEFAULT_USER_AGENT, fetch, public_summary
 from .robots import AI_AGENTS, RobotsTxt, robots_url_for
 from .safety import UrlNotAllowed, normalise_url
@@ -435,6 +444,101 @@ def cmd_gsc(args) -> int:
     return EXIT_OK
 
 
+
+def cmd_crawl(args) -> int:
+    """Read a crawl export from any tool and report what it can answer alone."""
+    try:
+        loaded = crawl_module.load_crawl(args.csv, columns=args.columns)
+    except crawl_module.CrawlError as exc:
+        _fail(str(exc), args)
+
+    rows = loaded["rows"]
+    result = crawl_module.analyse(rows, thin_threshold=args.thin)
+    payload = {
+        "file": loaded["path"],
+        "exporter": loaded["exporter"],
+        "columns_detected": loaded["columns_detected"],
+        "columns_ignored": loaded["columns_ignored"],
+        "columns_resolved_by": loaded["columns_resolved_by"],
+        "rows": loaded["row_count"],
+    }
+    payload.update(result)
+
+    if args.json:
+        output.emit_json(payload)
+        return EXIT_OK
+
+    newline = "\n"
+    summary = result["summary"]
+    print(output.rule("crawl export"))
+    print(newline.join(output.kv({
+        "file": loaded["path"],
+        "exporter": loaded["exporter"],
+        "urls": summary["urls"],
+        "columns": ", ".join(loaded["columns_detected"]),
+        "resolved by": loaded["columns_resolved_by"],
+    })))
+
+    print(newline + output.rule("shape of the crawl"))
+    print(newline.join(output.kv({
+        "by status": ", ".join(
+            "{} {}".format(count, band) for band, count in summary["by_status_band"].items()
+        ),
+        "indexable": summary["indexable"],
+        "not indexable": summary["non_indexable"],
+        "indexability unknown": summary["indexability_unknown"],
+        "max crawl depth": summary["max_crawl_depth"],
+        "median crawl depth": summary["median_crawl_depth"],
+    })))
+
+    sections = (
+        ("could not be fetched", result["broken"], ["url", "status", "inlinks"]),
+        (
+            "redirect chains",
+            result["redirect_chains"],
+            ["url", "status", "redirects_to", "then_status"],
+        ),
+        ("canonical points elsewhere", result["non_self_canonical"], ["url", "canonical", "status"]),
+        (
+            "thin pages under {} words".format(result["thin_threshold"]),
+            result["thin"],
+            ["url", "word_count", "crawl_depth"],
+        ),
+    )
+    for title, entries, columns in sections:
+        print(newline + output.rule(title))
+        print("{} found".format(len(entries)))
+        if entries:
+            print(newline.join(output.table(entries, columns, limit=15)))
+
+    for label, key in (
+        ("titles", "duplicate_titles"),
+        ("descriptions", "duplicate_descriptions"),
+        ("H1s", "duplicate_h1"),
+    ):
+        groups = result[key]
+        print(newline + output.rule("duplicate {}".format(label)))
+        print(
+            "{} groups covering {} URLs".format(
+                len(groups), sum(group["count"] for group in groups)
+            )
+        )
+        for group in groups[:5]:
+            print("  {}x  {}".format(group["count"], str(group["value"])[:70]))
+            for url in group["urls"][:3]:
+                print("        {}".format(url))
+
+    print(newline + output.rule("missing on indexable pages"))
+    print(newline.join(output.kv({
+        "no title": len(result["missing_titles"]),
+        "no meta description": len(result["missing_descriptions"]),
+        "no H1": len(result["missing_h1"]),
+        "no inlinks (orphans)": len(result["orphans"]),
+    })))
+    print(newline + "Use --json for the full lists.")
+    return EXIT_OK
+
+
 def cmd_doctor(args) -> int:
     """Answer "will this work on my machine" before anyone runs a real command."""
     import platform
@@ -588,6 +692,19 @@ def build_parser() -> argparse.ArgumentParser:
     history = add("history", cmd_history, "List the baselines and comparisons held for a URL.")
     history.add_argument("url")
     history.add_argument("--limit", type=int, default=20)
+
+    crawl = add(
+        "crawl",
+        cmd_crawl,
+        "Analyse a crawl export from Screaming Frog, Sitebulb or any CSV. No API needed.",
+    )
+    crawl.add_argument("csv", help="the crawl export to read")
+    crawl.add_argument("--thin", type=int, default=300, help="word count below which a page is listed as thin")
+    crawl.add_argument(
+        "--columns",
+        help="name the columns positionally when the headers are not recognised, "
+        "e.g. url,status,title,meta_description. Use - to skip one",
+    )
 
     gsc = add("gsc", cmd_gsc, "Analyse a Search Console CSV export. No API access needed.")
     gsc.add_argument("csv", help="the export to analyse")

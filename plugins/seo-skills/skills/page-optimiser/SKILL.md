@@ -28,8 +28,8 @@ the answer, so ask rather than assume.
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | The page's rendered content | `mcp__Ahrefs__site-audit-page-content`, or a fetch of the URL | Ask the user to paste the page copy and headings, and say the render is unverified |
 | Crawl detail: title, canonical, status, indexability | `mcp__Ahrefs__site-audit-page-explorer` | Read the page source directly, or ask for a Screaming Frog row |
 | How the page performs now | `mcp__Ahrefs__gsc-page-history`, `mcp__Ahrefs__gsc-keywords` | Ask for a Search Console export, and state that the before picture is unknown |
@@ -38,6 +38,13 @@ the answer, so ask rather than assume.
 | Whether another page competes for the keyword | `.seo/keyword-map.csv`, `mcp__Ahrefs__site-explorer-organic-keywords` | Ask which other pages target the term |
 
 Full text, image and video standards: `references/content-quality.md`.
+
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
 
 ## Tools
 

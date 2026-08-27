@@ -31,8 +31,8 @@ keyword, and saying that out loud stops someone mapping a thank-you page.
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | The page list, types and markets | `.seo/pages.csv` from `/site-inventory` | Ask for a sitemap URL or a crawl export, or work from a user-supplied page list and say the map covers only those pages |
 | Pages the search engines actually see | `mcp__Ahrefs__site-explorer-crawled-pages`, `mcp__Ahrefs__site-audit-page-explorer` | Read `/sitemap.xml` directly and say coverage is sitemap-only |
 | What each page already ranks for | `mcp__Ahrefs__site-explorer-organic-keywords` | Ask for an organic export per market |
@@ -43,6 +43,13 @@ keyword, and saying that out loud stops someone mapping a thank-you page.
 Search Console is the only source of truth for which page currently receives a
 query. When it disagrees with an Ahrefs position, Search Console wins. Full tool
 list: `docs/data-sources.md`.
+
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
 
 ## Procedure
 

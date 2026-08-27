@@ -41,8 +41,8 @@ an owned citation is recognised as owned.
 
 ## Data
 
-| Need | Live tool | Without a connector |
-|------|-----------|---------------------|
+| Need | Our stack | Otherwise |
+|------|-----------|-----------|
 | Which domains get retrieved and cited, and how often | Peec `get_domain_report` | Ahrefs `mcp__Ahrefs__brand-radar-cited-domains`; otherwise run the prompts by hand and list every source the answer links |
 | Which exact URLs get cited | Peec `get_url_report` | Ahrefs `mcp__Ahrefs__brand-radar-cited-pages`; otherwise record the URLs from hand runs |
 | What a cited page actually says about us | Peec `get_url_content` | Fetch and read the page, and quote the sentence verbatim |
@@ -57,6 +57,13 @@ never quoted. Report both columns and never substitute one for the other.
 
 **IDs are opaque.** Copy `pr_`, `to_` and `tg_` identifiers verbatim from the tool
 result. Full tool list: `docs/data-sources.md`.
+
+**Providers are swappable.** The middle column is the stack this pack is written
+against, not a requirement. `docs/data-sources.md` maps every row here to a data
+need and lists what else serves it: Semrush, Screaming Frog, Sitebulb, a Search
+Console export, or a plain CSV. Name yours in profile section 11 and use those
+instead. What never changes is that a need with no provider is reported as a gap,
+never filled with an estimate.
 
 ## Procedure
 
