@@ -4,6 +4,35 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+An audit of the whole pack from a fresh clone, probing every command with hostile
+input rather than reading the code. Three defects, all now pinned by tests.
+
+- **`robots` and `sitemap` printed a traceback on a malformed URL.** Both call
+  `fetch` directly instead of through the helper that catches a refused URL, so
+  `robots ftp://example.com/` and `sitemap notaurl` crashed at the user. Caught
+  centrally in `main()` now, so a command added later cannot reintroduce it.
+- **`robots` accepted a URL that every other command refuses.** `robots_url_for`
+  reduces a URL to scheme plus host, which silently discards credentials, so
+  `http://user:pass@example.com/` succeeded there while `page` rejected it. Both
+  `robots` and `sitemap` now validate what the user actually typed before
+  deriving anything from it. Found by a test asserting consistency across
+  commands, not by inspection.
+- **The plugin mirror shipped a README with four broken relative links.** It
+  copied the README but not `docs/workflows.md`, `docs/skill-template.md`,
+  `CONTRIBUTING.md` or `LICENSE`. The mirror now carries all of `docs/`, plus
+  `LICENSE`, `CONTRIBUTING.md` and `AGENTS.md`, and CI fails on a broken relative
+  link in either tree.
+
+### Added
+
+- `tests/test_cli_errors.py`: every URL-taking command against ten malformed or
+  hostile inputs, asserting a non-zero exit and no traceback, plus a usage error
+  for no arguments and a clean failure for a missing file. 209 tests total.
+
 ## [0.4.0] 2026-08-27
 
 ### Added
