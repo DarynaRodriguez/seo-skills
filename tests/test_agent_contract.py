@@ -279,5 +279,81 @@ class TestTheAuditRowKeepsWhatTheVerdictSays(unittest.TestCase):
         self.assertIn("implicit_allow_count", text)
 
 
+class TestTheNoProfileConventionIsStated(unittest.TestCase):
+    """Every agent that can receive a profile must say how "no profile" is spelled.
+
+    The orchestrator passes the literal string `none`, which reads like a path and
+    means an absence. Two live runs each decided that alone and wrote a note
+    explaining the reasoning, which is a spec gap wearing the clothes of a
+    judgement call.
+    """
+
+    TAKES_A_PROFILE = (
+        "seo-page-auditor.md",
+        "seo-ai-access-checker.md",
+        "seo-crawl-analyst.md",
+    )
+
+    def test_each_one_spells_it_out(self):
+        for name in self.TAKES_A_PROFILE:
+            with self.subTest(agent=name):
+                text = (AGENTS_DIR / name).read_text(encoding="utf-8")
+                self.assertIn('"No profile" is spelled `none`', text)
+
+    def test_the_orchestrator_passes_what_the_agents_expect(self):
+        skill = AGENTS_DIR.parent / "skills" / "site-audit" / "SKILL.md"
+        self.assertIn("the word `none`", skill.read_text(encoding="utf-8"))
+
+
+class TestTheRenderGapIsDeclared(unittest.TestCase):
+    """The access checker is asked what a rendering crawler sees; its tools cannot say.
+
+    `seo.py` is standard library only and never executes JavaScript. A live run
+    answered the question anyway, using a browser tool it happened to have, and
+    pointed out that an instance holding only the declared tools would have had to
+    call it permanently unknown. The definition now says which it is.
+    """
+
+    def setUp(self):
+        self.text = (AGENTS_DIR / "seo-ai-access-checker.md").read_text(encoding="utf-8")
+
+    def test_the_limit_is_stated_rather_than_left_to_be_discovered(self):
+        self.assertIn("never executes JavaScript", self.text)
+
+    def test_both_word_counts_have_a_field(self):
+        for field in ("main_word_count", "main_word_count_rendered", "rendered_check"):
+            with self.subTest(field=field):
+                self.assertIn(field, self.text)
+
+    def test_the_unrendered_case_has_a_documented_value(self):
+        # Otherwise an agent with no browser invents one, and null-because-unchecked
+        # becomes indistinguishable from zero-words-rendered.
+        self.assertIn("`null` unless you actually loaded the page", self.text)
+
+
+class TestEveryAgentDeclaresItsInputs(unittest.TestCase):
+    """An agent given inputs its definition never names has to guess at them.
+
+    The access checker received url, market, profile_path, output_dir and
+    pack_root, and documented none of them, while the other three carried a table.
+    """
+
+    def test_each_agent_names_pack_root_and_output_dir(self):
+        for path in sorted(AGENTS_DIR.glob("*.md")):
+            text = path.read_text(encoding="utf-8")
+            with self.subTest(agent=path.name):
+                self.assertIn("pack_root", text)
+                self.assertIn("output_dir", text)
+
+    def test_each_agent_has_an_inputs_section(self):
+        for path in sorted(AGENTS_DIR.glob("*.md")):
+            text = path.read_text(encoding="utf-8")
+            with self.subTest(agent=path.name):
+                self.assertTrue(
+                    "## Inputs you are given" in text or "## What you are given" in text,
+                    "{} documents no inputs".format(path.name),
+                )
+
+
 if __name__ == "__main__":
     unittest.main()

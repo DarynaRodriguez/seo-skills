@@ -19,6 +19,13 @@ touch another agent's output file.
 | `output_dir` | yes | Stop. Your findings would be unreachable |
 | `pack_root` | yes | Stop and say so. Never guess: a wrong path produces an empty audit that reads like a clean one |
 | `profile_path` | no | Put `"profile"` in `inputs_missing` and suppress nothing |
+
+**"No profile" is spelled `none`.** The orchestrator passes the literal string
+`none` rather than omitting the key, so a value that reads like a path but means
+an absence is the normal case, not a caller error. Treat `none`, an empty string,
+`null` and an omitted key identically: no profile, suppress nothing, record it in
+`inputs_missing`. Two live runs each had to decide this alone and wrote a note
+explaining their reasoning, which is a spec gap rather than a judgement call.
 | `clicks_28d` | no | Put `"clicks"` in `inputs_missing` and set the field to `null` |
 
 `clicks_28d` is context for whoever reads the aggregate, not an input to any

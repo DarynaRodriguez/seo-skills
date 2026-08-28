@@ -22,6 +22,10 @@ from typing import Dict, List, Optional, Sequence
 
 from .safety import normalise_url
 
+# How many example URLs a grouped finding carries. The group's size is always
+# reported in full as `count`; this bounds only the illustrative list.
+URL_SAMPLE = 20
+
 # The canonical row. Every exporter is mapped onto these names, and every
 # analysis below reads only these.
 CANONICAL_FIELDS = (
@@ -295,8 +299,19 @@ def duplicates(rows: Sequence[Dict[str, object]], field: str) -> List[Dict[str, 
         if not value:
             continue
         groups.setdefault(str(value).strip(), []).append(str(row["url"]))
+    # The URL list is capped so a duplicate group covering a thousand pages does
+    # not dump a thousand strings into the output. The cap is named rather than
+    # silent: a live agent run read len(urls) as the size of the group and
+    # understated a 31-page finding as 20. `count` is the truth, and
+    # `urls_truncated` says when the list is not.
     out = [
-        {"value": value, "count": len(urls), "urls": urls[:20]}
+        {
+            "value": value,
+            "count": len(urls),
+            "urls": urls[:URL_SAMPLE],
+            "urls_truncated": len(urls) > URL_SAMPLE,
+            "urls_shown": min(len(urls), URL_SAMPLE),
+        }
         for value, urls in groups.items()
         if len(urls) > 1
     ]

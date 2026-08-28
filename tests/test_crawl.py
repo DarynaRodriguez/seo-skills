@@ -219,5 +219,52 @@ class TestProviderInterchangeability(unittest.TestCase):
         self.assertEqual(loaded["row_count"], 1)
 
 
+class TestGroupedFindingsNameTheirCap(unittest.TestCase):
+    """A capped list must say it is capped.
+
+    A live run read `len(urls)` as the size of a duplicate-title group and
+    understated a 31-page finding as 20, because the list was silently trimmed
+    while `count` told the truth. The cap is still there, since a group covering
+    a thousand pages should not dump a thousand strings, but it is named now.
+    """
+
+    def rows_sharing_a_title(self, n):
+        return [
+            {"url": "https://example.com/p{}".format(i), "status": 200,
+             "title": "One title for all of them", "indexability": True}
+            for i in range(n)
+        ]
+
+    def group(self, n):
+        from seo_tools.crawl import duplicates
+
+        found = duplicates(self.rows_sharing_a_title(n), "title")
+        self.assertEqual(len(found), 1)
+        return found[0]
+
+    def test_count_is_the_real_size_not_the_list_length(self):
+        g = self.group(31)
+        self.assertEqual(g["count"], 31)
+        self.assertEqual(len(g["urls"]), 20)
+
+    def test_a_truncated_list_says_so(self):
+        g = self.group(31)
+        self.assertIs(g["urls_truncated"], True)
+        self.assertEqual(g["urls_shown"], 20)
+
+    def test_an_untruncated_list_says_that_too(self):
+        g = self.group(3)
+        self.assertIs(g["urls_truncated"], False)
+        self.assertEqual(g["urls_shown"], 3)
+        self.assertEqual(g["count"], len(g["urls"]))
+
+    def test_the_flag_and_the_lengths_never_disagree(self):
+        for n in (2, 19, 20, 21, 500):
+            with self.subTest(n=n):
+                g = self.group(n)
+                self.assertEqual(g["urls_shown"], len(g["urls"]))
+                self.assertEqual(g["urls_truncated"], g["count"] > len(g["urls"]))
+
+
 if __name__ == "__main__":
     unittest.main()

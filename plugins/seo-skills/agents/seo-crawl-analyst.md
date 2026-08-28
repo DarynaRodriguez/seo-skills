@@ -14,8 +14,13 @@ being finished.
 
 ## What you are given
 
-A path to a crawl export, an output directory, and optionally a Search Console
-export and the site profile.
+A path to a crawl export, an output directory, `pack_root`, and optionally a
+Search Console export and the site profile.
+
+**"No profile" is spelled `none`.** The orchestrator passes the literal string
+`none` rather than omitting the key, so a value that reads like a path but means
+an absence is the normal case, not a caller error. Treat `none`, an empty string,
+`null` and an omitted key identically, and record the absence in `limitations`.
 
 ## Invoking the tools
 
