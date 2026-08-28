@@ -117,6 +117,11 @@ byline is not visible on the page, add the byline, then add the markup.
 
 ## FAQPage
 
+**No rich result.** FAQPage is not in Google's structured data gallery as of
+2026-08-28 ([search-gallery](https://developers.google.com/search/docs/appearance/structured-data/search-gallery)). The markup remains valid and correctly
+describes a page with a real FAQ, so it is not wrong to publish, but it will not
+produce a rich result and should never be sold as doing so.
+
 Only for questions and answers a visitor can read on the page. Answer text should
 match the visible answer.
 
@@ -221,6 +226,10 @@ eligible for review rich results, whatever their provenance.
 ---
 
 ## HowTo, for genuinely procedural content
+
+**No rich result.** HowTo is not in Google's structured data gallery as of
+2026-08-28 ([search-gallery](https://developers.google.com/search/docs/appearance/structured-data/search-gallery)). Rich results were dropped in 2023 and have not
+returned. Valid markup, honest description, no rich result.
 
 ```html
 <script type="application/ld+json">

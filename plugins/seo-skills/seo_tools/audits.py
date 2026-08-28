@@ -39,13 +39,30 @@ SCHEMA_REQUIRED: Dict[str, List[str]] = {
     "SoftwareApplication": ["name"],
 }
 
-# Types Google has retired as rich result drivers. Emitting them is not an
-# error, but expecting a rich result from them is.
+# Types that no longer appear in Google's structured data gallery. Emitting them
+# is not an error, and schema.org is happy with them: they are still correct
+# vocabulary describing the page. What they no longer buy is a rich result.
+#
+# Checked against the gallery on 2026-08-28:
+# https://developers.google.com/search/docs/appearance/structured-data/search-gallery
+# Re-check before trusting these. Google removes features with little notice, and
+# a stale "no rich result" note is the same defect as a stale "use this" note.
 SCHEMA_RETIRED: Dict[str, str] = {
-    "HowTo": "Google dropped HowTo rich results for desktop and mobile in 2023. Valid markup, no rich result.",
-    "FAQPage": "Since August 2023 Google shows FAQ rich results only for well-known health and government sites.",
-    "Book": "Book actions are limited to approved partners.",
-    "Course": "Course rich results need a Course carousel and an approved provider feed.",
+    "HowTo": (
+        "HowTo has no entry in Google's structured data gallery as of 2026-08-28. "
+        "Rich results were dropped in 2023 and the feature has not returned. The "
+        "markup is still valid and still describes the page correctly."
+    ),
+    "FAQPage": (
+        "FAQPage has no entry in Google's structured data gallery as of 2026-08-28. "
+        "Display was narrowed to well-known health and government sites in 2023 and "
+        "the feature is no longer listed at all. Keep the markup if it describes the "
+        "page; do not expect a rich result from it."
+    ),
+    "Book": (
+        "Book has no entry in Google's structured data gallery as of 2026-08-28. "
+        "Book actions were limited to approved partners."
+    ),
 }
 
 
@@ -339,6 +356,12 @@ def check_schema(page: Dict[str, object]) -> List[Finding]:
             types = _types_of(node)
             if not types:
                 continue
+            # A node carrying an @id and no properties of its own is a reference to
+            # a node defined elsewhere, which is ordinary JSON-LD and the whole
+            # point of @id. Checking it for required properties reports a missing
+            # name on markup that is correct.
+            if _is_reference(node):
+                continue
             for type_name in types:
                 for required in SCHEMA_REQUIRED.get(type_name, []):
                     if required not in node:
@@ -346,7 +369,9 @@ def check_schema(page: Dict[str, object]) -> List[Finding]:
                             _finding(
                                 "schema.missing_required",
                                 "warning",
-                                "{} is missing the required property {!r}.".format(type_name, required),
+                                "{} has no {!r}. Google requires it for the {} rich result; "
+                                "schema.org itself requires nothing, so this is about "
+                                "eligibility, not validity.".format(type_name, required, type_name),
                                 type=type_name,
                                 property=required,
                                 index=block.get("index"),
@@ -417,6 +442,20 @@ def _nodes(data) -> List[Dict]:
         for item in data:
             out.extend(_nodes(item))
     return out
+
+
+def _is_reference(node: Dict) -> bool:
+    """Whether a node points at a definition elsewhere rather than being one.
+
+    `{"@type": "Organization", "@id": "https://example.com/#org"}` names an entity
+    described in another node or another block. Every key is a JSON-LD keyword, so
+    there is nothing here to be missing: the properties live where the @id resolves.
+    Treating it as a definition produces a missing-property finding on markup that
+    is doing exactly what @id is for.
+    """
+    if "@id" not in node:
+        return False
+    return not any(not str(key).startswith("@") for key in node)
 
 
 def _types_of(node: Dict) -> List[str]:

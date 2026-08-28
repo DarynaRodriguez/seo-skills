@@ -626,5 +626,139 @@ class TestTheAiSkillsAreGrounded(unittest.TestCase):
         self.assertIn("does not remove a site from AI Overviews", text)
 
 
+class TestSchemaOrgFlexibilityIsRespected(unittest.TestCase):
+    """schema.org requires nothing and permits a great deal. Do not flag valid markup.
+
+    Its data model is explicit: no property is ever required, an entity may hold
+    properties from several types, extra properties are allowed, and text where an
+    object is expected is not an error. A checker that reports those as defects
+    sends people to fix markup that was already correct.
+    """
+
+    def findings(self, payload):
+        from seo_tools.audits import check_schema
+
+        page = {"schema_blocks": [{"index": 0, "valid_json": True, "data": payload}]}
+        return {f["check"] for f in check_schema(page)}
+
+    def test_an_id_reference_is_not_a_missing_definition(self):
+        # The whole point of @id: the properties live where it resolves.
+        found = self.findings({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "H",
+            "publisher": {"@type": "Organization", "@id": "https://e.com/#org"},
+        })
+        self.assertNotIn("schema.missing_required", found)
+
+    def test_a_graph_with_cross_references_is_clean(self):
+        found = self.findings({
+            "@context": "https://schema.org",
+            "@graph": [
+                {"@type": "Organization", "@id": "https://e.com/#org", "name": "Acme"},
+                {"@type": "Article", "headline": "H", "publisher": {"@id": "https://e.com/#org"}},
+            ],
+        })
+        self.assertNotIn("schema.missing_required", found)
+
+    def test_multiple_types_on_one_entity_are_allowed(self):
+        found = self.findings({
+            "@context": "https://schema.org",
+            "@type": ["Product", "SoftwareApplication"],
+            "name": "N",
+        })
+        self.assertNotIn("schema.missing_required", found)
+
+    def test_text_where_an_object_is_expected_is_not_flagged(self):
+        # schema.org says search engines accept this and do the best they can.
+        found = self.findings({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": "H",
+            "author": "Jane Doe",
+        })
+        self.assertNotIn("schema.missing_required", found)
+
+    def test_a_partial_node_is_still_checked(self):
+        # A node carrying real properties is a definition, not a reference, so the
+        # exemption must not swallow it.
+        found = self.findings({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "@id": "https://e.com/#org",
+            "url": "https://e.com",
+        })
+        self.assertIn("schema.missing_required", found)
+
+    def test_a_genuinely_incomplete_type_is_still_flagged(self):
+        self.assertIn("schema.missing_required", self.findings({
+            "@context": "https://schema.org", "@type": "Article", "name": "N"}))
+
+
+class TestRequirednessIsAttributedToGoogle(unittest.TestCase):
+    """Only Google draws the line, so only Google may be cited for it."""
+
+    def test_the_finding_says_who_requires_it(self):
+        from seo_tools.audits import check_schema
+
+        page = {"schema_blocks": [{"index": 0, "valid_json": True,
+                                   "data": {"@context": "https://schema.org", "@type": "Article"}}]}
+        message = [f for f in check_schema(page) if f["check"] == "schema.missing_required"][0]["message"]
+        self.assertIn("Google requires it", message)
+        self.assertIn("schema.org itself requires nothing", message)
+
+    def test_the_skill_table_names_google_not_schema_org(self):
+        text = (SKILLS_DIR / "schema-builder" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("Required by Google", text)
+        self.assertIn("required by Google for that rich result, not by", " ".join(text.split()))
+
+
+class TestRetiredRichResultsAreDated(unittest.TestCase):
+    """A stale "no rich result" note is the same defect as a stale "use this" note."""
+
+    def test_every_retired_entry_carries_the_date_it_was_checked(self):
+        from seo_tools.audits import SCHEMA_RETIRED
+
+        self.assertTrue(SCHEMA_RETIRED)
+        for type_name, note in SCHEMA_RETIRED.items():
+            with self.subTest(type=type_name):
+                self.assertIn("2026-", note, "{} has no checked-on date".format(type_name))
+
+    def test_course_is_not_listed_as_retired(self):
+        # Google documents a Course list feature, so calling Course retired was wrong.
+        from seo_tools.audits import SCHEMA_RETIRED
+
+        self.assertNotIn("Course", SCHEMA_RETIRED)
+
+    def test_the_recipes_warn_at_the_point_of_use(self):
+        # Somebody copying a block will not have read the skill's preamble.
+        recipes = (SKILLS_DIR / "schema-builder" / "references" / "schema-recipes.md").read_text(encoding="utf-8")
+        self.assertEqual(recipes.count("**No rich result.**"), 2)
+
+    def test_the_retired_note_does_not_call_the_markup_invalid(self):
+        from seo_tools.audits import SCHEMA_RETIRED
+
+        for type_name, note in SCHEMA_RETIRED.items():
+            with self.subTest(type=type_name):
+                self.assertNotIn("invalid", note.lower())
+
+
+class TestGoogleStructuredDataPoliciesAreCited(unittest.TestCase):
+    def test_the_visible_content_rule_cites_the_policy(self):
+        text = (SKILLS_DIR / "schema-builder" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("sd-policies", text)
+        self.assertIn("manual action", " ".join(text.split()).lower())
+
+    def test_json_ld_is_named_as_the_recommended_format(self):
+        text = " ".join((SKILLS_DIR / "schema-builder" / "SKILL.md").read_text(encoding="utf-8").split())
+        self.assertIn("Google names it the recommended format", text)
+
+    def test_the_guidance_doc_separates_the_two_sources(self):
+        text = (DOCS_DIR / "google-guidance.md").read_text(encoding="utf-8")
+        self.assertIn("schema.org/docs/datamodel.html", text)
+        self.assertIn("sd-policies", text)
+        self.assertIn("only one of them draws lines", text)
+
+
 if __name__ == "__main__":
     unittest.main()

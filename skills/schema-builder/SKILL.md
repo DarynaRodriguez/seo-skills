@@ -61,7 +61,12 @@ never filled with an estimate.
 
 ## The hard rule
 
-**Markup describes what is on the page.** Stated once, applied without exception:
+**Markup describes what is on the page.** Stated once, applied without exception.
+
+This is not house style, it is Google's stated policy: do not mark up content that
+is not visible to readers, and do not use structured data to mislead
+([sd-policies](https://developers.google.com/search/docs/appearance/structured-data/sd-policies)). Violations can draw a manual action that removes rich result
+eligibility. Every line below is that policy applied to a case people actually try:
 
 - No `FAQPage` without a visible FAQ, with those exact questions and those exact
   answers, readable by a visitor without clicking anything that hides content.
@@ -96,11 +101,33 @@ the page first, visibly, then the markup is honest". Refuse the shortcut and say
 | Any page below the root | `BreadcrumbList` | |
 
 One page can carry several types. Prefer a single `@graph` with `@id` references
-over a stack of unconnected blocks.
+over a stack of unconnected blocks. Use JSON-LD: Google names it the recommended
+format, though microdata and RDFa are read too ([sd-policies](https://developers.google.com/search/docs/appearance/structured-data/sd-policies)). An entity may
+legitimately hold properties from several types at once, which schema.org states
+plainly ([datamodel](https://schema.org/docs/datamodel.html)).
+
+**`FAQPage` and `HowTo` no longer earn a rich result.** Neither appears in Google's
+structured data gallery as of 2026-08-28 ([search-gallery](https://developers.google.com/search/docs/appearance/structured-data/search-gallery)). The markup is
+still valid and still describes the page correctly, so keep it where it is honest,
+and never propose it as the way to win a rich result. Re-check the gallery before
+relying on either direction: Google adds and removes features with little notice.
+
+On duplicated pages, Google asks for the same markup on every duplicate rather than
+on the canonical alone ([sd-policies](https://developers.google.com/search/docs/appearance/structured-data/sd-policies)).
 
 ## Required versus recommended properties
 
-| Type | Required | Recommended |
+**"Required" here means required by Google for that rich result, not by
+schema.org.** Schema.org requires nothing: its data model is deliberately flexible,
+extra properties are allowed, and even a wrong value type is not an error
+([datamodel](https://schema.org/docs/datamodel.html)). Google is the one drawing lines, because it is the one
+deciding eligibility: items missing required properties are not eligible for rich
+results ([sd-policies](https://developers.google.com/search/docs/appearance/structured-data/sd-policies)).
+
+So a missing property below is an eligibility problem, never a validity error, and
+saying it the other way round sends people to fix markup that was already correct.
+
+| Type | Required by Google | Recommended |
 |------|----------|-------------|
 | `Organization` | `name`, `url` | `logo`, `sameAs`, `description`, `address`, `contactPoint`, `foundingDate` |
 | `WebSite` | `name`, `url` | `publisher` reference, `inLanguage`, `potentialAction` |

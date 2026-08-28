@@ -20,6 +20,9 @@ pages, and the AI optimization guide was last updated 2026-07-10.
 | Snippets and meta descriptions | [appearance/snippet](https://developers.google.com/search/docs/appearance/snippet) |
 | Spam policies | [essentials/spam-policies](https://developers.google.com/search/docs/essentials/spam-policies) |
 | JavaScript and rendering | [javascript-seo-basics](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics) |
+| Structured data policies | [sd-policies](https://developers.google.com/search/docs/appearance/structured-data/sd-policies) |
+| Which rich results exist | [search-gallery](https://developers.google.com/search/docs/appearance/structured-data/search-gallery) |
+| The schema.org vocabulary and its data model | [schema.org/docs](https://schema.org/docs/documents.html), [datamodel](https://schema.org/docs/datamodel.html) |
 
 ## What Google says, and what this pack does about it
 
@@ -98,6 +101,40 @@ not itself the violation; producing bulk low-value pages is.
 generate pages at scale without a person deciding each one is worth publishing. That
 is why `seo-brief-writer` can return `do_not_publish`, and why `/content-brief`
 refuses to brief a page whose angle nobody can name.
+
+## Structured data: two sources, and only one of them draws lines
+
+Schema.org and Google answer different questions, and conflating them is the most
+common structured-data mistake in this field.
+
+**Schema.org defines the vocabulary and requires nothing.** Its data model is
+deliberately flexible: no property is ever required, an entity may carry properties
+from several types at once, extra and unrecognised properties are allowed, and even
+supplying text where an object is expected is explicitly not an error
+([datamodel](https://schema.org/docs/datamodel.html)). Validators may warn, but the
+project states they are not obliged to treat unexpected structures as errors.
+
+**Google decides eligibility, and that is where "required" comes from.** Items
+missing required properties are not eligible for rich results, markup must describe
+content visible to readers, misleading markup can draw a manual action, and JSON-LD
+is the recommended format
+([sd-policies](https://developers.google.com/search/docs/appearance/structured-data/sd-policies)).
+
+So this pack says "required by Google for that rich result" and never "required".
+A missing property is an eligibility problem, not a validity error. Telling someone
+their markup is invalid when schema.org is perfectly happy with it sends them to fix
+something that was already correct.
+
+**Features get removed.** As of 2026-08-28, `FAQPage`, `HowTo` and `Book` have no
+entry in the structured data gallery
+([search-gallery](https://developers.google.com/search/docs/appearance/structured-data/search-gallery)).
+`seo_tools/audits.py` carries that list with the date it was checked, because a
+stale "no rich result" note is the same defect as a stale "use this" note. Re-check
+before trusting it in either direction.
+
+**And structured data is not the route into an AI answer.** Google says it is not
+required for generative AI search. It earns rich results, which is a real and
+separate prize.
 
 ## Where this pack goes beyond Google
 
