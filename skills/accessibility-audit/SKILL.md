@@ -49,6 +49,52 @@ four things already.
 **WCAG is the standard.** Cite the success criterion and its level on every finding
 so a reader can look it up and argue with you.
 
+## The legal question, which this skill does not answer
+
+Accessibility is often a legal obligation, and in the EU the instrument is the
+European Accessibility Act, Directive (EU) 2019/882 ([EUR-Lex](https://eur-lex.europa.eu/eli/dir/2019/882/oj/eng)). Read from
+the directive itself, because the summaries circulating about it are wrong in both
+directions.
+
+**Whether it applies to a given site is a legal question for that organisation.
+This skill does not answer it, and neither should you.** What follows is what the
+text says, so a reader knows whether the question is even live for them.
+
+- **It covers named services, not "websites" in general.** Article 2(2) lists
+  services provided **to consumers** after 28 June 2025: electronic communications;
+  services providing access to audiovisual media; specified elements of air, bus,
+  rail and waterborne passenger transport including their websites, mobile apps and
+  e-ticketing; consumer banking services; e-books and dedicated software; and
+  e-commerce services.
+- **"To consumers" is doing real work.** E-commerce services are defined in
+  Article 3(30) as provided at a distance, by electronic means, at the individual request of
+  a consumer, with a view to concluding a **consumer contract**. A business-to-
+  business site that sells to companies rather than consumers is a different case,
+  and reading the list as "all websites" is the most common error about this
+  directive.
+- **Microenterprises providing services are exempt** from those requirements, per
+  Article 4(5). A microenterprise is defined in Article 3(23) as fewer than 10
+  persons **and** turnover or balance sheet total not exceeding EUR 2 million. Both
+  halves matter; headcount alone is not the test.
+- **There is a limit: fundamental alteration and disproportionate burden.**
+  Article 14. It is not a shrug: the economic operator must carry out the
+  assessment against the criteria in Annex VI, document it, and keep the results
+  for five years.
+- **Dates.** Member States applied their measures from 28 June 2025, Article 31.
+  Article 32 sets a transitional period to 28 June 2030 for services using products
+  lawfully in use before then, and lets service contracts agreed before 28 June 2025
+  run to expiry, capped at five years.
+- **It is a directive, so the binding text is national law.** Each Member State
+  transposes it, and enforcement and penalties are set nationally. Germany's
+  implementation is not Ireland's.
+
+**How to use this in a report.** If the profile's market is in the EU and its
+service plausibly sits in the Article 2(2) list, say that the question is live and
+belongs with whoever owns legal, and give them the article numbers so the
+conversation starts somewhere. Never write that a site must comply, must not, or is
+non-compliant. You have checked four criteria out of dozens from markup, which is
+not a compliance assessment and could not be one.
+
 ## Data
 
 | Need | Our stack | Otherwise |
@@ -144,8 +190,10 @@ visible to this pack, and each fails real users.
 - **Never call a page accessible.** You checked four criteria out of dozens. Say
   "no automated failures in the four criteria checked" and never more than that.
 - **Never claim accessibility improves ranking.** It is not a documented ranking
-  factor. Argue it on the grounds that it works: more people can use the page, and
-  in many jurisdictions it is a legal obligation.
+  factor. Argue it on the grounds that it works: more people can use the page.
+- **Never state that a site is or is not legally required to comply**, with the EAA
+  or anything else. Name the instrument, name the article, say the question belongs
+  with legal. Four markup criteria is not a compliance assessment.
 - **Never report `alt=""` as a missing alt.** An empty alt on a decorative image is
   the correct markup, and flagging it teaches people to add noise for screen reader
   users.

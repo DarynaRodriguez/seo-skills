@@ -1128,5 +1128,85 @@ class TestTheSourceOfRecordIsNotOnlyGoogle(unittest.TestCase):
                 self.assertNotIn("google-guidance", (root / name).read_text(encoding="utf-8"))
 
 
+class TestTheEaaIsCitedNotInterpreted(unittest.TestCase):
+    """A legal claim in a public tool is a different risk from an SEO tip.
+
+    The skill may say what the directive says, with article numbers, so a reader
+    can check it. It may not tell a stranger whether they are required to comply,
+    which is a question about their business that four markup checks cannot reach.
+    """
+
+    def setUp(self):
+        self.text = (SKILLS_DIR / "accessibility-audit" / "SKILL.md").read_text(encoding="utf-8")
+        self.flat = " ".join(self.text.split())
+
+    def test_it_refuses_to_decide_applicability(self):
+        self.assertIn("this skill does not answer", self.flat.lower())
+
+    def test_the_guardrail_forbids_a_compliance_verdict(self):
+        self.assertIn("Never state that a site is or is not legally required to comply", self.text)
+
+    def test_it_cites_the_primary_source(self):
+        self.assertIn("eur-lex.europa.eu", self.text)
+        self.assertIn("2019/882", self.text)
+
+    def test_article_numbers_are_given_so_a_reader_can_check(self):
+        for article in ("Article 2(2)", "Article 3(23)", "Article 4(5)", "Article 14", "Article 32"):
+            with self.subTest(article=article):
+                self.assertIn(article, self.text)
+
+    def test_the_consumer_scope_is_stated(self):
+        # Reading Article 2(2) as "all websites" is the common error, and for a
+        # B2B pack it is the difference between in scope and out of it.
+        self.assertIn("to consumers", self.flat)
+        self.assertIn("consumer contract", self.flat)
+
+    def test_the_microenterprise_test_is_stated_in_full(self):
+        # Headcount alone is not the test, and the summaries that say so are wrong.
+        self.assertIn("fewer than 10 persons", self.flat)
+        self.assertIn("EUR 2 million", self.flat)
+
+    def test_it_says_national_law_is_the_binding_text(self):
+        self.assertIn("It is a directive", self.flat)
+
+    def test_no_skill_claims_accessibility_is_a_ranking_factor(self):
+        for path in sorted(SKILLS_DIR.rglob("SKILL.md")):
+            flat = " ".join(path.read_text(encoding="utf-8").split()).lower()
+            with self.subTest(skill=path.parent.name):
+                self.assertNotIn("accessibility improves ranking", flat.replace("never claim accessibility improves ranking", ""))
+
+
+class TestNoUnsubstitutedPlaceholdersShip(unittest.TestCase):
+    """A template placeholder that survived into the file is a dead link or worse.
+
+    Caught for real: the EAA section shipped `([EUR-Lex]({EUR}))` because the
+    authoring script defined the URL and never substituted it. The skill validated,
+    the suite passed, and the reader would have got a broken link to the one source
+    that mattered most in that section.
+    """
+
+    # Placeholder shapes used by the scripts that generate these files. Angle
+    # brackets are excluded on purpose: `<url>` and `<pack_root>` are real
+    # documentation conventions here, not accidents.
+    PLACEHOLDER = re.compile(r"\{[A-Z][A-Z0-9_]*\}")
+
+    def test_no_prose_file_carries_one(self):
+        docs = sorted(DOCS_DIR.glob("*.md"))
+        for path in _prose_files() + docs:
+            text = path.read_text(encoding="utf-8")
+            for match in self.PLACEHOLDER.finditer(text):
+                line = text[: match.start()].count("\n") + 1
+                with self.subTest(file=path.name, line=line):
+                    self.fail(
+                        "{}:{} ships an unsubstituted placeholder {}".format(
+                            path.name, line, match.group(0)
+                        )
+                    )
+
+    def test_the_check_would_catch_a_planted_one(self):
+        self.assertRegex("see ([Source]({EUR}))", self.PLACEHOLDER)
+        self.assertNotRegex("run `python <pack_root>/seo.py`", self.PLACEHOLDER)
+
+
 if __name__ == "__main__":
     unittest.main()
