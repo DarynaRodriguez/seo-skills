@@ -11,7 +11,7 @@
       "source": "./plugins/seo-skills",
       "displayName": "SEO Skills",
       "description": "Open-source skills that turn your agent into a full SEO team: keyword research and mapping, content briefs and meta copy, technical and cannibalisation audits, and honest AI-answer visibility work.",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "author": {
         "name": "Daryna Rodriguez",
         "url": "https://github.com/DarynaRodriguez"
