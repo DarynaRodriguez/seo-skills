@@ -26,6 +26,7 @@ page, and you never touch another agent's file.
 | `keyword_provider` | no | Put `"keyword data"` in `inputs_missing`. Every volume and difficulty is then `null`, never a guess |
 | `serp_provider` | no | Put `"SERP"` in `inputs_missing` and mark "What wins now" incomplete |
 | `profile_path` | no | Put `"profile"` in `inputs_missing` |
+| `platform` | no | Put `"platform"` in `inputs_missing`. Write the fixes generically and say you did not know the platform |
 | `audit_file` | no | Nothing breaks. If given, it is this page's `pages/<slug>.json` from a site audit, and it saves you a call |
 
 **"No profile" is spelled `none`.** The orchestrator passes the literal string
@@ -113,6 +114,34 @@ gets a row: the claim, the proof required, who holds it, and its status. State
 plainly that a claim whose proof is missing is cut, not softened into a vaguer
 version of itself.
 
+## Write fixes the platform can execute
+
+`platform` comes from profile section 1, and it changes what a usable instruction
+looks like. A fix the platform cannot perform is not a fix: it is homework for
+somebody who will find out in an hour that it was impossible, and it costs more
+trust than saying nothing.
+
+`docs/platforms.md` has the constraint table for WordPress, Webflow, Framer and
+Lovable. Three rules come out of it:
+
+- **Name the surface, not the outcome.** "Set the canonical in Page settings" beats
+  "add a canonical tag" on Webflow. On WordPress, ask which SEO plugin is installed
+  before writing any instruction at all, because Yoast, Rank Math, AIOSEO, SEOPress
+  and Slim SEO put the same field in five different places.
+- **Say who owns the change.** On Webflow and Framer most of this is a designer in
+  the editor. On Lovable every one of these is a code change in the repository.
+  That difference decides whether the brief takes ten minutes or a sprint, and the
+  person reading it needs to know before they plan.
+- **Where the platform cannot do it, say so and offer the nearest thing.** Asking
+  for per-page canonicals on paginated Webflow collection lists is asking for
+  something that does not exist.
+
+**One platform trap worth knowing before you judge a page.** On Lovable, apps built
+before 13 May 2026 pre-render for verified crawlers only, so `seo.py` receives the
+single-page-app shell while Googlebot may receive rendered HTML. A `requires_js`
+finding there is not evidence of a rendering problem. Check the rendered DOM before
+writing one into a brief.
+
 ## Recommendation
 
 Every brief carries exactly one, and the set is closed:
@@ -160,6 +189,7 @@ becomes `root`. Over 80 characters, truncate to 80 and append `-` plus the first
   "url": "https://example.com/pricing",
   "written_at": "2026-08-28T09:14:13+00:00",
   "recommendation": "write",
+  "platform": "webflow",
   "primary_keyword": "example keyword",
   "primary_volume": 320,
   "primary_difficulty": 41,
@@ -199,6 +229,7 @@ becomes `root`. Over 80 characters, truncate to 80 and append `-` plus the first
 ```
 # Brief: <working title>
 URL: <target url>   Type: <page type>   Market and language: <country, language>
+Platform: <from profile section 1, or "not supplied">
 Recommendation: <write | rewrite | merge | do_not_publish>
 Data pulled: <tool, country, date>   Existing page read from: <served HTML | rendered DOM | not read>
 

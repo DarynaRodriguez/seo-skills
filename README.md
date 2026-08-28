@@ -174,7 +174,7 @@ Fourteen commands in total, all offline except the ones that fetch a page.
 already on your machine. No `pip install`, no requirements file, no API key, no
 account. CI fails the build if a dependency file ever appears.
 
-**Testable, which is the point.** 381 tests, run with
+**Testable, which is the point.** 396 tests, run with
 `python -m unittest discover -s tests -t .` and no test runner to install.
 Writing them found five real bugs, including a robots.txt group-precedence case
 that would have reported GPTBot as allowed when it was blocked.
@@ -427,7 +427,9 @@ included. The short version:
 ## Contributing
 
 New skills, better procedures, corrections to the data-source mappings: all
-welcome. [`docs/source-of-record.md`](docs/source-of-record.md) is the source of
+welcome. [`docs/platforms.md`](docs/platforms.md) records what each CMS can
+actually do, because a fix the platform cannot execute is not a fix.
+[`docs/source-of-record.md`](docs/source-of-record.md) is the source of
 record for every threshold and best practice a skill states, and names the myths
 Google explicitly rejects.
 [`docs/skill-template.md`](docs/skill-template.md) is the required shape,

@@ -100,6 +100,12 @@ the page first, visibly, then the markup is honest". Refuse the shortcut and say
 | Any page with an embedded video | `VideoObject` | Transcript in the page, referenced |
 | Any page below the root | `BreadcrumbList` | |
 
+**Say where the block goes on this site's platform**, not just what it should
+contain. Profile section 1 records the CMS, and `docs/platforms.md` has the surface
+for each: custom code in the page head on Webflow and Framer, a plugin or theme
+template on WordPress, the page component on Lovable. "Add this JSON-LD" without a
+destination is half an instruction.
+
 One page can carry several types. Prefer a single `@graph` with `@id` references
 over a stack of unconnected blocks. Use JSON-LD: Google names it the recommended
 format, though microdata and RDFa are read too ([sd-policies](https://developers.google.com/search/docs/appearance/structured-data/sd-policies)). An entity may

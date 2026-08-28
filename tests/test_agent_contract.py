@@ -1288,5 +1288,108 @@ class TestTheReadmeDescribesTheActualRepo(unittest.TestCase):
         )
 
 
+class TestPlatformConstraintsAreDocumented(unittest.TestCase):
+    """A recommendation the platform cannot execute is homework, not a fix.
+
+    The profile has recorded CMS / platform since the beginning and nothing read
+    it, so every brief gave the same generic instruction regardless of whether the
+    site could follow it.
+    """
+
+    PLATFORMS = ("WordPress", "Webflow", "Framer", "Lovable")
+
+    def setUp(self):
+        self.doc = (DOCS_DIR / "platforms.md").read_text(encoding="utf-8")
+        self.flat = " ".join(self.doc.split())
+
+    def test_the_reference_exists_and_covers_each_platform(self):
+        for name in self.PLATFORMS:
+            with self.subTest(platform=name):
+                self.assertIn("## " + name, self.doc)
+
+    def test_it_is_dated_because_platforms_ship_changes(self):
+        self.assertIn("Checked 2026-", self.doc)
+
+    def test_the_wordpress_plugin_dependency_is_stated_first(self):
+        # Capability there is decided by which plugin is installed, and the
+        # instruction differs per plugin, so asking comes before writing.
+        self.assertIn("Ask which SEO plugin is installed before writing anything", self.flat)
+
+    def test_the_webflow_localised_redirect_trap_is_recorded(self):
+        self.assertIn("do not apply to localised", self.flat)
+
+    def test_the_lovable_verified_crawler_behaviour_is_recorded(self):
+        self.assertIn("Pre-rendering serves verified crawlers only", self.flat)
+
+    def test_the_soft_404_at_scale_case_is_recorded(self):
+        # Found on a real site: 22 of 31 sitemap URLs rendered the app's own 404
+        # while answering HTTP 200.
+        self.assertIn("advertise pages the app does not have", self.flat)
+
+
+class TestTheRenderingFindingAdmitsItsBlindSpot(unittest.TestCase):
+    """`requires_js` describes what this fetcher saw, not what Googlebot sees.
+
+    Some hosts pre-render for verified crawlers only. Reporting a critical
+    rendering defect from our fetch alone would be a confident claim about an
+    engine we never observed.
+    """
+
+    def setUp(self):
+        from seo_tools.audits import audit_page
+
+        shell = "<html><head><title>T</title></head><body><div id=root></div></body></html>"
+        self.finding = [
+            f for f in audit_page(parse_page(shell, "https://e.com/"))["findings"]
+            if f["check"] == "rendering.requires_js"
+        ][0]
+
+    def test_it_tells_the_reader_to_confirm(self):
+        self.assertIn("confirm_with", self.finding)
+
+    def test_the_message_names_the_false_positive_path(self):
+        self.assertIn("pre-render for verified crawlers only", str(self.finding["message"]))
+
+    def test_it_does_not_claim_googlebot_sees_a_shell(self):
+        message = str(self.finding["message"])
+        self.assertIn("does not prove Googlebot sees a shell", message)
+
+    def test_it_is_still_a_warning_not_a_critical(self):
+        # Real for fetchers outside the verified list, unproven for the rest.
+        self.assertEqual(self.finding["severity"], "warning")
+
+
+class TestBriefsAccountForThePlatform(unittest.TestCase):
+    def test_the_agent_takes_platform_as_an_input(self):
+        text = (AGENTS_DIR / "seo-brief-writer.md").read_text(encoding="utf-8")
+        self.assertIn("| `platform` |", text)
+        self.assertIn('"platform"', text)
+
+    def test_the_agent_is_told_to_name_the_surface(self):
+        flat = " ".join((AGENTS_DIR / "seo-brief-writer.md").read_text(encoding="utf-8").split())
+        self.assertIn("Name the surface, not the outcome", flat)
+        self.assertIn("Say who owns the change", flat)
+
+    def test_the_skill_carries_the_same_step(self):
+        flat = " ".join((SKILLS_DIR / "content-brief" / "SKILL.md").read_text(encoding="utf-8").split())
+        self.assertIn("platform's own vocabulary", flat)
+
+    def test_the_brief_template_shows_the_platform(self):
+        for path in (
+            AGENTS_DIR / "seo-brief-writer.md",
+            SKILLS_DIR / "content-brief" / "SKILL.md",
+        ):
+            with self.subTest(file=path.name):
+                self.assertIn("Platform:", path.read_text(encoding="utf-8"))
+
+    def test_the_newest_platforms_reached_the_technical_audit_table(self):
+        # It already covered Webflow, HubSpot and WordPress. Framer and Lovable
+        # were the gap, and Lovable is the one with the invisible failure mode.
+        flat = " ".join((SKILLS_DIR / "technical-audit" / "SKILL.md").read_text(encoding="utf-8").split())
+        self.assertIn("| Framer |", flat)
+        self.assertIn("| Lovable |", flat)
+        self.assertIn("docs/platforms.md", flat)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -341,9 +341,13 @@ def check_indexability(page: Dict[str, object], headers: Optional[Dict[str, str]
             _finding(
                 "rendering.requires_js",
                 "warning",
-                "Almost no text in the served HTML next to an app root element. The content is likely "
-                "client-rendered, so anything that does not execute JavaScript sees an empty page.",
+                "Almost no text in the served HTML next to an app root element. The content is "
+                "likely client-rendered, so anything that does not execute JavaScript sees an "
+                "empty page. Confirm in a browser before reporting it: some hosts pre-render "
+                "for verified crawlers only, and this fetcher is not one, so a shell here does "
+                "not prove Googlebot sees a shell.",
                 main_word_count=page.get("main_word_count"),
+                confirm_with="a rendered-DOM check, or Search Console",
             )
         )
     if not page.get("has_viewport"):
