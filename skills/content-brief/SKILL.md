@@ -114,7 +114,30 @@ wearing a dozen costumes.
 10. **List required proof assets.** Which number, from which source; which customer,
     with permission status; which third-party citation. State plainly: a claim whose
     proof is missing is cut, not softened into a vaguer version of itself.
-11. **Set the CTA and the definition of done.** The CTA matches the funnel stage,
+11. **Write the fixes in the platform's own vocabulary.** Profile section 1 records
+    the CMS. A brief that says "add a canonical tag" is generic advice; "set the
+    canonical in Page settings, and note the global one in Site settings is already
+    self-referencing" is an instruction someone can follow without a detour.
+
+    `docs/platforms.md` carries the constraints for WordPress, Webflow, Framer and
+    Lovable. The three that change a brief most often:
+
+    - **WordPress capability depends entirely on which SEO plugin is installed.**
+      Ask before writing. Core gives you a title tag and a sitemap and very little
+      else, so meta descriptions, canonicals and `noindex` all live somewhere that
+      differs per plugin.
+    - **Webflow's 301 redirects do not cover localised slugs.** `/old` and `/es/old`
+      need separate rules, and a migration brief that assumes one covers both leaves
+      half the locales broken.
+    - **On Lovable every change is a code change**, and apps built before 13 May
+      2026 pre-render for verified crawlers only, so a client-rendering finding from
+      a plain fetch may be an artefact rather than a defect.
+
+    Where the platform cannot do the thing, say so in the brief and name the nearest
+    thing it can do. A request the platform cannot execute wastes the reader's hour
+    and the brief's credibility.
+
+12. **Set the CTA and the definition of done.** The CTA matches the funnel stage,
     not the highest-value action available. Definition of done is checkable by
     someone who did not write the page.
 
@@ -125,6 +148,7 @@ Return one markdown brief in this exact shape, ready to paste into a ticket or d
 ```
 # Brief: <working title>
 URL: <target url or proposed slug>   Type: <page type>   Market and language: <from profile>
+Platform: <from profile section 1>   Publishing owner: <editor or developer>
 Owner: <writer>   Reviewer: <named human>   Data pulled: <tool, country, date>
 
 ## Primary keyword

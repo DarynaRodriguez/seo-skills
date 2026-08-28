@@ -173,10 +173,14 @@ instead, which works from any directory. If anything errors, run
    | Webflow | auto-generated canonicals silently pointing at the wrong variant after a slug change; CMS collection templates that hardcode one title or fall back to a site-wide OG image; the per-page "exclude from search" toggle left on after staging; sitemap auto-generation toggled off or overridden by a manual sitemap; 301s living only in project settings, so a slug rename with no matching rule 404s; oversized images uploaded at full resolution into small slots; custom code in the head blocking render; animation libraries shifting layout and wrecking CLS |
    | HubSpot | template-level canonical and robots settings overriding page settings; blog listing and tag pages indexable by default; the `hs-sites` or preview domain competing with the primary; module-level content invisible to crawlers; duplicate content across campaign landing page variants |
    | WordPress | two SEO plugins both emitting canonical and robots tags; category, tag, author and date archives indexable by default; attachment pages; paginated comment URLs; theme-level H1 in the site title on every page; a caching or CDN layer serving stale head tags |
+   | Framer | pre-rendered at publish, so a rendering finding is unlikely and worth double-checking; canonicals auto-generated and self-referencing, so a custom one set per page is the thing to verify; sitemap.xml and robots.txt generated automatically, so confirm what is actually served before promising a change to either; CMS collection pages carry their own SEO fields that can be left at template defaults |
+   | Lovable | apps built before 13 May 2026 pre-render for verified crawlers only, so `requires_js` from a plain fetch is not evidence about Googlebot and must be confirmed in a browser; `/thing/:slug` routes resolve against a backend, so a sitemap URL whose record is unpublished answers 200 and renders the app's own 404, which is a soft 404 at scale; only publicly published apps are indexable at all; titles, descriptions and JSON-LD live in the page component, so every fix is a code change |
    | Framework-rendered heads (Next.js, Nuxt, Astro and similar) | head tags emitted client-side only and therefore missing from source; canonical built from a runtime variable that resolves to the preview domain; router-level redirects duplicating CDN-level redirects into chains; incremental regeneration serving stale titles; localised routes with no hreflang emitted |
 
    Any platform not listed: name the mechanism generically and say which platform
-   behaviour you could not verify.
+   behaviour you could not verify. `docs/platforms.md` carries the fuller
+   constraint tables, including where each platform puts the setting and who owns
+   the change, which decides whether a fix is ten minutes or a sprint.
 
 10. **Assign effort and owner to every finding.** Effort as `S` (one page or one
     setting, under an hour), `M` (a template or a batch, up to a day), `L`
