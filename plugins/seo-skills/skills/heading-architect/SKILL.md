@@ -62,8 +62,10 @@ instead, which works from any directory. If anything errors, run
    the brief carries both, take them from `/content-brief` rather than re-deriving.
 2. **Write the H1 twice.** Once as a keyword label, once as a value proposition,
    then merge. The H1 must contain the primary keyword and tell the reader what
-   they get. Keep it under about 70 characters so it does not wrap awkwardly on
-   mobile. One H1 per page, no exceptions.
+   they get. Keep it short enough not to wrap awkwardly on a phone, which is a
+   layout judgement about your own template rather than a search rule: Google
+   documents no length limit for headings, and the H1 is not the title link. One H1
+   per page, no exceptions.
 3. **List the reader's questions in the order they occur.** Not the order that
    suits the product. Someone who does not yet know the category needs the
    definition before the pricing model.

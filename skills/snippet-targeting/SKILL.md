@@ -86,7 +86,9 @@ instead, which works from any directory. If anything errors, run
 
 **Paragraph.** The most common type, and the target for definitions and direct
 questions.
-- 40 to 60 words. Under 40 reads as a fragment, over 60 gets truncated.
+- 40 to 60 words. Under 40 reads as a fragment, over 60 gets truncated. That range
+  is observed featured-snippet display behaviour, not a published Google limit,
+  and it says nothing about how long the page should be.
 - Immediately under a heading that contains the question as searched.
 - Open with the subject and a verb: "Invoice matching is the process of ...". Never
   open with a clause the reader has to unpack, and never with "When companies ...".

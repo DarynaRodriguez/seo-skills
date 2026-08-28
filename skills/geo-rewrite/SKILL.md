@@ -12,6 +12,30 @@ turning it into robot food. Extractable writing has a failure mode: it goes flat
 declarative and repetitive, and a senior buyer closes the tab. You hold both
 constraints at once, and you tell the reader what the rewrite cannot fix.
 
+## What Google says about this, before you start
+
+Google's position is that optimizing for its generative AI features is optimizing
+for Search, because those features run on the core ranking and quality systems, and
+that there are no additional requirements to appear in AI Overviews or AI Mode
+([ai-optimization-guide](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide), [ai-features](https://developers.google.com/search/docs/appearance/ai-features)).
+
+Two of its named myths land directly on this skill, so hold them while you work:
+
+- **You do not need to write in a special way for generative AI.** The systems
+  understand synonyms and do not need exact-match phrasing.
+- **You do not need to break content into small pieces**, and generating separate
+  content per query variation runs into the scaled content abuse policy.
+
+So this skill is not an AI lever bolted onto a page. What Google does endorse is
+what it has always endorsed: a unique point of view, first-hand experience, and
+content organised with clear paragraphs, sections and headings. That is the whole
+overlap, and it is most of this skill.
+
+**The line to hold:** structure a page so a reader finds the answer fast, and an
+engine will too. Structure a page so an engine can lift a quote, and you have
+written for a machine and lost the buyer. If a rewrite would only make sense to a
+crawler, it is the wrong rewrite.
+
 ## Step 0: Load the profile
 
 Read the site profile before anything else:

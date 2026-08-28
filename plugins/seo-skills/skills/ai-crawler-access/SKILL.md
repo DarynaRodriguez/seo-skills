@@ -130,13 +130,19 @@ instead, which works from any directory. If anything errors, run
    `noindex` left on a page after a launch all remove a page from consideration as
    effectively as a block.
 
-9. **Treat llms.txt evenhandedly.** It is a proposed convention with limited
-   adoption. No engine guarantees reading it, and no measured visibility gain is
-   attributable to it. It is cheap to publish and harmless if it accurately
-   describes the site. Publish it if the team wants to, list it as optional, and
-   never present it as a fix for a blocked fetcher or a low visibility figure. If
-   an existing llms.txt contradicts robots.txt or lists pages that do not exist,
-   that is a defect worth fixing.
+9. **Treat llms.txt evenhandedly, and quote Google on it.** Google states plainly
+   that you do not need to create AI-specific machine-readable files such as
+   llms.txt, that Search ignores them, and that they neither harm nor help
+   ([ai-optimization-guide](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide)).
+   That is Google's position on Google. It is a proposed convention with limited
+   adoption elsewhere, no engine guarantees reading it, and no measured visibility
+   gain is attributable to it anywhere.
+
+   So: it is cheap to publish and harmless if it accurately describes the site.
+   Publish it if the team wants to, list it as optional, cite the line above so
+   nobody has to relitigate it next quarter, and never present it as a fix for a
+   blocked fetcher or a low visibility figure. If an existing llms.txt contradicts
+   robots.txt or lists pages that do not exist, that is a defect worth fixing.
 
 10. **Write the fix with the owner it actually needs.** robots.txt is usually a
     developer or CMS change. CDN, WAF and rate limits belong to security or

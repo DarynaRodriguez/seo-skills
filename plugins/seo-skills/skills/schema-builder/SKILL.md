@@ -12,6 +12,18 @@ page as it actually is. The rule that governs everything here: markup is a
 description, not a claim. If it is not on the page, it does not go in the block, and
 no amount of eligibility for a rich result changes that.
 
+## What Google says about this, before you start
+
+**Structured data is not required for generative AI search.** Google says so
+directly ([ai-optimization-guide](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide)), and it is worth saying out loud because the
+opposite is one of the most repeated claims in the AEO market.
+
+What structured data actually earns is rich results, which is a real and separate
+prize with its own documented requirements. Build markup for that, and for the
+accuracy of what a machine reads about the page. Never sell it as the way into an AI
+answer, and never tell a team their absent AI citations are a schema problem unless
+something else establishes that.
+
 ## Step 0: Load the profile
 
 Read the site profile before anything else:

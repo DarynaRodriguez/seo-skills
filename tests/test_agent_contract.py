@@ -483,5 +483,148 @@ class TestHostProvidedToolsAreNotThisRepoBusiness(unittest.TestCase):
         self.assertIn('base.startswith("mcp__")', source)
 
 
+SKILLS_DIR = AGENTS_DIR.parent / "skills"
+DOCS_DIR = AGENTS_DIR.parent / "docs"
+
+# A blank line, however the file was checked out. Built from chr() because this
+# pattern has been mangled by a shell heredoc more than once in this repo's history.
+BLANK_LINE = re.compile(chr(92) + "n" + chr(92) + "s*" + chr(92) + "n")
+
+
+def _prose_files():
+    """Every file that gives advice to a person or an agent."""
+    return sorted(SKILLS_DIR.rglob("*.md")) + sorted(AGENTS_DIR.glob("*.md"))
+
+
+class TestNoCharacterLimitFolklore(unittest.TestCase):
+    """Google publishes no character limit for titles or meta descriptions.
+
+    It says both are truncated to fit the device width, and describes neither as a
+    ranking factor. The 60 and 155 character rules are folklore that outlived
+    whatever produced them, and they are wrong the moment the text is not English:
+    60 characters of Cyrillic is far wider than 60 of Latin, which this pack's own
+    width tables demonstrate.
+
+    The pack measures pixels. This stops the character rules coming back.
+    """
+
+    BANNED = (
+        re.compile(r"\b(?:50|55|60|65|70)\s*(?:to\s*\d+\s*)?characters?\b", re.I),
+        re.compile(r"\b(?:140|150|155|160)\s*(?:to\s*\d+\s*)?characters?\b", re.I),
+        re.compile(r"over\s+(?:60|155)\s+characters", re.I),
+    )
+
+    # Naming the myth in order to reject it is allowed. Stating it as a rule is not.
+    REJECTING = ("not Google's", "never were", "far wider than", "flags the wrong rows",
+                 "no character limit", "publishes no character limit")
+
+    def test_no_skill_or_agent_states_a_character_limit(self):
+        for path in _prose_files():
+            # Scan per paragraph, not per line: these files are hard-wrapped, so a
+            # rule and its rebuttal routinely land on different lines.
+            raw = path.read_text(encoding="utf-8")
+            for para in re.split(BLANK_LINE, raw):
+                flat = " ".join(para.split())
+                if any(marker in flat for marker in self.REJECTING):
+                    continue
+                for pattern in self.BANNED:
+                    with self.subTest(file=path.name, para=flat[:60]):
+                        self.assertIsNone(
+                            pattern.search(flat),
+                            "{} states a character limit: {!r}".format(path.name, flat[:160]),
+                        )
+
+    def test_the_width_tooling_is_what_skills_point_at(self):
+        meta = (SKILLS_DIR / "meta-writer" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("seo_tools meta", meta)
+        self.assertIn("no character limit", meta)
+
+
+class TestGoogleGuidanceExists(unittest.TestCase):
+    """One file holds the citations, so a claim can be checked rather than argued."""
+
+    def setUp(self):
+        self.path = DOCS_DIR / "google-guidance.md"
+        self.text = self.path.read_text(encoding="utf-8")
+
+    def test_it_exists_and_names_its_sources(self):
+        self.assertTrue(self.path.exists())
+        for page in (
+            "ai-optimization-guide",
+            "appearance/title-link",
+            "appearance/snippet",
+            "essentials/spam-policies",
+            "javascript-seo-basics",
+        ):
+            with self.subTest(page=page):
+                self.assertIn(page, self.text)
+
+    def test_it_records_the_myths_google_names(self):
+        flat = " ".join(self.text.split())
+        for myth in ("llms.txt", "no ideal page length", "not required for generative AI search"):
+            with self.subTest(myth=myth):
+                self.assertIn(myth, flat)
+
+    def test_it_says_where_the_pack_goes_beyond_google(self):
+        # A pack that claimed everything traced to Google would be lying: crawler
+        # tables, pixel widths and severities are all this pack's own.
+        self.assertIn("Where this pack goes beyond Google", self.text)
+
+    def test_the_contributor_rule_is_recorded_where_contributors_read(self):
+        agents_md = (AGENTS_DIR.parent / "AGENTS.md").read_text(encoding="utf-8")
+        self.assertIn("Google Search Central is the source of record", agents_md)
+
+
+class TestCitationsPointAtGoogle(unittest.TestCase):
+    """A citation that does not resolve is worse than no citation.
+
+    Shape only: this runs offline, so it checks that anything presented as a Google
+    source is a developers.google.com/search URL rather than an invented one.
+    """
+
+    CITE = re.compile(r"\]\((https?://[^)]+)\)")
+
+    def test_every_google_looking_link_is_a_real_search_central_path(self):
+        for path in _prose_files() + [DOCS_DIR / "google-guidance.md"]:
+            for url in self.CITE.findall(path.read_text(encoding="utf-8")):
+                if "google.com" not in url:
+                    continue
+                with self.subTest(file=path.name, url=url):
+                    self.assertTrue(
+                        url.startswith("https://developers.google.com/search/"),
+                        "{} cites {} as Google guidance, which is not Search Central".format(path.name, url),
+                    )
+
+
+class TestTheAiSkillsAreGrounded(unittest.TestCase):
+    """Google says AI features need no special optimization. The AI skills must say so.
+
+    Otherwise the pack sells the thing Google explicitly says is unnecessary, which
+    is the whole AEO market's failure mode.
+    """
+
+    GROUNDED = (
+        "ai-visibility-audit",
+        "geo-rewrite",
+        "citation-gap",
+        "schema-builder",
+    )
+
+    def test_each_one_states_googles_position_up_front(self):
+        for name in self.GROUNDED:
+            text = (SKILLS_DIR / name / "SKILL.md").read_text(encoding="utf-8")
+            with self.subTest(skill=name):
+                self.assertIn("What Google says about this", text)
+                self.assertIn("developers.google.com/search/", text)
+
+    def test_schema_builder_does_not_claim_ai_requires_markup(self):
+        text = (SKILLS_DIR / "schema-builder" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("not required for generative AI search", text)
+
+    def test_the_google_extended_fact_is_stated_not_implied(self):
+        text = (SKILLS_DIR / "ai-visibility-audit" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("does not remove a site from AI Overviews", text)
+
+
 if __name__ == "__main__":
     unittest.main()

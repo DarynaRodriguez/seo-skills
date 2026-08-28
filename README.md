@@ -371,7 +371,10 @@ included. The short version:
 ## Contributing
 
 New skills, better procedures, corrections to the data-source mappings: all
-welcome. [`docs/skill-template.md`](docs/skill-template.md) is the required shape,
+welcome. [`docs/google-guidance.md`](docs/google-guidance.md) is the source of
+record for every threshold and best practice a skill states, and names the myths
+Google explicitly rejects.
+[`docs/skill-template.md`](docs/skill-template.md) is the required shape,
 [`CONTRIBUTING.md`](CONTRIBUTING.md) has the rest. One rule that trips people up:
 no em dashes anywhere in the repo, because half the skills teach a house style
 that bans them and the repo should practise what it teaches.
