@@ -77,15 +77,29 @@ instead, which works from any directory. If anything errors, run
 3. **Take the real query language.** Use the queries the page already receives.
    Where the site's phrasing and the searcher's phrasing differ, the searcher wins,
    subject to the profile's product vocabulary.
-4. **Write the title.** 50 to 60 characters. Primary keyword early and reading
-   naturally. Brand placed per profile. One separator, a pipe or a colon. No
-   superlative that lacks verifiable backing. No banned word, no banned character.
-5. **Write the description.** 140 to 155 characters. Primary keyword used once,
-   naturally. One concrete differentiator: a number with a source, a named
-   capability, a named customer. One soft CTA at the end.
-6. **Count the characters.** Count both, print both. A title at 64 characters is a
-   truncated title, not a long one. Treat the counts as the budget, and note that
-   the real limit is pixel width, so a title full of wide capitals may clip early.
+4. **Write the title.** Primary keyword early and reading naturally. Brand placed
+   per profile. One separator, a pipe or a colon. No superlative that lacks
+   verifiable backing. No banned word, no banned character.
+5. **Write the description.** Primary keyword used once, naturally. One concrete
+   differentiator: a number with a source, a named capability, a named customer.
+   One soft CTA at the end.
+6. **Measure the width, do not count the characters.** Run
+   `python -m seo_tools meta <url> --json`, or measure the draft directly, and
+   report pixels with the `method` string the tool returns.
+
+   **Google states there is no character limit on either element**, and that both
+   are truncated in results to fit the device width
+   ([title-link](https://developers.google.com/search/docs/appearance/title-link),
+   [snippet](https://developers.google.com/search/docs/appearance/snippet)). The
+   familiar 60 and 155 character rules are not Google's and never were. They are
+   also wrong in both directions once the text is not English: the same 60
+   characters of Cyrillic or CJK is far wider than 60 of Latin, and this pack's own
+   width tables show it.
+
+   A width finding says the text **will be truncated**. It does not say the text is
+   too long, and neither element is documented by Google as a ranking factor, so
+   never imply one. If a truncated title still carries its meaning in the visible
+   part, that can be a deliberate choice rather than a defect.
 7. **Check the set, not just the line.** Titles across a site must be distinguishable
    from each other. Two pages with near-identical titles are a cannibalisation tell,
    so send them to `/cannibalisation-audit`.

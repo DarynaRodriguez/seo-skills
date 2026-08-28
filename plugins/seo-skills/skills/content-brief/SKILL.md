@@ -61,6 +61,22 @@ means it answered, 1 means it could not. Run these from the pack root; if
 instead, which works from any directory. If anything errors, run
 `python -m seo_tools doctor` first. Full reference: `docs/execution-layer.md`.
 
+## More than one page at a time
+
+This skill briefs one page, in conversation, and that is the right shape when a
+person is deciding what to commission next.
+
+For a set of pages, fan out the `seo-brief-writer` agent instead, one instance per
+URL, all in a single batch. It follows the same evidence rules as this skill and
+writes two files per page, `briefs/<slug>.md` for the writer and
+`briefs/<slug>.json` for aggregation, so a dozen briefs come back in the time one
+would take. Pass every instance `pack_root`, `output_dir`, the URL, and the
+providers you have. `/site-audit` produces exactly the page set worth briefing.
+
+Aggregate the JSON afterwards: the useful cross-page question is how many pages
+came back `do_not_publish` and why, because that is usually one strategic problem
+wearing a dozen costumes.
+
 ## Procedure
 
 1. **Confirm the page and its keyword.** One page, one primary keyword. If the

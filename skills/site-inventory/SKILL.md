@@ -110,14 +110,24 @@ instead, which works from any directory. If anything errors, run
 8. **Flag the suspects** in `notes`, appending each tag that applies:
    - `orphan`: zero internal inlinks in the audit data, or absent from nav, footer and
      every fetched page's body links.
-   - `thin`: indexable, under 300 words of body text, and not a deliberate utility page.
+   - `thin`: indexable, under 300 words of body text, and not a deliberate utility
+     page. **A triage threshold, not a target.** Google states there is no ideal
+     page length, so this column selects pages to look at and never says a page
+     should be longer. A 200-word pricing page can be exactly right.
    - `dupe-title`: title identical to another row.
    - `dupe-h1`: H1 identical to another row.
    - `zero-click`: indexable, in the sitemap, 0 clicks in 28 days, and older than 90
      days by last_modified.
    - `noindex-live`: carries noindex but sits in the sitemap.
-   - `missing-title`, `long-title` (over 60 characters), `missing-meta`,
-     `long-meta` (over 155 characters), `missing-h1`, `multi-h1`.
+   - `missing-title`, `missing-meta`, `missing-h1`, `multi-h1`.
+   - `wide-title`, `wide-meta`: the element will be truncated in results. Take the
+     verdict from `python -m seo_tools meta <url> --json`, which measures pixel
+     width, not from a character count. Google publishes no character limit for
+     either element and truncates to fit the device width
+     ([title-link](https://developers.google.com/search/docs/appearance/title-link)),
+     so a character threshold flags the wrong rows: 60 characters of Cyrillic is
+     far wider than 60 of Latin. Where no width was measured, leave both blank
+     rather than falling back to counting.
 9. **Write the file,** summary block first as comment lines prefixed `#`, then the
    header row, then one row per URL sorted by market, then page_type, then clicks
    descending. Say where you wrote it.
@@ -134,7 +144,7 @@ readable as a CSV:
 #                case-study 7, legal 5, utility 12, unclassified 2
 # Pages by market: UK 68, Germany 44, unknown 4
 # Zero clicks in 28 days: 74 of 116 indexable
-# Titles missing 3, over 60 characters 19
+# Titles missing 3, will truncate 19 (pixel width, Arial estimate)
 # No primary keyword assigned: 91
 # Flags: orphan 6, thin 14, dupe-title 8, noindex-live 2
 url,page_type,market,language,indexable,title,title_len,meta_description,meta_len,h1,primary_keyword,clicks_28d,impressions_28d,avg_position,top_query,last_modified,notes

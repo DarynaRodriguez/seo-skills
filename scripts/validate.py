@@ -186,6 +186,12 @@ if AGENTS.is_dir():
         if tools:
             for tool in [x.strip() for x in tools.group(1).split(",") if x.strip()]:
                 base = tool.split("(")[0].strip()
+                # Anything MCP-prefixed comes from the host, not from this repo,
+                # and the set differs per host and per user. Enumerating one
+                # host's names here would make the pack warn on every other
+                # host's, which is the opposite of what this check is for.
+                if base.startswith("mcp__"):
+                    continue
                 if base not in KNOWN_TOOLS:
                     warnings.append(f"agents/{f.name}: tool {base!r} is not one this repo knows about")
 

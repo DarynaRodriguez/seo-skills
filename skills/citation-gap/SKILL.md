@@ -21,6 +21,20 @@ causation, and the sample was filtered to domains above DR 40 with keywords over
 800 monthly searches, so it describes established brands rather than new ones.
 Treat it as the reason this skill exists, not as a promise.
 
+## What Google says about this, before you start
+
+Google names one myth that lands squarely here: seeking inauthentic mentions across
+the web is less helpful than it might seem ([ai-optimization-guide](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide)).
+
+Read that precisely. It is about **inauthentic** mentions, manufactured to be
+counted. This skill is about earning genuine editorial citations, which is a
+different activity and one Google has no quarrel with. But the failure mode is one
+step away, so the skill must never read as a mention-acquisition programme, and the
+correlation figures below are evidence about how answers get assembled, not a target
+to farm.
+
+A placement nobody would have made on the merits is the thing Google is describing.
+
 ## Step 0: Load the profile
 
 Read the site profile before anything else:

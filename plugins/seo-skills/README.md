@@ -51,6 +51,7 @@ or just describe what you want and your agent picks the right one.
 ### 🩺 Audit, find and rank what is broken
 
 - **`/technical-audit`** triages technical health by traffic at risk, not by issue count, and returns six fixes instead of three hundred rows.
+- **`/accessibility-audit`** reports the WCAG criteria this pack can decide from markup, with the success criterion on every finding, then names every category no automated tool can see. It never calls a page accessible.
 - **`/cannibalisation-audit`** proves two pages are competing with position history, then names which one should win and why.
 - **`/content-decay`** separates real decay from seasonality, dead demand, and a SERP layout change, then decides refresh, consolidate, or retire.
 - **`/indexation-check`** answers both halves of the question: what should be indexed and is not, and what is indexed and should not be.
@@ -211,6 +212,12 @@ the fan-out and can be put back together:
 | `seo-page-auditor` | once per URL, concurrently | Everything measurable on one page |
 | `seo-drift-watcher` | once per baselined URL | What changed since the snapshot |
 
+A fifth runs on the other side of the work. Once an audit has said what is wrong,
+`/content-brief` fans out `seo-brief-writer`, one instance per page, to say what
+should be written instead. It answers with one of `write`, `rewrite`, `merge` or
+`do_not_publish`, and the last of those is the point: an agent that can only say
+yes is a content mill with a schema.
+
 The orchestrator then aggregates by finding rather than by page, so one template
 problem across thirty URLs is one row and not thirty, and ranks by clicks at risk
 rather than by severity. Ten rows out, the rest counted in a line.
@@ -251,6 +258,7 @@ tool command they reference actually exists.
 | internal-linking | 🔧 | 🔧 | 🔧 | ⚠️ |
 | **Audit** | | | | |
 | technical-audit | 🔧 | 🔧 | 🔧 | ⚠️ |
+| accessibility-audit | 🔧 | 🔧 | 🔧 | ⚠️ |
 | cannibalisation-audit | 🔧 | 🔧 | 🔧 | ⚠️ |
 | content-decay | 🔧 | 🔧 | 🔧 | ⚠️ |
 | indexation-check | 🔧 | 🔧 | 🔧 | ⚠️ |
@@ -365,7 +373,10 @@ included. The short version:
 ## Contributing
 
 New skills, better procedures, corrections to the data-source mappings: all
-welcome. [`docs/skill-template.md`](docs/skill-template.md) is the required shape,
+welcome. [`docs/google-guidance.md`](docs/google-guidance.md) is the source of
+record for every threshold and best practice a skill states, and names the myths
+Google explicitly rejects.
+[`docs/skill-template.md`](docs/skill-template.md) is the required shape,
 [`CONTRIBUTING.md`](CONTRIBUTING.md) has the rest. One rule that trips people up:
 no em dashes anywhere in the repo, because half the skills teach a house style
 that bans them and the repo should practise what it teaches.

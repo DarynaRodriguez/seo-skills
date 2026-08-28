@@ -22,6 +22,26 @@ trend line. Read it as: rankings are a head start, not a precondition. Roughly a
 third of citations go to pages that do not rank, which is why this audit is worth
 running separately from a rankings report rather than as a section of one.
 
+## What Google says about this, before you start
+
+Google states there are no additional requirements to appear in AI Overviews or AI
+Mode, and no special optimizations necessary ([ai-features](https://developers.google.com/search/docs/appearance/ai-features)). It describes
+AEO and GEO as SEO reframed rather than as a separate discipline, because the
+generative features are rooted in the core Search ranking and quality systems
+([ai-optimization-guide](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide)).
+
+This skill still earns its place, because **the reporting differs even though the
+work does not.** You cannot see AI answers in Search Console the way you see blue
+links, so measuring presence takes different instruments. What you must not do is
+conclude from a visibility gap that some AI-specific technique is missing. Usually
+the page is not retrievable, not indexed, or not distinctive, and those are ordinary
+SEO findings with ordinary SEO fixes.
+
+One control question this skill gets asked constantly: **blocking `Google-Extended`
+does not remove a site from AI Overviews or AI Mode.** Google-Extended governs
+training and grounding in other Google systems. Googlebot and robots.txt are the
+controls for Search, AI features included ([ai-features](https://developers.google.com/search/docs/appearance/ai-features)).
+
 ## Step 0: Load the profile
 
 Read the site profile before anything else:

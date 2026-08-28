@@ -46,6 +46,8 @@ changes which findings are real:
 | Whether a hit page is trending down already | `mcp__Ahrefs__gsc-page-history` | Note that the trend is unknown |
 | Pages the crawler outside your audit has seen | `mcp__Ahrefs__site-explorer-crawled-pages` | Compare the sitemap against the supplied crawl instead |
 | Internal link depth and orphan candidates | `mcp__Ahrefs__site-explorer-pages-by-internal-links` | Derive depth from the crawl export |
+| Core Web Vitals from real users, at the 75th percentile | CrUX, via the PageSpeed Insights API or the CrUX dashboard | Search Console's Core Web Vitals report. Without either, say the field data is unknown and never substitute a lab score for it |
+| A diagnosis of why one page is slow | Lighthouse, via PageSpeed Insights | Chrome DevTools on the page. Label it lab data from one run |
 
 Never invent a metric. Every number carries its source and the date it was pulled.
 Search Console is the only truth for received traffic; Ahrefs organic traffic is a
@@ -120,11 +122,31 @@ instead, which works from any directory. If anything errors, run
 6. **Use current Core Web Vitals thresholds, and read field data at the 75th
    percentile.** Lab scores from a single run are diagnostic, not the metric.
 
+   **This pack cannot measure any of them.** `seo.py` never runs JavaScript and
+   never renders, so LCP, INP and CLS have to come from a provider. Field data is
+   real users over a trailing 28 days from CrUX; lab data is a simulated load on a
+   mid-tier device. The two legitimately disagree, and when they do the field data
+   is the one describing your actual users
+   ([PageSpeed Insights](https://developers.google.com/speed/docs/insights/v5/about)).
+
+   Say which you used, on every number.
+
    | Metric | Good | Needs improvement | Poor |
    |--------|------|-------------------|------|
    | LCP | 2.5s or less | 2.5s to 4.0s | over 4.0s |
    | INP | 200ms or less | 200ms to 500ms | over 500ms |
    | CLS | 0.1 or less | 0.1 to 0.25 | over 0.25 |
+
+   **Be accurate about what this buys.** Google states that Core Web Vitals are
+   used by its ranking systems, and in the same breath that there is no single page
+   experience signal, that good scores do not guarantee a top ranking, and that
+   Search shows the most relevant content even where the page experience is sub-par
+   ([page-experience](https://developers.google.com/search/docs/appearance/page-experience)).
+
+   So a slow page is a real problem for the people using it, and a real conversion
+   problem, and one input among many to ranking. Sell it on the first two. A team
+   that fixes LCP expecting a ranking jump and gets a conversion lift instead will
+   still have been misled.
 
    Report by template, not by URL. One slow template is one fix; forty URLs from
    that template is one finding, not forty. Name the cause where the data shows
