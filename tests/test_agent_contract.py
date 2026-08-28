@@ -544,7 +544,7 @@ class TestGoogleGuidanceExists(unittest.TestCase):
     """One file holds the citations, so a claim can be checked rather than argued."""
 
     def setUp(self):
-        self.path = DOCS_DIR / "google-guidance.md"
+        self.path = DOCS_DIR / "source-of-record.md"
         self.text = self.path.read_text(encoding="utf-8")
 
     def test_it_exists_and_names_its_sources(self):
@@ -586,15 +586,17 @@ class TestCitationsPointAtGoogle(unittest.TestCase):
 
     # The documentation roots this pack is allowed to cite as Google's own word.
     # Search Central for search behaviour, /speed for PageSpeed and Core Web Vitals
-    # measurement. Anything else on google.com is a blog post, a marketing page or
-    # an invention, and none of those is a source of record.
+    # measurement, Search Console Help for what its numbers mean. Anything else on
+    # google.com is a blog post, a marketing page or an invention, and none of those
+    # is a source of record.
     GOOGLE_DOC_ROOTS = (
         "https://developers.google.com/search/",
         "https://developers.google.com/speed/",
+        "https://support.google.com/webmasters/",
     )
 
     def test_every_google_looking_link_is_a_documented_source(self):
-        for path in _prose_files() + [DOCS_DIR / "google-guidance.md"]:
+        for path in _prose_files() + [DOCS_DIR / "source-of-record.md"]:
             for url in self.CITE.findall(path.read_text(encoding="utf-8")):
                 if "google.com" not in url:
                     continue
@@ -765,7 +767,7 @@ class TestGoogleStructuredDataPoliciesAreCited(unittest.TestCase):
         self.assertIn("Google names it the recommended format", text)
 
     def test_the_guidance_doc_separates_the_two_sources(self):
-        text = (DOCS_DIR / "google-guidance.md").read_text(encoding="utf-8")
+        text = (DOCS_DIR / "source-of-record.md").read_text(encoding="utf-8")
         self.assertIn("schema.org/docs/datamodel.html", text)
         self.assertIn("sd-policies", text)
         self.assertIn("only one of them draws lines", text)
@@ -891,6 +893,319 @@ class TestPerformanceGuidanceMatchesTheSource(unittest.TestCase):
 
     def test_a_provider_row_exists_for_field_data(self):
         self.assertIn("CrUX", self.flat)
+
+
+class TestEeatIsStatedAccurately(unittest.TestCase):
+    """Two facts about E-E-A-T are routinely inverted, and both change the advice.
+
+    It is not a ranking factor, and trust is the component that matters. A pack
+    telling someone to "improve E-E-A-T to rank" is selling a lever that does not
+    exist.
+    """
+
+    def setUp(self):
+        self.quality = " ".join(
+            (SKILLS_DIR / "page-optimiser" / "references" / "content-quality.md")
+            .read_text(encoding="utf-8").split()
+        )
+        self.guidance = " ".join((DOCS_DIR / "source-of-record.md").read_text(encoding="utf-8").split())
+
+    def test_it_is_not_sold_as_a_ranking_factor(self):
+        for text in (self.quality, self.guidance):
+            with self.subTest():
+                self.assertIn("not a ranking factor", text)
+
+    def test_trust_is_named_as_the_one_that_matters(self):
+        for text in (self.quality, self.guidance):
+            with self.subTest():
+                self.assertIn("trust is most important", text.lower())
+
+    def test_the_four_letters_are_expanded(self):
+        for word in ("Experience", "Expertise", "Authoritativeness", "Trustworthiness"):
+            with self.subTest(word=word):
+                self.assertIn(word, self.quality)
+
+    def test_the_who_how_why_frame_is_present(self):
+        self.assertIn("who, how and why", self.guidance)
+
+    def test_the_authority_collision_is_called_out(self):
+        # "Authority" already means link equity in two other skills. Blurring the
+        # two produces advice to build links when the problem is an anonymous byline.
+        self.assertIn("link equity", self.guidance)
+        self.assertIn("different sense of", self.quality)
+
+
+class TestSearchConsoleSemanticsAreDocumented(unittest.TestCase):
+    """Every one of these produces a plausible wrong answer rather than an error."""
+
+    def setUp(self):
+        self.guidance = " ".join((DOCS_DIR / "source-of-record.md").read_text(encoding="utf-8").split())
+        self.code = (AGENTS_DIR.parent / "seo_tools" / "gsc.py").read_text(encoding="utf-8")
+
+    def test_position_is_documented_as_non_additive(self):
+        self.assertIn("not additive", self.guidance)
+
+    def test_position_is_documented_as_not_a_rank(self):
+        self.assertIn("Position is not a rank", self.guidance)
+
+    def test_rows_not_summing_to_totals_is_documented(self):
+        self.assertIn("do not sum to totals", self.guidance)
+
+    def test_anonymised_queries_are_documented(self):
+        self.assertIn("anonymised", self.guidance)
+
+    def test_the_code_explains_itself_where_it_is_read(self):
+        # A caveat only in the docs is a caveat the next maintainer will not see.
+        self.assertIn("not additive", self.code)
+        self.assertIn("support.google.com/webmasters", self.code)
+
+    def test_the_summary_field_names_its_own_weighting(self):
+        from seo_tools.gsc import summarise
+
+        rows = [
+            {"clicks": 10, "impressions": 1000, "position": 8.0},
+            {"clicks": 1, "impressions": 10, "position": 40.0},
+        ]
+        out = summarise(rows)
+        self.assertIn("avg_position_impression_weighted", out)
+        # A naive mean would be 24.0; weighting keeps the big row dominant.
+        self.assertLess(out["avg_position_impression_weighted"], 12)
+
+
+class TestIndexNowIsScopedHonestly(unittest.TestCase):
+    """The name promises Google. The protocol does not deliver it."""
+
+    def setUp(self):
+        self.skill = " ".join(
+            (SKILLS_DIR / "indexation-check" / "SKILL.md").read_text(encoding="utf-8").split()
+        )
+        self.guidance = " ".join((DOCS_DIR / "source-of-record.md").read_text(encoding="utf-8").split())
+
+    def test_the_skill_says_google_is_not_a_participant(self):
+        self.assertIn("Google is not a participant", self.skill)
+
+    def test_the_guidance_says_it_too(self):
+        self.assertIn("Google is not a participant", self.guidance)
+
+    def test_the_engines_it_does_reach_are_named(self):
+        for engine in ("Bing", "Seznam", "Naver"):
+            with self.subTest(engine=engine):
+                self.assertIn(engine, self.skill)
+
+    def test_it_is_not_offered_as_a_google_indexing_fix(self):
+        self.assertIn("never as a fix for a Google indexing problem", self.skill)
+
+
+class TestTheValidatorReadsCodeSpansAsCode(unittest.TestCase):
+    """A URL path in backticks is not a reference to a skill.
+
+    `/indexnow?url=` tripped the sibling-reference check, which would hit anyone
+    documenting a URL. The fix has to stay precise: a real bad reference in prose
+    must still be caught.
+    """
+
+    def test_a_url_path_in_a_code_span_is_ignored(self):
+        import subprocess
+        import sys
+
+        root = AGENTS_DIR.parent
+        result = subprocess.run(
+            [sys.executable, str(root / "scripts" / "validate.py")],
+            capture_output=True, text=True, cwd=str(root),
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("which is not a skill in this repo", result.stdout)
+
+    def test_the_check_still_exists_and_strips_both_forms(self):
+        source = (AGENTS_DIR.parent / "scripts" / "validate.py").read_text(encoding="utf-8")
+        self.assertIn("CODE_SPAN", source)
+        self.assertIn("FENCE.sub", source)
+        self.assertIn("CODE_SPAN.sub", source)
+        self.assertIn("which is not a skill in this repo", source)
+
+
+class TestBingCopilotDirectivesAreChecked(unittest.TestCase):
+    """A page can be fully crawlable and still opted out of Copilot answers.
+
+    Bing documents meta directives that decide what Copilot may use, separately
+    from whether the page may be fetched. `noarchive` is the dangerous one: every
+    robots.txt check passes while the page drops out of AI answers entirely.
+    """
+
+    def findings_for(self, content, headers=None):
+        from seo_tools.audits import audit_page
+
+        html = (
+            '<html lang="en"><head><title>A title of a reasonable width for this</title>'
+            '<meta name="robots" content="{}"></head>'
+            "<body><h1>H</h1><p>x</p></body></html>"
+        ).format(content)
+        return {f["check"]: f for f in audit_page(parse_page(html, "https://e.com/"), headers)["findings"]}
+
+    def test_noarchive_is_raised_as_a_warning(self):
+        found = self.findings_for("index, follow, noarchive")
+        self.assertIn("robots.noarchive", found)
+        self.assertEqual(found["robots.noarchive"]["severity"], "warning")
+
+    def test_nocache_is_raised_as_info(self):
+        found = self.findings_for("index, follow, nocache")
+        self.assertIn("robots.nocache", found)
+        self.assertEqual(found["robots.nocache"]["severity"], "info")
+
+    def test_the_finding_is_scoped_to_the_engine_that_documents_it(self):
+        # Google publishes no equivalent, so stating it generally would be a claim
+        # about Google that Google has not made.
+        found = self.findings_for("noarchive")
+        self.assertEqual(found["robots.noarchive"]["affects"], "Bing and Copilot")
+
+    def test_the_header_form_is_caught_too(self):
+        found = self.findings_for("index", headers={"x-robots-tag": "noarchive"})
+        self.assertIn("robots.noarchive", found)
+
+    def test_a_clean_page_raises_neither(self):
+        found = self.findings_for("index, follow")
+        self.assertNotIn("robots.noarchive", found)
+        self.assertNotIn("robots.nocache", found)
+
+    def test_noarchive_does_not_imply_noindex(self):
+        # The whole point: indexable and uncitable at the same time.
+        found = self.findings_for("index, follow, noarchive")
+        self.assertNotIn("robots.noindex_meta", found)
+
+
+class TestTheEngineDisagreementIsRecorded(unittest.TestCase):
+    """Google says AI needs no special optimisation. Bing publishes a checklist.
+
+    A pack serving both cannot quietly pick a side, and quoting one engine's
+    position as the industry's is the error this guards.
+    """
+
+    def setUp(self):
+        self.text = " ".join((DOCS_DIR / "source-of-record.md").read_text(encoding="utf-8").split())
+
+    def test_both_positions_are_stated(self):
+        self.assertIn("Google says there is nothing extra to do", self.text)
+        self.assertIn("Bing publishes a grounding checklist", self.text)
+
+    def test_the_doc_does_not_pick_a_winner(self):
+        self.assertIn("Both can be true", self.text)
+
+    def test_bing_specific_directives_are_documented(self):
+        for directive in ("noarchive", "nocache", "data-snippet"):
+            with self.subTest(directive=directive):
+                self.assertIn(directive, self.text)
+
+    def test_the_indexnow_streaming_correction_is_recorded(self):
+        self.assertIn("streamed, not batched", self.text)
+
+    def test_the_skill_says_stream_rather_than_batch(self):
+        skill = " ".join(
+            (SKILLS_DIR / "indexation-check" / "SKILL.md").read_text(encoding="utf-8").split()
+        )
+        self.assertIn("Submit as things change, not in nightly batches", skill)
+
+
+class TestTheSourceOfRecordIsNotOnlyGoogle(unittest.TestCase):
+    """The file was renamed because the name had stopped being true."""
+
+    def setUp(self):
+        self.path = DOCS_DIR / "source-of-record.md"
+        self.text = self.path.read_text(encoding="utf-8")
+
+    def test_the_old_name_is_gone(self):
+        self.assertFalse((DOCS_DIR / "google-guidance.md").exists())
+        self.assertTrue(self.path.exists())
+
+    def test_every_operator_the_pack_cites_is_listed(self):
+        for source in ("developers.google.com", "schema.org", "web.dev", "bing.com", "indexnow.org"):
+            with self.subTest(source=source):
+                self.assertIn(source, self.text)
+
+    def test_nothing_still_points_at_the_old_path(self):
+        root = DOCS_DIR.parent
+        for name in ("AGENTS.md", "README.md"):
+            with self.subTest(file=name):
+                self.assertNotIn("google-guidance", (root / name).read_text(encoding="utf-8"))
+
+
+class TestTheEaaIsCitedNotInterpreted(unittest.TestCase):
+    """A legal claim in a public tool is a different risk from an SEO tip.
+
+    The skill may say what the directive says, with article numbers, so a reader
+    can check it. It may not tell a stranger whether they are required to comply,
+    which is a question about their business that four markup checks cannot reach.
+    """
+
+    def setUp(self):
+        self.text = (SKILLS_DIR / "accessibility-audit" / "SKILL.md").read_text(encoding="utf-8")
+        self.flat = " ".join(self.text.split())
+
+    def test_it_refuses_to_decide_applicability(self):
+        self.assertIn("this skill does not answer", self.flat.lower())
+
+    def test_the_guardrail_forbids_a_compliance_verdict(self):
+        self.assertIn("Never state that a site is or is not legally required to comply", self.text)
+
+    def test_it_cites_the_primary_source(self):
+        self.assertIn("eur-lex.europa.eu", self.text)
+        self.assertIn("2019/882", self.text)
+
+    def test_article_numbers_are_given_so_a_reader_can_check(self):
+        for article in ("Article 2(2)", "Article 3(23)", "Article 4(5)", "Article 14", "Article 32"):
+            with self.subTest(article=article):
+                self.assertIn(article, self.text)
+
+    def test_the_consumer_scope_is_stated(self):
+        # Reading Article 2(2) as "all websites" is the common error, and for a
+        # B2B pack it is the difference between in scope and out of it.
+        self.assertIn("to consumers", self.flat)
+        self.assertIn("consumer contract", self.flat)
+
+    def test_the_microenterprise_test_is_stated_in_full(self):
+        # Headcount alone is not the test, and the summaries that say so are wrong.
+        self.assertIn("fewer than 10 persons", self.flat)
+        self.assertIn("EUR 2 million", self.flat)
+
+    def test_it_says_national_law_is_the_binding_text(self):
+        self.assertIn("It is a directive", self.flat)
+
+    def test_no_skill_claims_accessibility_is_a_ranking_factor(self):
+        for path in sorted(SKILLS_DIR.rglob("SKILL.md")):
+            flat = " ".join(path.read_text(encoding="utf-8").split()).lower()
+            with self.subTest(skill=path.parent.name):
+                self.assertNotIn("accessibility improves ranking", flat.replace("never claim accessibility improves ranking", ""))
+
+
+class TestNoUnsubstitutedPlaceholdersShip(unittest.TestCase):
+    """A template placeholder that survived into the file is a dead link or worse.
+
+    Caught for real: the EAA section shipped `([EUR-Lex]({EUR}))` because the
+    authoring script defined the URL and never substituted it. The skill validated,
+    the suite passed, and the reader would have got a broken link to the one source
+    that mattered most in that section.
+    """
+
+    # Placeholder shapes used by the scripts that generate these files. Angle
+    # brackets are excluded on purpose: `<url>` and `<pack_root>` are real
+    # documentation conventions here, not accidents.
+    PLACEHOLDER = re.compile(r"\{[A-Z][A-Z0-9_]*\}")
+
+    def test_no_prose_file_carries_one(self):
+        docs = sorted(DOCS_DIR.glob("*.md"))
+        for path in _prose_files() + docs:
+            text = path.read_text(encoding="utf-8")
+            for match in self.PLACEHOLDER.finditer(text):
+                line = text[: match.start()].count("\n") + 1
+                with self.subTest(file=path.name, line=line):
+                    self.fail(
+                        "{}:{} ships an unsubstituted placeholder {}".format(
+                            path.name, line, match.group(0)
+                        )
+                    )
+
+    def test_the_check_would_catch_a_planted_one(self):
+        self.assertRegex("see ([Source]({EUR}))", self.PLACEHOLDER)
+        self.assertNotRegex("run `python <pack_root>/seo.py`", self.PLACEHOLDER)
 
 
 if __name__ == "__main__":

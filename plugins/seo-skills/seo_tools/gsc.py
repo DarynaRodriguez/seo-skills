@@ -4,6 +4,10 @@ Anyone with a verified property can export a CSV. That export is real received
 traffic, which makes it the only trustworthy number in most SEO work, and it
 costs nothing. Everything here runs on those files.
 
+Read the caveats on `summarise` before building anything on these numbers.
+Search Console data has several properties that make naive arithmetic wrong, and
+the errors are silent: they produce a plausible figure rather than a failure.
+
 Tolerant about input because the export differs by locale and by where it came
 from: the GSC UI, the API, Looker Studio, or a tool re-export. Column names are
 matched loosely, numbers are parsed with either decimal separator, and any
@@ -347,7 +351,24 @@ def load_csv(path: str, columns: Optional[str] = None) -> Dict[str, object]:
 
 
 def summarise(rows: Iterable[Dict[str, object]]) -> Dict[str, object]:
-    """Totals and weighted average position, which is not the mean of positions."""
+    """Totals and weighted average position, which is not the mean of positions.
+
+    Position is the topmost placement Search Console saw, averaged per query. It
+    is not additive, so a plain mean across rows weights a query with nine
+    impressions the same as one with ninety thousand and produces a number that
+    describes nothing. Weighting by impressions is the least wrong summary, and it
+    is still a summary: the distribution behind it is gone.
+
+    Two further things this total cannot fix, both documented by Google:
+
+    - Rows grouped by query or by page do not sum to the property total, because
+      one search result element can carry several URLs and is counted once per
+      property and once per URL.
+    - Low-frequency queries are anonymised and dropped, so query-level clicks are
+      a floor, never the truth.
+
+    https://support.google.com/webmasters/answer/7042828
+    """
     clicks = impressions = 0.0
     weighted_position = 0.0
     positioned_impressions = 0.0

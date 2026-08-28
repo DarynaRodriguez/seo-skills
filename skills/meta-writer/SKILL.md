@@ -67,7 +67,15 @@ instead, which works from any directory. If anything errors, run
 ## Procedure
 
 1. **Find the pages worth rewriting.** Pull page-level impressions, clicks, CTR and
-   average position. Pull the site's CTR curve by position. Flag any page whose CTR
+   average position. Pull the site's CTR curve by position.
+
+   **Position is not a rank and position 11 is not page two.** Search Console
+   reports the topmost placement it saw, averaged per query, and what position 11
+   means depends on the layout: a knowledge panel on desktop, the first item on the
+   second page, or the second image row on mobile ([Search Console performance
+   data](https://support.google.com/webmasters/answer/7042828)). Build the curve from your own property's rows, compare like with
+   like, and never import a published CTR curve as though positions meant the same
+   thing on your SERPs as on someone else's. Flag any page whose CTR
    sits meaningfully below the site's own curve for its position band and which has
    enough impressions to matter. Rank by impressions lost, not by CTR gap alone: a
    two-point gap on 40,000 impressions beats a ten-point gap on 200.

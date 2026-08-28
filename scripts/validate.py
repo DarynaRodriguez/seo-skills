@@ -9,6 +9,9 @@ SKILLS = ROOT / "skills"
 DASHES = re.compile("[‐-―−]")
 REQUIRED_SECTIONS = ["## Data", "## Output", "## Guardrails"]
 FENCE = re.compile(r"```.*?```", re.S)
+# Inline code, bounded to one line so adjacent spans stay separate. Built with
+# chr() because a shell heredoc has collapsed this escape more than once.
+CODE_SPAN = re.compile("`[^`" + chr(92) + "n]+`")
 
 # Frontmatter this repo uses. `name` and `description` are the only two the
 # portable Agent Skills spec allows; `when_to_use` and `argument-hint` are read
@@ -79,9 +82,11 @@ for d in sorted(p for p in SKILLS.iterdir() if p.is_dir()):
             errors.append(f"{path.relative_to(ROOT)}: dash characters found {bad}")
 
     # Sibling references are checked in prose only. Fenced blocks hold example
-    # output, which legitimately contains URL paths like /pricing that look
-    # exactly like a skill reference and are not one.
+    # output, and inline code spans hold URLs and paths, both of which legitimately
+    # contain things like /pricing or /indexnow?url= that look exactly like a skill
+    # reference and are not one. Strip both before looking.
     prose = FENCE.sub("", text)
+    prose = CODE_SPAN.sub("", prose)
     for ref in set(re.findall(r"(?<![\w/])/([a-z][a-z0-9-]{3,})(?![\w/.])", prose)):
         if ref not in names and ref not in {"seo", "skills"}:
             warnings.append(f"{d.name}: references /{ref}, which is not a skill in this repo")

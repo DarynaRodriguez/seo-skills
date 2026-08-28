@@ -68,7 +68,7 @@ listed in `docs/execution-layer.md`. Notes that matter when calling them:
 - **Google Search Central is the source of record.** Any threshold, limit or "best
   practice" a skill states must either cite a Google page that says it, cite another
   operator's own docs for something Google does not cover, or be labelled plainly as
-  this pack's judgement. `docs/google-guidance.md` holds the citations, the myths
+  this pack's judgement. `docs/source-of-record.md` holds the citations, the myths
   Google names explicitly, and the places this pack knowingly goes beyond Google.
   Anything else is folklore. In particular: Google publishes **no** character limit
   for titles or meta descriptions and **no** ideal page length, so never reintroduce

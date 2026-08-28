@@ -155,7 +155,36 @@ instead, which works from any directory. If anything errors, run
    traffic claim. Do not pad the ranked list: report the classes that matter and
    summarise the tail in one line each.
 
-10. **Flag every de-indexing as destructive.** Noindexing, removing sitemap
+10. **Where discovery is the bottleneck, name IndexNow, and be exact about who it
+    reaches.** Class A pages that are new or recently changed and simply have not
+    been picked up are a discovery problem, not a quality one, and IndexNow exists
+    for it ([protocol](https://www.indexnow.org/documentation)).
+
+    **Google is not a participant.** It tested the protocol and never adopted it,
+    so IndexNow does nothing for Google discovery. It reaches Bing, and through
+    Bing's ecosystem Copilot, plus Seznam, Naver and Yep. Submitting to one
+    participant shares the URL with the others. Recommend it where those engines
+    matter to the profile's markets, and never as a fix for a Google indexing
+    problem, which is the mistake the name invites.
+
+    The implementation is small: host a key file of 8 to 128 hex-ish characters at
+    the domain root, then GET
+    `https://<searchengine>/indexnow?url=<url>&key=<key>` per URL. A 200 means
+    accepted, 202 means the key is still being validated, 403 means the key is
+    wrong, and 422 means the URLs do not match the host the key authorises.
+
+    **Submit as things change, not in nightly batches.** The protocol accepts a
+    POST carrying up to 10,000 URLs, but Bing asks you to avoid batch submissions
+    where you can, because streaming them one at a time as content changes gives
+    faster updates and lower server load
+    ([Bing Webmaster Guidelines](https://www.bing.com/webmasters/help/webmasters-guidelines-30fba23a)).
+    Wire it to the publish event, not to a cron job. Bulk is the migration tool,
+    not the steady state.
+
+    It is cheap enough that the argument against it is usually just that nobody
+    owns it.
+
+11. **Flag every de-indexing as destructive.** Noindexing, removing sitemap
     entries and adding robots rules can remove traffic within days and are slow to
     undo. Name the approver from the profile and attach the rollback: the exact
     previous directive, where it is stored, and how to restore it.
