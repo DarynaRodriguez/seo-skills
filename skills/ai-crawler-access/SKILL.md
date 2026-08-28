@@ -144,7 +144,31 @@ instead, which works from any directory. If anything errors, run
    blocked fetcher or a low visibility figure. If an existing llms.txt contradicts
    robots.txt or lists pages that do not exist, that is a defect worth fixing.
 
-10. **Write the fix with the owner it actually needs.** robots.txt is usually a
+10. **Check the meta directives that govern Copilot specifically.** robots.txt is
+    the fetch decision. These decide what may be *used* once fetched, and a site
+    can be perfectly crawlable and still opted out of the answer. Bing documents
+    them and Google publishes no equivalent, so this is Bing's word about Bing
+    ([Bing Webmaster Guidelines](https://www.bing.com/webmasters/help/webmasters-guidelines-30fba23a)):
+
+    | Directive | Effect on Copilot and grounding |
+    |-----------|--------------------------------|
+    | `noindex` | Keeps the URL out of Bing search, Copilot and the grounding API entirely |
+    | `noarchive` | **Prevents the content being used in Copilot responses and grounding results** |
+    | `nocache` | Limits Copilot to the URL, title and snippet, so citations lose depth |
+    | `nosnippet`, `data-nosnippet` | Stop captions displaying, and may reduce citation quality |
+    | `data-snippet` | The positive control: marks the text Bing may display or cite |
+
+    **`noarchive` is the one to look for first.** It is old, it was added to many
+    sites years ago for reasons nobody remembers, and it now quietly removes a page
+    from Copilot answers while every robots.txt check passes. A site reporting
+    "we are crawlable but never cited" should be checked for it before anything
+    else is investigated.
+
+    Report each one found with the URL and the likely age of the decision. Removing
+    a directive is a content-policy change with an owner, not a quick fix, so it
+    goes to the named human with what it currently costs.
+
+11. **Write the fix with the owner it actually needs.** robots.txt is usually a
     developer or CMS change. CDN, WAF and rate limits belong to security or
     platform, and they will want the business reason in one sentence. Rendering
     changes belong to engineering and are the slowest item on the list. Say which.

@@ -169,11 +169,20 @@ instead, which works from any directory. If anything errors, run
 
     The implementation is small: host a key file of 8 to 128 hex-ish characters at
     the domain root, then GET
-    `https://<searchengine>/indexnow?url=<url>&key=<key>` per URL, or POST a
-    `urlList` of up to 10,000. A 200 means accepted, 202 means the key is still
-    being validated, 403 means the key is wrong, and 422 means the URLs do not
-    match the host the key authorises. It is cheap enough that the argument against
-    it is usually just that nobody owns it.
+    `https://<searchengine>/indexnow?url=<url>&key=<key>` per URL. A 200 means
+    accepted, 202 means the key is still being validated, 403 means the key is
+    wrong, and 422 means the URLs do not match the host the key authorises.
+
+    **Submit as things change, not in nightly batches.** The protocol accepts a
+    POST carrying up to 10,000 URLs, but Bing asks you to avoid batch submissions
+    where you can, because streaming them one at a time as content changes gives
+    faster updates and lower server load
+    ([Bing Webmaster Guidelines](https://www.bing.com/webmasters/help/webmasters-guidelines-30fba23a)).
+    Wire it to the publish event, not to a cron job. Bulk is the migration tool,
+    not the steady state.
+
+    It is cheap enough that the argument against it is usually just that nobody
+    owns it.
 
 11. **Flag every de-indexing as destructive.** Noindexing, removing sitemap
     entries and adding robots rules can remove traffic within days and are slow to

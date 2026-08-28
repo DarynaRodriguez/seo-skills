@@ -373,7 +373,7 @@ included. The short version:
 ## Contributing
 
 New skills, better procedures, corrections to the data-source mappings: all
-welcome. [`docs/google-guidance.md`](docs/google-guidance.md) is the source of
+welcome. [`docs/source-of-record.md`](docs/source-of-record.md) is the source of
 record for every threshold and best practice a skill states, and names the myths
 Google explicitly rejects.
 [`docs/skill-template.md`](docs/skill-template.md) is the required shape,

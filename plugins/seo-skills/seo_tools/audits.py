@@ -281,6 +281,34 @@ def check_indexability(page: Dict[str, object], headers: Optional[Dict[str, str]
                 observed=header_robots,
             )
         )
+    # Directives that leave the page indexable and remove it from AI answers.
+    # Bing documents these for Copilot and grounding; Google publishes no
+    # equivalent, so the finding is scoped to Bing rather than stated generally.
+    # https://www.bing.com/webmasters/help/webmasters-guidelines-30fba23a
+    if "noarchive" in directives or "noarchive" in header_robots:
+        findings.append(
+            _finding(
+                "robots.noarchive",
+                "warning",
+                "noarchive is set. Bing documents this as preventing the content being "
+                "used in Copilot responses and grounding results, so the page stays "
+                "indexable and stops being citable. Often a years-old default nobody "
+                "revisited. Confirm it is deliberate before removing it.",
+                observed=page.get("meta_robots") or header_robots,
+                affects="Bing and Copilot",
+            )
+        )
+    if "nocache" in directives or "nocache" in header_robots:
+        findings.append(
+            _finding(
+                "robots.nocache",
+                "info",
+                "nocache is set. Bing documents this as limiting Copilot to the URL, "
+                "title and snippet, which shallows any citation the page earns.",
+                observed=page.get("meta_robots") or header_robots,
+                affects="Bing and Copilot",
+            )
+        )
     if "nofollow" in directives:
         findings.append(
             _finding(

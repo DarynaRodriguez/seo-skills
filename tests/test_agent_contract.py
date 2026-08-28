@@ -544,7 +544,7 @@ class TestGoogleGuidanceExists(unittest.TestCase):
     """One file holds the citations, so a claim can be checked rather than argued."""
 
     def setUp(self):
-        self.path = DOCS_DIR / "google-guidance.md"
+        self.path = DOCS_DIR / "source-of-record.md"
         self.text = self.path.read_text(encoding="utf-8")
 
     def test_it_exists_and_names_its_sources(self):
@@ -596,7 +596,7 @@ class TestCitationsPointAtGoogle(unittest.TestCase):
     )
 
     def test_every_google_looking_link_is_a_documented_source(self):
-        for path in _prose_files() + [DOCS_DIR / "google-guidance.md"]:
+        for path in _prose_files() + [DOCS_DIR / "source-of-record.md"]:
             for url in self.CITE.findall(path.read_text(encoding="utf-8")):
                 if "google.com" not in url:
                     continue
@@ -767,7 +767,7 @@ class TestGoogleStructuredDataPoliciesAreCited(unittest.TestCase):
         self.assertIn("Google names it the recommended format", text)
 
     def test_the_guidance_doc_separates_the_two_sources(self):
-        text = (DOCS_DIR / "google-guidance.md").read_text(encoding="utf-8")
+        text = (DOCS_DIR / "source-of-record.md").read_text(encoding="utf-8")
         self.assertIn("schema.org/docs/datamodel.html", text)
         self.assertIn("sd-policies", text)
         self.assertIn("only one of them draws lines", text)
@@ -908,7 +908,7 @@ class TestEeatIsStatedAccurately(unittest.TestCase):
             (SKILLS_DIR / "page-optimiser" / "references" / "content-quality.md")
             .read_text(encoding="utf-8").split()
         )
-        self.guidance = " ".join((DOCS_DIR / "google-guidance.md").read_text(encoding="utf-8").split())
+        self.guidance = " ".join((DOCS_DIR / "source-of-record.md").read_text(encoding="utf-8").split())
 
     def test_it_is_not_sold_as_a_ranking_factor(self):
         for text in (self.quality, self.guidance):
@@ -939,7 +939,7 @@ class TestSearchConsoleSemanticsAreDocumented(unittest.TestCase):
     """Every one of these produces a plausible wrong answer rather than an error."""
 
     def setUp(self):
-        self.guidance = " ".join((DOCS_DIR / "google-guidance.md").read_text(encoding="utf-8").split())
+        self.guidance = " ".join((DOCS_DIR / "source-of-record.md").read_text(encoding="utf-8").split())
         self.code = (AGENTS_DIR.parent / "seo_tools" / "gsc.py").read_text(encoding="utf-8")
 
     def test_position_is_documented_as_non_additive(self):
@@ -979,7 +979,7 @@ class TestIndexNowIsScopedHonestly(unittest.TestCase):
         self.skill = " ".join(
             (SKILLS_DIR / "indexation-check" / "SKILL.md").read_text(encoding="utf-8").split()
         )
-        self.guidance = " ".join((DOCS_DIR / "google-guidance.md").read_text(encoding="utf-8").split())
+        self.guidance = " ".join((DOCS_DIR / "source-of-record.md").read_text(encoding="utf-8").split())
 
     def test_the_skill_says_google_is_not_a_participant(self):
         self.assertIn("Google is not a participant", self.skill)
@@ -1022,6 +1022,110 @@ class TestTheValidatorReadsCodeSpansAsCode(unittest.TestCase):
         self.assertIn("FENCE.sub", source)
         self.assertIn("CODE_SPAN.sub", source)
         self.assertIn("which is not a skill in this repo", source)
+
+
+class TestBingCopilotDirectivesAreChecked(unittest.TestCase):
+    """A page can be fully crawlable and still opted out of Copilot answers.
+
+    Bing documents meta directives that decide what Copilot may use, separately
+    from whether the page may be fetched. `noarchive` is the dangerous one: every
+    robots.txt check passes while the page drops out of AI answers entirely.
+    """
+
+    def findings_for(self, content, headers=None):
+        from seo_tools.audits import audit_page
+
+        html = (
+            '<html lang="en"><head><title>A title of a reasonable width for this</title>'
+            '<meta name="robots" content="{}"></head>'
+            "<body><h1>H</h1><p>x</p></body></html>"
+        ).format(content)
+        return {f["check"]: f for f in audit_page(parse_page(html, "https://e.com/"), headers)["findings"]}
+
+    def test_noarchive_is_raised_as_a_warning(self):
+        found = self.findings_for("index, follow, noarchive")
+        self.assertIn("robots.noarchive", found)
+        self.assertEqual(found["robots.noarchive"]["severity"], "warning")
+
+    def test_nocache_is_raised_as_info(self):
+        found = self.findings_for("index, follow, nocache")
+        self.assertIn("robots.nocache", found)
+        self.assertEqual(found["robots.nocache"]["severity"], "info")
+
+    def test_the_finding_is_scoped_to_the_engine_that_documents_it(self):
+        # Google publishes no equivalent, so stating it generally would be a claim
+        # about Google that Google has not made.
+        found = self.findings_for("noarchive")
+        self.assertEqual(found["robots.noarchive"]["affects"], "Bing and Copilot")
+
+    def test_the_header_form_is_caught_too(self):
+        found = self.findings_for("index", headers={"x-robots-tag": "noarchive"})
+        self.assertIn("robots.noarchive", found)
+
+    def test_a_clean_page_raises_neither(self):
+        found = self.findings_for("index, follow")
+        self.assertNotIn("robots.noarchive", found)
+        self.assertNotIn("robots.nocache", found)
+
+    def test_noarchive_does_not_imply_noindex(self):
+        # The whole point: indexable and uncitable at the same time.
+        found = self.findings_for("index, follow, noarchive")
+        self.assertNotIn("robots.noindex_meta", found)
+
+
+class TestTheEngineDisagreementIsRecorded(unittest.TestCase):
+    """Google says AI needs no special optimisation. Bing publishes a checklist.
+
+    A pack serving both cannot quietly pick a side, and quoting one engine's
+    position as the industry's is the error this guards.
+    """
+
+    def setUp(self):
+        self.text = " ".join((DOCS_DIR / "source-of-record.md").read_text(encoding="utf-8").split())
+
+    def test_both_positions_are_stated(self):
+        self.assertIn("Google says there is nothing extra to do", self.text)
+        self.assertIn("Bing publishes a grounding checklist", self.text)
+
+    def test_the_doc_does_not_pick_a_winner(self):
+        self.assertIn("Both can be true", self.text)
+
+    def test_bing_specific_directives_are_documented(self):
+        for directive in ("noarchive", "nocache", "data-snippet"):
+            with self.subTest(directive=directive):
+                self.assertIn(directive, self.text)
+
+    def test_the_indexnow_streaming_correction_is_recorded(self):
+        self.assertIn("streamed, not batched", self.text)
+
+    def test_the_skill_says_stream_rather_than_batch(self):
+        skill = " ".join(
+            (SKILLS_DIR / "indexation-check" / "SKILL.md").read_text(encoding="utf-8").split()
+        )
+        self.assertIn("Submit as things change, not in nightly batches", skill)
+
+
+class TestTheSourceOfRecordIsNotOnlyGoogle(unittest.TestCase):
+    """The file was renamed because the name had stopped being true."""
+
+    def setUp(self):
+        self.path = DOCS_DIR / "source-of-record.md"
+        self.text = self.path.read_text(encoding="utf-8")
+
+    def test_the_old_name_is_gone(self):
+        self.assertFalse((DOCS_DIR / "google-guidance.md").exists())
+        self.assertTrue(self.path.exists())
+
+    def test_every_operator_the_pack_cites_is_listed(self):
+        for source in ("developers.google.com", "schema.org", "web.dev", "bing.com", "indexnow.org"):
+            with self.subTest(source=source):
+                self.assertIn(source, self.text)
+
+    def test_nothing_still_points_at_the_old_path(self):
+        root = DOCS_DIR.parent
+        for name in ("AGENTS.md", "README.md"):
+            with self.subTest(file=name):
+                self.assertNotIn("google-guidance", (root / name).read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

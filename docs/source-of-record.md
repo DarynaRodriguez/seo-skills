@@ -1,8 +1,14 @@
-# Google's documentation is the source of record
+# The source of record
 
-Every recommendation in this pack traces to Google Search Central where Google has
-documented a position. Where Google is silent, the pack says so and reasons from
-evidence. Where the pack disagrees with Google, it says that too, and says why.
+Every recommendation in this pack traces to a primary source: the operator that
+actually decides the behaviour. Google Search Central for Google, Bing's own
+guidelines for Bing and Copilot, schema.org for the vocabulary, the IndexNow spec
+for the protocol. Where a source is silent, the pack says so and reasons from
+evidence. Where the pack disagrees with a source, it says that too, and says why.
+
+Google is the largest section because Google documents the most, not because it is
+the only voice. Where two operators disagree, and on AI optimisation they clearly
+do, this file records the disagreement rather than picking a winner.
 
 This file exists because SEO advice ages badly and folklore outlives the reason for
 it. A rule nobody can source is a rule nobody can check.
@@ -30,6 +36,7 @@ pages, and the AI optimization guide was last updated 2026-07-10.
 | E-E-A-T and content quality | [creating-helpful-content](https://developers.google.com/search/docs/fundamentals/creating-helpful-content) |
 | What Search Console's numbers mean | [performance data](https://support.google.com/webmasters/answer/7042828) |
 | The IndexNow protocol | [indexnow.org](https://www.indexnow.org/documentation) |
+| Bing, Copilot and grounding | [Bing Webmaster Guidelines](https://www.bing.com/webmasters/help/webmasters-guidelines-30fba23a) |
 
 ## What Google says, and what this pack does about it
 
@@ -252,6 +259,72 @@ the truth, and the gap is largest exactly where a long tail matters most.
 
 The practical rule for this pack: weight findings by clicks, which are countable,
 and treat position as a direction rather than a measurement.
+
+## Google and Bing disagree about whether AI optimisation exists
+
+This is the most useful thing in this file, because a pack serving both engines
+cannot quietly pick a side.
+
+**Google says there is nothing extra to do.** No additional requirements to appear
+in AI Overviews or AI Mode, no special optimizations necessary, AEO and GEO are SEO
+reframed.
+
+**Bing publishes a grounding checklist.** Its guidelines are written around
+eligibility for "grounding results and citations" across Bing and Copilot, and they
+name GEO as its own thing: SEO improves technical quality and clarity, GEO focuses
+on content eligibility for grounding and reference in AI responses
+([Bing Webmaster Guidelines](https://www.bing.com/webmasters/help/webmasters-guidelines-30fba23a)).
+
+Both can be true. They are different systems. What a skill must not do is quote one
+engine's position as the industry's.
+
+### What Bing asks for that Google does not
+
+Most of it is ordinary SEO, and then there is a cluster aimed squarely at being
+quotable by a machine:
+
+- **Content must stand on its own.** Facts and definitions explicit, key statements
+  not relying on implied context, important information visible on the URL itself.
+- **One topic per URL.** Mixed concepts are less likely to be selected.
+- **Key information early.** Long introductions before the main point cost
+  grounding visibility.
+- **Entities named clearly and consistently**, avoiding ambiguous references.
+- **Images and video reinforce the text**, never carry meaning the text lacks.
+
+That list is close to what `/geo-rewrite` already does on instinct. It now has an
+operator's documentation behind it rather than only inference.
+
+### The controls Google has no equivalent for
+
+Bing documents meta directives that decide what Copilot may *use*, separately from
+whether the page may be crawled:
+
+| Directive | Effect |
+|-----------|--------|
+| `noarchive` | Content cannot be used in Copilot responses or grounding results |
+| `nocache` | Copilot limited to URL, title and snippet |
+| `nosnippet`, `data-nosnippet` | Captions suppressed, citation quality may suffer |
+| `data-snippet` | Marks the text Bing may display or cite |
+
+`noarchive` is the dangerous one: a page stays fully indexable while dropping out of
+AI answers, so every robots.txt check passes and the site is invisible where it
+matters. `seo.py page` now raises `robots.noarchive` as a warning and
+`robots.nocache` as info, both scoped to Bing rather than stated generally.
+
+### Other differences worth knowing
+
+- **302 redirects are for changes under two days.** Google puts no number on it.
+- **Redirects are preferred over canonical tags** for moves, and canonicals "do not
+  replace fixing underlying issues".
+- **IndexNow should be streamed, not batched.** The protocol accepts 10,000 URLs in
+  a POST; Bing asks you to avoid batches where possible because streaming updates
+  are faster and lighter. Wire it to the publish event, not to a nightly job.
+- **Prompt injection is named as an abuse** that can reduce visibility or remove a
+  site. Content written to manipulate the models behind Copilot is treated the way
+  cloaking is.
+- **A decline in clicks is not necessarily a loss of visibility**, because content
+  can surface as an impression or a citation without one. Bing asks you to monitor
+  impressions, indexing status and grounding eligibility alongside clicks.
 
 ## Other engines document themselves, and IndexNow is not a Google lever
 
