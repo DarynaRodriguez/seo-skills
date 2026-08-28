@@ -28,6 +28,49 @@ never be indexed, and which surfaces hold user content. This skill then writes
 contain. Where the crawl contradicts the profile, for example a market path the profile
 does not mention, report the contradiction rather than silently adopting either.
 
+## When you cannot get an authoritative URL list
+
+This skill depends on its execution environment more than most of the pack. It needs
+a real HTTP client or a crawl export. An agent with web search and page retrieval but
+no fetch capability cannot run it, and the failure is not obvious from the inside,
+because search will happily return some URLs.
+
+**Four states, and they are not the same thing.** Say which one you are in:
+
+| State | What it means | What to do |
+|-------|--------------|-----------|
+| `ok` | Fetched, parsed, URLs in hand | Proceed |
+| `missing` | robots.txt answered, every sitemap path returns 404 | Fall back to crawling nav and footer to depth 3. Say the list is partial |
+| `unreachable` | You tried and the request failed: DNS, timeout, a block | **Not the same as missing.** You do not know whether one exists, so do not fall back as though it were absent |
+| not supported by the environment | You have no way to fetch a URL at all | Stop. The depth-3 fallback needs the same capability, so it is not available to you either |
+
+`sitemap --expand --json` returns `discovery_state` with the first three, so you do
+not have to infer it. The fourth is about you, not the site, and only you can report
+it.
+
+### The blocked contract
+
+Where the state is `unreachable`, or your environment cannot fetch, this skill
+produces **no `.seo/pages.csv`**. It reports:
+
+- **BLOCKED**, with the state and the exact command or fetch that failed.
+- **The missing capability**, named: authoritative URL discovery.
+- **What would unblock it**: a sitemap export, a Screaming Frog or Sitebulb crawl, an
+  Ahrefs crawled-pages pull, or any URL export the site can produce.
+- **Anything you did learn**, as findings rather than as an inventory. A URL you
+  confirmed exists is worth recording; it is not a row in a page inventory.
+
+**Never build the URL set from search results.** A `site:` query, an index listing,
+or a handful of URLs a search engine happened to surface is not a site inventory. It
+is biased towards what is already indexed, which is exactly the population this skill
+exists to compare against, so using it guarantees the comparison finds nothing. Three
+search-discovered URLs are three findings, and calling them an inventory is the most
+tempting wrong answer available here.
+
+A blocked run that names its missing capability is a useful result. An inventory
+assembled from whatever happened to be reachable is worse than none, because
+everything downstream treats it as the URL universe.
+
 ## Privacy outranks opportunity
 
 If this inventory turns up a large crawlable set built from user content, profiles,
@@ -45,7 +88,7 @@ writing is one of these whether or not anyone wrote it down.
 
 | Need | Our stack | Otherwise |
 |------|-----------|-----------|
-| The URL list | `sitemap.xml` and any child sitemaps, fetched directly | Same: the sitemap is public. If it is missing, crawl the nav and footer to depth 3 and say the list is partial |
+| The URL list | `sitemap.xml` and any child sitemaps, fetched directly | Same: the sitemap is public. If `discovery_state` is `missing`, crawl the nav and footer to depth 3 and say the list is partial. If it is `unreachable`, or you cannot fetch at all, see the blocked contract above and produce no inventory |
 | Crawl detail per URL: status, indexability, canonical, depth, inlinks | `mcp__Ahrefs__site-audit-page-explorer` | Read pages directly and record `indexable` as `unknown` unless the meta robots tag is visible |
 | Pages Ahrefs has seen, including ones absent from the sitemap | `mcp__Ahrefs__site-explorer-crawled-pages` | Skip. Orphan detection then rests on internal links only, and the summary says so |
 | Title, meta description, H1 | `mcp__Ahrefs__site-audit-page-content` when an audit project exists | Fetch each page and read the tags. Slower, but exact |
