@@ -27,6 +27,7 @@ an absence is the normal case, not a caller error. Treat `none`, an empty string
 `inputs_missing`. Two live runs each had to decide this alone and wrote a note
 explaining their reasoning, which is a spec gap rather than a judgement call.
 | `clicks_28d` | no | Put `"clicks"` in `inputs_missing` and set the field to `null` |
+| `platform` | no | Put `"platform"` in `inputs_missing`. Describe findings generically and say the platform was not supplied |
 
 `clicks_28d` is context for whoever reads the aggregate, not an input to any
 check: it is how the orchestrator sorts a hundred page files so a broken page
@@ -139,6 +140,12 @@ How to fill it:
 **If the page is client-rendered**, put that first in `notes` and set
 `page_facts.requires_js` to true. Everything else you report then describes the
 served HTML only, and the reader has to know that before reading it.
+
+**And say what you could not rule out.** Some platforms pre-render for verified
+crawlers only, so a shell here can mean the host did not recognise this fetcher
+rather than that the content is missing. Where `platform` is one of those, per
+`docs/platforms.md`, write that in `notes` beside the finding. Do not silently
+upgrade it into a claim about what a search engine sees.
 
 ## Your reply to the orchestrator
 

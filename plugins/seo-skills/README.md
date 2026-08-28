@@ -174,7 +174,7 @@ Fourteen commands in total, all offline except the ones that fetch a page.
 already on your machine. No `pip install`, no requirements file, no API key, no
 account. CI fails the build if a dependency file ever appears.
 
-**Testable, which is the point.** 396 tests, run with
+**Testable, which is the point.** 406 tests, run with
 `python -m unittest discover -s tests -t .` and no test runner to install.
 Writing them found five real bugs, including a robots.txt group-precedence case
 that would have reported GPTBot as allowed when it was blocked.

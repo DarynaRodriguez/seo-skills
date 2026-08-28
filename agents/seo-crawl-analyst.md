@@ -17,6 +17,20 @@ being finished.
 A path to a crawl export, an output directory, `pack_root`, and optionally a
 Search Console export and the site profile.
 
+The orchestrator also passes `platform` where the profile records one. It changes
+how you read two things, and `docs/platforms.md` has the detail:
+
+- **A sitemap can advertise records that are not published.** On data-driven routes
+  such as `/thing/:slug`, an unpublished record answers HTTP 200 and renders the
+  application's own 404. In an export that is a row of 200s with identical titles
+  and near-zero word counts, which reads as a template problem and is not one. If
+  the export shows that pattern, say the pages may not exist and recommend opening
+  a sample in a browser before anyone writes content for them.
+- **An identical shell across every row** can be a pre-rendering host that did not
+  recognise the fetcher that built the export, rather than a site with no content.
+  Report the pattern, name the platform, and do not call it a rendering defect from
+  a crawl alone.
+
 **"No profile" is spelled `none`.** The orchestrator passes the literal string
 `none` rather than omitting the key, so a value that reads like a path but means
 an absence is the normal case, not a caller error. Treat `none`, an empty string,

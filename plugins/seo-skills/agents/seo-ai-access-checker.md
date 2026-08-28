@@ -21,6 +21,7 @@ you are blunt about it.
 | `pack_root` | yes | Stop and say so. Never guess: a wrong path produces an empty audit that reads like a clean one |
 | `market` | no | Put `"market"` in `inputs_missing`; report Googlebot and Bingbot only, and say that is what you did |
 | `profile_path` | no | Put `"profile"` in `inputs_missing` and suppress nothing |
+| `platform` | no | Put `"platform"` in `inputs_missing`. Read the shell literally and say you could not account for host behaviour |
 
 **"No profile" is spelled `none`.** The orchestrator passes the literal string
 `none` rather than omitting the key, so a value that reads like a path but means
@@ -135,6 +136,27 @@ content exists for a browser and not for a fetcher that does not run JavaScript,
 which is most of them. Say it in the first line of your output, because it looks
 fine to every human who checks.
 
+**The platform can make that finding wrong, and this is where the error gets
+committed.** Some hosts pre-render for verified crawlers only. Lovable apps built
+before 13 May 2026 serve rendered HTML to Google, Bing, ChatGPT and Claude, and the
+app shell to everything else. `seo.py` is everything else, so `requires_js: true`
+there tells you the pre-renderer did not recognise our fetcher, not that the answer
+engines see nothing.
+
+Returning `reachable but empty` on that evidence is a false critical, aimed at an
+engineering team, about a problem the site does not have. This pack made exactly
+that mistake on a live site before the behaviour was documented.
+
+So **never return `reachable but empty` from the served HTML alone.** Confirm in a
+rendered view, or return `unknown` for the rendering question and name the check
+that would settle it. `docs/platforms.md` records which platforms behave this way,
+and `platform` from the profile tells you which one you are on.
+
+One more thing from that file, because it also lands on this agent: on data-driven
+routes such as `/thing/:slug`, a sitemap URL whose record is unpublished answers 200
+and renders the application's own 404. Every robots.txt check passes. When you
+expand a sitemap, open two or three of the URLs rather than trusting the status.
+
 ## Persistence contract
 
 `<output_dir>/ai-access/<slug>.json`
@@ -177,7 +199,7 @@ The verdict, in priority order. Take the first that applies:
 | `unknown` | A tool failed, so you cannot answer. Never guess one of the others |
 | `blocked` | robots.txt refuses a live-fetch or search-index crawler |
 | `noindex` | The fetch is permitted and the listing is not, by meta tag or header |
-| `reachable but empty` | Nothing blocked, but `requires_js` is true |
+| `reachable but empty` | Nothing blocked, `requires_js` is true, **and you confirmed it in a rendered view** |
 | `reachable` | None of the above |
 
 Six notes on the rest, each of which caused a wrong guess in a live run:

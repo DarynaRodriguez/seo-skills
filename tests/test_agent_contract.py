@@ -1391,5 +1391,84 @@ class TestBriefsAccountForThePlatform(unittest.TestCase):
         self.assertIn("docs/platforms.md", flat)
 
 
+class TestTheAuditChainReadsThePlatform(unittest.TestCase):
+    """An audit of a Webflow site and a Lovable site should not read identically.
+
+    The briefs learned this first. One layer up, the orchestrator was still passing
+    the same inputs to every agent regardless of what the site could do, and no
+    agent could tell a real rendering defect from a host that did not recognise our
+    fetcher.
+    """
+
+    AGENTS_TAKING_PLATFORM = (
+        "seo-ai-access-checker.md",
+        "seo-page-auditor.md",
+        "seo-drift-watcher.md",
+        "seo-brief-writer.md",
+    )
+
+    def setUp(self):
+        self.orchestrator = (SKILLS_DIR / "site-audit" / "SKILL.md").read_text(encoding="utf-8")
+
+    def test_the_orchestrator_passes_platform_to_every_agent(self):
+        self.assertIn("| `platform` |", self.orchestrator)
+
+    def test_the_orchestrator_lists_platform_among_the_deciding_profile_fields(self):
+        flat = " ".join(self.orchestrator.split())
+        self.assertIn("CMS or platform | 1. Site", flat)
+
+    def test_each_agent_declares_it_as_an_input(self):
+        for name in self.AGENTS_TAKING_PLATFORM:
+            with self.subTest(agent=name):
+                self.assertIn("| `platform` |", (AGENTS_DIR / name).read_text(encoding="utf-8"))
+
+    def test_the_crawl_analyst_is_told_about_it_too(self):
+        # It has prose inputs rather than a table, so the row check does not apply.
+        flat = " ".join((AGENTS_DIR / "seo-crawl-analyst.md").read_text(encoding="utf-8").split())
+        self.assertIn("also passes `platform`", flat)
+
+
+class TestNoAgentCallsRenderingFromAShellAlone(unittest.TestCase):
+    """The specific error this pack already made, encoded so it cannot recur.
+
+    A Lovable site reported a critical rendering defect across nine pages on the
+    strength of our fetch. The host pre-renders for verified crawlers only, so the
+    evidence never supported the claim.
+    """
+
+    def test_the_access_checker_verdict_requires_a_rendered_view(self):
+        flat = " ".join((AGENTS_DIR / "seo-ai-access-checker.md").read_text(encoding="utf-8").split())
+        self.assertIn("never return `reachable but empty` from the served HTML alone", flat)
+        self.assertIn("confirmed it in a rendered view", flat)
+
+    def test_the_page_auditor_says_what_it_could_not_rule_out(self):
+        flat = " ".join((AGENTS_DIR / "seo-page-auditor.md").read_text(encoding="utf-8").split())
+        self.assertIn("pre-render for verified crawlers only", flat)
+
+    def test_the_drift_watcher_checks_before_escalating(self):
+        flat = " ".join((AGENTS_DIR / "seo-drift-watcher.md").read_text(encoding="utf-8").split())
+        self.assertIn("rule out the boring explanation", flat)
+
+    def test_the_orchestrator_records_the_incident_rather_than_the_lesson_alone(self):
+        # A rule with its case attached survives editing; a bare rule gets tidied away.
+        flat = " ".join((SKILLS_DIR / "site-audit" / "SKILL.md").read_text(encoding="utf-8").split())
+        self.assertIn("had to be downgraded", flat)
+
+    def test_every_agent_that_can_see_a_shell_points_at_the_platform_doc(self):
+        for name in ("seo-ai-access-checker.md", "seo-page-auditor.md", "seo-drift-watcher.md"):
+            with self.subTest(agent=name):
+                self.assertIn("docs/platforms.md", (AGENTS_DIR / name).read_text(encoding="utf-8"))
+
+
+class TestTheOrchestratorStepsAreSequential(unittest.TestCase):
+    """Inserting a step by hand is how a procedure ends up with two number sevens."""
+
+    def test_site_audit_steps_run_1_to_n_without_gaps(self):
+        text = (SKILLS_DIR / "site-audit" / "SKILL.md").read_text(encoding="utf-8")
+        numbers = [int(n) for n in re.findall(r"^(\d+)\. \*\*", text, re.M)]
+        self.assertTrue(numbers, "no numbered steps found")
+        self.assertEqual(numbers, list(range(1, len(numbers) + 1)), "steps are not sequential")
+
+
 if __name__ == "__main__":
     unittest.main()
