@@ -1673,5 +1673,115 @@ class TestTheExamplesShowTheTaxonomyWorking(unittest.TestCase):
         self.assertIn("Link to them", flat)
 
 
+class TestEverySkillNumbersItsStepsInOrder(unittest.TestCase):
+    """Inserting a step by hand is how a procedure grows two number twelves.
+
+    Made three times in one day, in site-audit, seo-profile-setup and
+    content-brief. A procedure a reader cannot follow by number is a procedure
+    an agent will follow in the wrong order.
+    """
+
+    STEP = re.compile(r"^(\d+)\. \*\*", re.M)
+
+    def test_all_skills(self):
+        for path in sorted(SKILLS_DIR.rglob("SKILL.md")):
+            numbers = [int(n) for n in self.STEP.findall(path.read_text(encoding="utf-8"))]
+            if not numbers:
+                continue
+            with self.subTest(skill=path.parent.name):
+                self.assertEqual(
+                    numbers, list(range(1, len(numbers) + 1)),
+                    "{} steps run {}".format(path.parent.name, numbers),
+                )
+
+
+class TestEditorialPolicyExists(unittest.TestCase):
+    """What may be claimed is half the question. How a conclusion is reached is the rest.
+
+    A reader searches for the best hospital to give birth in. Targeting that intent
+    is correct; answering it with a winner is not, and no list of banned claims
+    catches the difference. Raised by an external tester against a real site.
+    """
+
+    def setUp(self):
+        self.template = (PROFILES_DIR / "PROFILE.template.md").read_text(encoding="utf-8")
+        self.flat = " ".join(self.template.split())
+
+    def test_the_section_exists_with_its_six_fields(self):
+        self.assertIn("## 12. Editorial policy", self.template)
+        for field in ("Evidence standard", "Opinion policy", "Commercial neutrality",
+                      "Professional review policy", "User experience policy",
+                      "Safety boundaries"):
+            with self.subTest(field=field):
+                self.assertIn(field, self.template)
+
+    def test_it_is_conditional_rather_than_mandatory(self):
+        # A B2B SaaS profile should not have to answer six YMYL questions.
+        self.assertIn("Skip this if the site sells software", self.flat)
+
+    def test_the_worked_case_is_in_the_template(self):
+        self.assertIn("no list of banned claims catches the difference", self.flat)
+
+    def test_review_may_not_be_claimed_without_review(self):
+        self.assertIn("Never describe content as reviewed unless that specific piece was", self.flat)
+
+    def test_proof_is_bounded_against_becoming_a_biography(self):
+        # An agent handed personal detail will use it, and a hospital-bag article
+        # is not the place for someone's medical history.
+        self.assertIn("Personal detail written here will end up in copy", self.flat)
+
+    def test_the_brief_carries_the_policy(self):
+        flat = " ".join((SKILLS_DIR / "content-brief" / "SKILL.md").read_text(encoding="utf-8").split())
+        self.assertIn("Carry the editorial policy into the brief", flat)
+        self.assertIn("Target that intent", flat)
+
+
+class TestLocalTerminologySurvives(unittest.TestCase):
+    """A local term is four things at once, and normalising it destroys all four.
+
+    The reader must learn it, it is the word on the form, it is what she types, and
+    it is an entity in the content. `Hebamme` folded into `midwife` loses the term
+    the audience actually needs and usually the easier ranking with it.
+    """
+
+    def setUp(self):
+        self.template = (PROFILES_DIR / "PROFILE.template.md").read_text(encoding="utf-8")
+        self.flat = " ".join(self.template.split())
+
+    def test_the_section_exists(self):
+        self.assertIn("## 13. Local terminology", self.template)
+
+    def test_it_carries_both_downstream_columns(self):
+        self.assertIn("| Preserve in copy |", self.template)
+        self.assertIn("| Search relevance |", self.template)
+
+    def test_it_is_conditional(self):
+        self.assertIn("Delete it if that is not the case", self.flat)
+
+    def test_keyword_discovery_will_not_collapse_them(self):
+        flat = " ".join((SKILLS_DIR / "keyword-discovery" / "SKILL.md").read_text(encoding="utf-8").split())
+        self.assertIn("Never collapse a local term into its translation", flat)
+        self.assertIn("two keywords, not one", flat)
+
+    def test_the_portability_reason_is_given(self):
+        # This is not a German problem. It is every audience inside a system whose
+        # language they do not fully speak.
+        self.assertIn("whose language they do not fully speak", self.flat)
+
+
+class TestVoiceIsNotAddress(unittest.TestCase):
+    """"Sounds like another parent" does not license calling every reader "mama"."""
+
+    def setUp(self):
+        self.flat = " ".join((PROFILES_DIR / "PROFILE.template.md").read_text(encoding="utf-8").split())
+
+    def test_both_fields_exist(self):
+        self.assertIn("Voice position:", self.flat)
+        self.assertIn("Reader address:", self.flat)
+
+    def test_the_reason_for_two_fields_is_stated(self):
+        self.assertIn("an agent given only the stance will infer the address from it", self.flat)
+
+
 if __name__ == "__main__":
     unittest.main()

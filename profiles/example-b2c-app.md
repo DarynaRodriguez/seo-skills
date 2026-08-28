@@ -149,6 +149,32 @@ may treat this as a competitor set.
 | ai-visibility | none | No claim about AI presence until a prompt set exists |
 | vitals | PageSpeed Insights | Field data from CrUX where the site has enough traffic to have any |
 
+## 12. Editorial policy
+
+- **Evidence standard:** An official source for every deadline, figure and entitlement, linked. A named professional for anything clinical. Nothing rests on a forum post
+- **Opinion policy:** Compare, never rank. The site may lay out criteria and say which matters to whom. It may not name a best hospital, insurer or clinic, and "most people choose X" is a ranking wearing a hat
+- **Commercial neutrality:** No endorsements, no affiliate links on procedural pages, and that holds whatever the traffic does. If that ever changes, disclosure comes first and this line gets rewritten
+- **Professional review policy:** Clinical guides are reviewed by a named midwife. Administrative guides are not systematically reviewed by anyone. **No page may say "reviewed" unless that specific page was**, and the reviewer is named on it
+- **User experience policy:** Lived experience is welcome and always marked as one person's experience. "Some people find" is a signpost, never evidence, and never appears in the same sentence as a figure
+- **Safety boundaries:** No diagnosis, no dosage, no legal advice. Anything urgent points to the emergency number and the nearest clinic before it explains anything
+
+**Founder authority:** first-hand experience of arriving, registering and going
+through the process this site documents. One line, and the About page carries the
+rest. It is not material for an article about what to pack.
+
+## 13. Local terminology
+
+| Term | English explanation | Preserve in copy | Search relevance |
+|------|--------------------|------------------|------------------|
+| Anmeldung | Registering your address | Yes, gloss on first use | Yes, high. "Anmeldung appointment" is a real query |
+| Elterngeld | Parental allowance | Yes | Yes, and far larger in German than in English |
+| Mutterpass | The maternity record book you are given and must carry | Yes, always | Yes, and there is no English equivalent to translate to |
+| Hebamme | Midwife | Yes | Yes, and it is a different query from "midwife" with a different SERP |
+| Krankenkasse | Statutory health insurer | Yes | Yes |
+
+- **Preserve or translate:** preserve, and gloss on first use. The reader will meet the German word on a form, a website and a receptionist's desk, and recognising it is part of what this site is for
+- **Terms the audience searches in their own language instead:** "health insurance" outranks Krankenkasse in English-language search. Target both, on the same page
+
 ## Gaps
 
 - No keyword tool, so every volume is unknown and every ranking is unweighted. The

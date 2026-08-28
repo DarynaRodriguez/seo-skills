@@ -75,6 +75,8 @@ just in section 2, because it decides whether the whole keyword set is viable.
 - **What it actually does:** <two sentences, no adjectives>
 - **How it is paid for, if at all:** <subscription, one-off, free, free pilot, ad supported, grant funded>
 - **Proof we can cite:** <named customers or users, verified numbers, certifications, credentials, published sources>
+  Keep each entry to something quotable in public. Personal detail written here
+  will end up in copy, because an agent reads this as material it may use.
 - **Claims we may not make:** <anything legal, medical, financial, security or product has not signed off>
 
 ## 5. Product vocabulary
@@ -92,6 +94,13 @@ just in section 2, because it decides whether the whole keyword set is viable.
 - **Banned words and phrases:** <leverage, unlock, seamlessly, game-changer, revolutionise, cutting-edge, robust, in today's fast-paced world>
 - **Numbers:** <% with numerals, no spelled-out percentages>
 - **Tone in one line:** <how a smart peer would say it out loud>
+- **Voice position:** <who the writing sounds like, such as someone who has done this before>
+- **Reader address:** <what to call the reader, and what never to call them>
+
+**Voice position and reader address are different fields on purpose.** "Sounds
+like another parent who has been through it" is a stance. It does not license
+calling every reader "mama", and an agent given only the stance will infer the
+address from it and produce exactly the copy the stance was meant to avoid.
 
 ## 7. Competitive landscape
 
@@ -181,6 +190,51 @@ instead of assuming a vendor.
 Write `none` where you have nothing. That is a better answer than naming a tool
 you do not really have, because it tells the skill to report a gap rather than
 attempt the work and quietly degrade.
+
+## 12. Editorial policy
+
+Skip this if the site sells software and the worst outcome of a wrong page is an
+unqualified lead. **Fill it in if a page could affect someone's health, money,
+legal position or safety**, because on that kind of site "what may we claim" is not
+the whole question. How a conclusion is reached is the other half, and it is the
+half that decides what a brief may ask for.
+
+The case that makes this concrete: a reader searches for the best hospital to give
+birth in. Targeting that intent is right. Answering it with "St Anselm's is the
+best" is not, and no list of banned claims catches the difference. What catches it
+is a rule saying conclusions are reached by giving the reader transparent criteria
+and letting her decide.
+
+- **Evidence standard:** <what counts as support for a factual claim here: an official source, a named professional, a published study, a measured number>
+- **Opinion policy:** <may this site rank, rate or recommend one option over another, or does it lay out criteria and let the reader choose>
+- **Commercial neutrality:** <may copy endorse a named commercial provider, and what happens where there is an affiliate or partnership>
+- **Professional review policy:** <which content requires review, by whom, and whether it is systematic yet. Never describe content as reviewed unless that specific piece was>
+- **User experience policy:** <may lived experience appear, and how it is marked so it is never read as a factual or professional claim>
+- **Safety boundaries:** <what this site never advises on, and where the reader is sent instead>
+
+**Keep this section short and public.** `Proof we can cite` and this section are
+about what the writing may rest on, not a biography. A founder's authority belongs
+here as one line and a link, not as a medical history: an agent handed detail will
+use it, and a personal ordeal has no business appearing in an article about what to
+pack for hospital.
+
+## 13. Local terminology
+
+For a site serving people inside a system whose language they do not fully speak.
+Delete it if that is not the case.
+
+These terms are four things at once and each is a different downstream job: the
+reader must learn them, they are the words on the forms, they are what she types
+into a search box, and they are entities in the content. A pipeline that normalises
+them into their English translations is the single most damaging thing it can do to
+this kind of site, because the reader needs the word she will actually meet.
+
+| Term | English explanation | Preserve in copy | Search relevance |
+|------|--------------------|------------------|------------------|
+| <local term> | <plain English gloss> | <yes, and gloss on first use> | <yes, people search this> |
+
+- **Preserve or translate:** <the default, and when to break it>
+- **Terms the audience searches in their own language instead:** <where the English word is genuinely the query>
 
 `page` and `robots-sitemap` are always available: the tools in this repo serve
 them with no account. Full provider list, per-need alternatives and the unit traps

@@ -85,6 +85,14 @@ never filled with an estimate.
    phrasing real people type. Deduplicate on normalised string. Do not stop at
    the head term: the buyer-fit terms usually sit three words further out.
 
+   **Never collapse a local term into its translation.** Where profile section 13
+   lists local terminology, `Hebamme` and `midwife` are two keywords, not one
+   deduplicated to the English. They have different volumes, different intents and
+   frequently different SERPs, and the local one is the word the reader will meet
+   on a form. Folding them together loses the term the audience actually needs and
+   usually the easier ranking opportunity with it. Keep both rows and let the
+   mapping decide.
+
 6. **Enrich the survivors once.** Batch the deduplicated list through
    `keywords-explorer-overview` for volume, difficulty, and CPC in the correct
    country. One pull, not one per term, and check
