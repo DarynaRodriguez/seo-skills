@@ -23,9 +23,23 @@ Read the site profile before crawling, because it decides scope:
 
 From the profile take: primary domain, market table (market, language variant, domain
 or path), blog or resources path, pillar and solution page lists, and pages that must
-never be indexed. This skill then writes `.seo/pages.csv`, which the profile does not
+never be indexed, and which surfaces hold user content. This skill then writes
+`.seo/pages.csv`, which the profile does not
 contain. Where the crawl contradicts the profile, for example a market path the profile
 does not mention, report the contradiction rather than silently adopting either.
+
+## Privacy outranks opportunity
+
+If this inventory turns up a large crawlable set built from user content, profiles,
+journals, saved items, uploads or community posts, **that is a finding to escalate,
+not a template to exploit.** Report the path, the estimated page count and the fact
+that it is indexable, and recommend it be closed. Do not compute its traffic
+potential, and do not describe it as a programmatic opportunity, because somebody
+skim-reading a report will act on the framing rather than the caveat.
+
+Profile section 8 names these surfaces where the site knows about them. Where it
+does not, use judgement: a URL pattern carrying a person's name, handle or private
+writing is one of these whether or not anyone wrote it down.
 
 ## Data
 

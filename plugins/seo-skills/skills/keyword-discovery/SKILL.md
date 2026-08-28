@@ -30,8 +30,8 @@ From the profile, extract the seed inputs explicitly before pulling any data:
 | Seed source | Profile section |
 |-------------|-----------------|
 | Category words buyers use | 4. What we sell |
-| Buyer language and the job to be done | 3. Who we sell to |
-| Competitor names | 7. Competitors |
+| Audience language and the job to be done | 3. Who this is for |
+| Competitor domains, **organic search competitors only** | 7. Competitive landscape |
 | Markets, languages, engines | 2. Markets |
 | Terms that must never appear | 5. Product vocabulary, 6. Language rules |
 | Topics that are off limits | 9. This quarter |
@@ -84,6 +84,14 @@ never filled with an estimate.
    `related-terms` for semantic neighbours, and `search-suggestions` for the
    phrasing real people type. Deduplicate on normalised string. Do not stop at
    the head term: the buyer-fit terms usually sit three words further out.
+
+   **Never collapse a local term into its translation.** Where profile section 13
+   lists local terminology, `Hebamme` and `midwife` are two keywords, not one
+   deduplicated to the English. They have different volumes, different intents and
+   frequently different SERPs, and the local one is the word the reader will meet
+   on a form. Folding them together loses the term the audience actually needs and
+   usually the easier ranking opportunity with it. Keep both rows and let the
+   mapping decide.
 
 6. **Enrich the survivors once.** Batch the deduplicated list through
    `keywords-explorer-overview` for volume, difficulty, and CPC in the correct

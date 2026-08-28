@@ -1470,5 +1470,422 @@ class TestTheOrchestratorStepsAreSequential(unittest.TestCase):
         self.assertEqual(numbers, list(range(1, len(numbers) + 1)), "steps are not sequential")
 
 
+PROFILES_DIR = AGENTS_DIR.parent / "profiles"
+
+
+class TestTheProfileServesBothAudienceShapes(unittest.TestCase):
+    """A buying committee and a person in a life stage need different questions.
+
+    Section 3 asked for role, seniority, company size and industry, which is a
+    business audience and only that. Run against a consumer product it produced a
+    section full of `<unknown>` values that were not unknown at all, which is worse
+    than a gap because it looks like one. Found by an external tester on a real
+    site in the first ten minutes.
+    """
+
+    def setUp(self):
+        self.template = (PROFILES_DIR / "PROFILE.template.md").read_text(encoding="utf-8")
+        self.flat = " ".join(self.template.split())
+
+    def test_the_section_offers_both_branches(self):
+        self.assertIn("KEEP ONE: business audience", self.template)
+        self.assertIn("KEEP ONE: consumer audience", self.template)
+
+    def test_the_consumer_branch_asks_consumer_questions(self):
+        for field in ("Primary audience", "Life stage or situation", "The need state"):
+            with self.subTest(field=field):
+                self.assertIn(field, self.template)
+
+    def test_the_business_branch_is_still_there(self):
+        for field in ("Primary buyer", "Secondary buyer or influencer"):
+            with self.subTest(field=field):
+                self.assertIn(field, self.template)
+
+    def test_the_reader_is_told_to_delete_the_other_one(self):
+        self.assertIn("Keep the one that fits and delete the other", self.flat)
+
+    def test_the_search_language_question_is_asked(self):
+        # A consumer audience in a country whose language they do not speak is the
+        # case this branch exists for, and the search language decides whether the
+        # keyword set is viable at all.
+        self.assertIn("the language they search in is a real question", self.flat.lower())
+
+    def test_section_four_no_longer_assumes_a_sale(self):
+        # Free, pilot, grant funded and ad supported are all real answers.
+        self.assertIn("How it is paid for, if at all", self.template)
+
+
+class TestTheSetupSkillPicksTheBranchFirst(unittest.TestCase):
+    def setUp(self):
+        self.text = (SKILLS_DIR / "seo-profile-setup" / "SKILL.md").read_text(encoding="utf-8")
+        self.flat = " ".join(self.text.split())
+
+    def test_the_branch_is_decided_before_the_draft_is_built(self):
+        decide = self.text.index("Decide which shape section 3 takes")
+        build = self.text.index("Build the draft profile")
+        self.assertLess(decide, build, "the draft is built before the branch is chosen")
+
+    def test_it_names_the_false_unknown_failure(self):
+        self.assertIn("`<unknown>` that is not actually unknown", self.flat)
+
+    def test_the_question_batch_covers_both_shapes(self):
+        self.assertIn("life stage and need state rather than role and company size", self.flat)
+
+    def test_the_steps_are_sequential(self):
+        numbers = [int(n) for n in re.findall(r"^(\d+)\. \*\*", self.text, re.M)]
+        self.assertEqual(numbers, list(range(1, len(numbers) + 1)))
+
+
+class TestBothWorkedExamplesExist(unittest.TestCase):
+    """The B2B example was the only one, which is partly why the gap survived."""
+
+    def test_there_is_an_example_for_each_shape(self):
+        for name in ("example-b2b-saas.md", "example-b2c-app.md"):
+            with self.subTest(example=name):
+                self.assertTrue((PROFILES_DIR / name).exists())
+
+    def test_the_consumer_example_uses_the_consumer_branch(self):
+        text = (PROFILES_DIR / "example-b2c-app.md").read_text(encoding="utf-8")
+        self.assertIn("Primary audience:", text)
+        self.assertNotIn("Primary buyer:", text)
+
+    def test_every_example_carries_all_eleven_sections(self):
+        for name in ("example-b2b-saas.md", "example-b2c-app.md"):
+            text = (PROFILES_DIR / name).read_text(encoding="utf-8")
+            headings = set(re.findall(r"^## (\d+)\. ", text, re.M))
+            for n in range(1, 12):
+                with self.subTest(example=name, section=n):
+                    self.assertIn(str(n), headings, "section {} missing".format(n))
+
+    def test_the_readme_points_at_both(self):
+        readme = (AGENTS_DIR.parent / "README.md").read_text(encoding="utf-8")
+        self.assertIn("example-b2b-saas.md", readme)
+        self.assertIn("example-b2c-app.md", readme)
+
+    def test_no_example_leaves_a_template_placeholder_behind(self):
+        # A worked example still carrying <role, seniority...> is not worked.
+        for name in ("example-b2b-saas.md", "example-b2c-app.md"):
+            text = (PROFILES_DIR / name).read_text(encoding="utf-8")
+            with self.subTest(example=name):
+                self.assertNotIn("<role", text)
+                self.assertNotIn("<unknown>", text)
+
+
+class TestCompetitorIsThreeThings(unittest.TestCase):
+    """One bucket meant a forum could reach a skill that pulls ranking data.
+
+    An external tester predicted the contamination before it happened: their site's
+    real search rivals are Reddit threads and an expat portal, its product rivals
+    are arguably nothing, and /keyword-discovery was reading a single undifferentiated
+    list of "competitor names".
+    """
+
+    def setUp(self):
+        self.template = (PROFILES_DIR / "PROFILE.template.md").read_text(encoding="utf-8")
+        self.flat = " ".join(self.template.split())
+
+    def test_the_three_buckets_exist(self):
+        for heading in ("### Product alternatives",
+                        "### Organic search competitors",
+                        "### Information alternatives"):
+            with self.subTest(heading=heading):
+                self.assertIn(heading, self.template)
+
+    def test_search_competitors_carry_provenance(self):
+        # A name from an interview is a hypothesis, not a search competitor.
+        self.assertIn("| Verified by |", self.template)
+        self.assertIn("UNVERIFIED", self.template)
+
+    def test_the_reason_for_the_split_is_stated(self):
+        self.assertIn("downstream skills use them differently", self.flat)
+
+    def test_comparison_policy_separates_products_from_decisions(self):
+        self.assertIn("Decision-support comparisons", self.template)
+
+    def test_keyword_discovery_reads_only_the_verified_bucket(self):
+        flat = " ".join((SKILLS_DIR / "keyword-discovery" / "SKILL.md").read_text(encoding="utf-8").split())
+        self.assertIn("organic search competitors only", flat)
+
+    def test_competitor_gap_says_which_bucket_it_means(self):
+        flat = " ".join((SKILLS_DIR / "competitor-gap" / "SKILL.md").read_text(encoding="utf-8").split())
+        self.assertIn("Which competitors this skill means", flat)
+        self.assertIn("never \"write a better Reddit\"", flat)
+
+    def test_competitor_gap_refuses_an_unverified_set(self):
+        flat = " ".join((SKILLS_DIR / "competitor-gap" / "SKILL.md").read_text(encoding="utf-8").split())
+        self.assertIn("say so and stop before the comparison", flat)
+
+
+class TestAnOutcomeIsNotAMetric(unittest.TestCase):
+    """"People find us and use the guides" is an outcome. Converting it invents a target.
+
+    The template demanded "the one metric that matters". A founder answered with the
+    result they cared about, and turning that into "organic sessions" would have
+    broken the pack's own rule against inventing values, silently.
+    """
+
+    def setUp(self):
+        self.template = (PROFILES_DIR / "PROFILE.template.md").read_text(encoding="utf-8")
+
+    def test_the_two_fields_are_separate(self):
+        self.assertIn("Primary SEO outcome:", self.template)
+        self.assertIn("Success metric:", self.template)
+
+    def test_the_old_single_field_is_gone(self):
+        self.assertNotIn("The one metric that matters", self.template)
+
+    def test_a_missing_metric_is_a_documented_answer(self):
+        flat = " ".join(self.template.split())
+        self.assertIn("or `<unknown>` if there is not one yet", flat)
+
+    def test_the_setup_skill_forbids_the_conversion(self):
+        flat = " ".join((SKILLS_DIR / "seo-profile-setup" / "SKILL.md").read_text(encoding="utf-8").split())
+        self.assertIn("Do not convert an outcome into a metric", flat)
+
+    def test_both_examples_carry_both_fields(self):
+        for name in ("example-b2b-saas.md", "example-b2c-app.md"):
+            text = (PROFILES_DIR / name).read_text(encoding="utf-8")
+            with self.subTest(example=name):
+                self.assertIn("Primary SEO outcome:", text)
+                self.assertIn("Success metric:", text)
+
+
+class TestTheExamplesShowTheTaxonomyWorking(unittest.TestCase):
+    def test_both_examples_use_the_three_buckets(self):
+        for name in ("example-b2b-saas.md", "example-b2c-app.md"):
+            text = (PROFILES_DIR / name).read_text(encoding="utf-8")
+            with self.subTest(example=name):
+                self.assertIn("### Product alternatives", text)
+                self.assertIn("### Organic search competitors", text)
+                self.assertIn("### Information alternatives", text)
+
+    def test_the_consumer_example_shows_an_honest_none(self):
+        # A product with no direct equivalent should be able to say so.
+        text = (PROFILES_DIR / "example-b2c-app.md").read_text(encoding="utf-8")
+        self.assertIn("none identified", text)
+
+    def test_the_consumer_example_marks_its_unverified_row(self):
+        text = (PROFILES_DIR / "example-b2c-app.md").read_text(encoding="utf-8")
+        self.assertIn("UNVERIFIED", text)
+
+    def test_an_official_source_is_cited_not_outranked(self):
+        flat = " ".join((PROFILES_DIR / "example-b2c-app.md").read_text(encoding="utf-8").split())
+        self.assertIn("Link to them", flat)
+
+
+class TestEverySkillNumbersItsStepsInOrder(unittest.TestCase):
+    """Inserting a step by hand is how a procedure grows two number twelves.
+
+    Made three times in one day, in site-audit, seo-profile-setup and
+    content-brief. A procedure a reader cannot follow by number is a procedure
+    an agent will follow in the wrong order.
+    """
+
+    STEP = re.compile(r"^(\d+)\. \*\*", re.M)
+
+    def test_all_skills(self):
+        for path in sorted(SKILLS_DIR.rglob("SKILL.md")):
+            numbers = [int(n) for n in self.STEP.findall(path.read_text(encoding="utf-8"))]
+            if not numbers:
+                continue
+            with self.subTest(skill=path.parent.name):
+                self.assertEqual(
+                    numbers, list(range(1, len(numbers) + 1)),
+                    "{} steps run {}".format(path.parent.name, numbers),
+                )
+
+
+class TestEditorialPolicyExists(unittest.TestCase):
+    """What may be claimed is half the question. How a conclusion is reached is the rest.
+
+    A reader searches for the best hospital to give birth in. Targeting that intent
+    is correct; answering it with a winner is not, and no list of banned claims
+    catches the difference. Raised by an external tester against a real site.
+    """
+
+    def setUp(self):
+        self.template = (PROFILES_DIR / "PROFILE.template.md").read_text(encoding="utf-8")
+        self.flat = " ".join(self.template.split())
+
+    def test_the_section_exists_with_its_six_fields(self):
+        self.assertIn("## 12. Editorial policy", self.template)
+        for field in ("Evidence standard", "Opinion policy", "Commercial neutrality",
+                      "Professional review policy", "User experience policy",
+                      "Safety boundaries"):
+            with self.subTest(field=field):
+                self.assertIn(field, self.template)
+
+    def test_it_is_conditional_rather_than_mandatory(self):
+        # A B2B SaaS profile should not have to answer six YMYL questions.
+        self.assertIn("Skip this if the site sells software", self.flat)
+
+    def test_the_worked_case_is_in_the_template(self):
+        self.assertIn("no list of banned claims catches the difference", self.flat)
+
+    def test_review_may_not_be_claimed_without_review(self):
+        self.assertIn("Never describe content as reviewed unless that specific piece was", self.flat)
+
+    def test_proof_is_bounded_against_becoming_a_biography(self):
+        # An agent handed personal detail will use it, and a hospital-bag article
+        # is not the place for someone's medical history.
+        self.assertIn("Personal detail written here will end up in copy", self.flat)
+
+    def test_the_brief_carries_the_policy(self):
+        flat = " ".join((SKILLS_DIR / "content-brief" / "SKILL.md").read_text(encoding="utf-8").split())
+        self.assertIn("Carry the editorial policy into the brief", flat)
+        self.assertIn("Target that intent", flat)
+
+
+class TestLocalTerminologySurvives(unittest.TestCase):
+    """A local term is four things at once, and normalising it destroys all four.
+
+    The reader must learn it, it is the word on the form, it is what she types, and
+    it is an entity in the content. `Hebamme` folded into `midwife` loses the term
+    the audience actually needs and usually the easier ranking with it.
+    """
+
+    def setUp(self):
+        self.template = (PROFILES_DIR / "PROFILE.template.md").read_text(encoding="utf-8")
+        self.flat = " ".join(self.template.split())
+
+    def test_the_section_exists(self):
+        self.assertIn("## 13. Local terminology", self.template)
+
+    def test_it_carries_both_downstream_columns(self):
+        self.assertIn("| Preserve in copy |", self.template)
+        self.assertIn("| Search relevance |", self.template)
+
+    def test_it_is_conditional(self):
+        self.assertIn("Delete it if that is not the case", self.flat)
+
+    def test_keyword_discovery_will_not_collapse_them(self):
+        flat = " ".join((SKILLS_DIR / "keyword-discovery" / "SKILL.md").read_text(encoding="utf-8").split())
+        self.assertIn("Never collapse a local term into its translation", flat)
+        self.assertIn("two keywords, not one", flat)
+
+    def test_the_portability_reason_is_given(self):
+        # This is not a German problem. It is every audience inside a system whose
+        # language they do not fully speak.
+        self.assertIn("whose language they do not fully speak", self.flat)
+
+
+class TestVoiceIsNotAddress(unittest.TestCase):
+    """"Sounds like another parent" does not license calling every reader "mama"."""
+
+    def setUp(self):
+        self.flat = " ".join((PROFILES_DIR / "PROFILE.template.md").read_text(encoding="utf-8").split())
+
+    def test_both_fields_exist(self):
+        self.assertIn("Voice position:", self.flat)
+        self.assertIn("Reader address:", self.flat)
+
+    def test_the_reason_for_two_fields_is_stated(self):
+        self.assertIn("an agent given only the stance will infer the address from it", self.flat)
+
+
+class TestUnknownsCarryRouting(unittest.TestCase):
+    """A bare `<unknown>` tells the next skill nothing about what to do next.
+
+    Ask, look, connect a provider, or leave it alone are four different answers,
+    and every skill downstream was working it out again from scratch.
+    """
+
+    QUALIFIERS = (
+        "<unknown - requires research>",
+        "<unknown - provider unavailable>",
+        "<unknown - not yet decided>",
+        "<unknown - not verified>",
+    )
+
+    def setUp(self):
+        self.template = (PROFILES_DIR / "PROFILE.template.md").read_text(encoding="utf-8")
+        self.flat = " ".join(self.template.split())
+
+    def test_the_four_qualifiers_are_specified(self):
+        for q in self.QUALIFIERS:
+            with self.subTest(qualifier=q):
+                self.assertIn(q, self.template)
+
+    def test_the_reason_is_given_as_routing(self):
+        self.assertIn("routing information rather than an absence", self.flat)
+
+    def test_belief_is_not_configuration(self):
+        # "I think the platform handles it" written as "allowed" is a fact nobody
+        # checked, and everything after it inherits the error.
+        self.assertIn("it stays a belief", self.flat)
+
+    def test_the_qualifier_may_not_smuggle_a_value(self):
+        self.assertIn("a guess wearing a disclaimer", self.flat)
+
+
+class TestSetupKnowsWhenToStop(unittest.TestCase):
+    """A blank field looks like a task. It is not.
+
+    An external tester typed "continue" to see whether the skill would finish
+    gracefully or keep interrogating. It kept interrogating, and one of the
+    questions asked a founder to architect their site from memory in a pack whose
+    whole argument is evidence first.
+    """
+
+    def setUp(self):
+        self.text = (SKILLS_DIR / "seo-profile-setup" / "SKILL.md").read_text(encoding="utf-8")
+        self.flat = " ".join(self.text.split())
+
+    def test_questions_are_classified_before_being_asked(self):
+        for kind in ("Configuration", "Researchable", "Operational"):
+            with self.subTest(kind=kind):
+                self.assertIn("| " + kind + " |", self.text)
+
+    def test_researchable_questions_are_not_asked(self):
+        self.assertIn("**Do not ask.**", self.text)
+
+    def test_the_pillar_pages_case_is_named(self):
+        self.assertIn("architect their site from memory", self.flat)
+
+    def test_there_is_a_stopping_rule(self):
+        self.assertIn("Stop when the remaining unknowns are researchable or non-blocking", self.flat)
+
+    def test_it_refuses_completionism(self):
+        self.assertIn("Do not prolong the interview to eliminate", self.flat)
+
+    def test_gaps_are_reported_as_next_steps(self):
+        self.assertIn("A bare `<unknown>` is a shrug", self.flat)
+
+
+class TestTheRuleIsGlobalNotLocal(unittest.TestCase):
+    """The tester called this the biggest of the findings, and it is not one skill's."""
+
+    def test_agents_md_carries_it(self):
+        flat = " ".join((AGENTS_DIR.parent / "AGENTS.md").read_text(encoding="utf-8").split())
+        self.assertIn("Never ask a person for something a skill can research", flat)
+        self.assertIn("A blank field is not a task", flat)
+
+
+class TestPrivacyOutranksOpportunity(unittest.TestCase):
+    """A crawlable set built from user content is an incident, not a template.
+
+    site-inventory is the skill that would find it, and a report framing 4,000
+    indexable profile pages as reach is one somebody will act on.
+    """
+
+    def test_the_profile_names_the_surfaces(self):
+        text = (PROFILES_DIR / "PROFILE.template.md").read_text(encoding="utf-8")
+        self.assertIn("Privacy-sensitive surfaces:", text)
+        self.assertIn("Privacy outranks any indexation opportunity, without exception", text)
+
+    def test_site_inventory_refuses_the_framing(self):
+        flat = " ".join((SKILLS_DIR / "site-inventory" / "SKILL.md").read_text(encoding="utf-8").split())
+        self.assertIn("finding to escalate, not a template to exploit", flat)
+        self.assertIn("do not describe it as a programmatic opportunity", flat)
+
+    def test_it_applies_judgement_where_the_profile_is_silent(self):
+        flat = " ".join((SKILLS_DIR / "site-inventory" / "SKILL.md").read_text(encoding="utf-8").split())
+        self.assertIn("whether or not anyone wrote it down", flat)
+
+    def test_indexation_check_reads_the_field(self):
+        text = (SKILLS_DIR / "indexation-check" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("Privacy-sensitive surfaces", text)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -75,35 +75,91 @@ never filled with an estimate.
    if it uses them heavily, say so and ask whether that is deliberate. Collect the
    words the site never uses and the AI-tell vocabulary it does use, and propose the
    banned list from that. Present every inference with the sentence you drew it from.
-5. **Build the draft profile.** Fill every field of the template you have evidence
+5. **Decide which shape section 3 takes, before drafting it.** The template
+   branches: a business audience is described by role, seniority and company size,
+   a consumer audience by life stage, location and need state. Answering the wrong
+   set produces a profile full of `<unknown>` that is not actually unknown, which
+   is worse than a gap because it looks like one.
+
+   The site almost always tells you. A pricing page with seats and procurement
+   language is one; a product about a life event, a place or a personal situation is
+   the other. If the evidence is genuinely mixed, that is a legitimate first
+   question rather than a guess. Delete the branch you did not use.
+
+   **A consumer audience in a country whose language it does not speak is a
+   distinct case, and the most common one this branch exists for.** Record the
+   language they search in, which is often not the language of the site, because it
+   decides whether the keyword set is viable at all.
+
+6. **Build the draft profile.** Fill every field of the template you have evidence
    for. Mark each filled field with its source in a working note: `site`, `Ahrefs`,
    `Peec`, or `inferred`. Every field with no evidence gets the literal string
    `<unknown>`. Do not soften an unknown into a plausible default.
-6. **Show the draft, then ask in batches.** Present the whole draft first so the user
+7. **Show the draft, then ask in batches.** Present the whole draft first so the user
    sees what you already know. Then ask **at most 4 questions per turn**, grouped by
    profile section, highest-consequence sections first:
-   - Buyer and market: who buys, which market matters this quarter, who does not
-     count as a lead, which language leads.
-   - Competitors: confirm or cut the Ahrefs list, name anyone missing, name anyone
-     legal will not let you write about.
+   - Audience and market: who this is for, which market matters this quarter, who
+     does not count, which language they search in. For a consumer audience, ask
+     about life stage and need state rather than role and company size, and ask
+     what ends their need for it: a life stage has an exit, a job title does not.
+   - Competitive landscape: ask the three separately, because the answers differ
+     and mixing them poisons `/competitor-gap` and `/keyword-discovery`. What would
+     someone use instead of this. Which domains rank for these terms, which you
+     confirm from search data rather than from the answer. And where else this
+     audience gets answers, which is often a forum, a group or an official page
+     rather than a product at all. Anything a person names without search data
+     behind it is recorded as `UNVERIFIED` and stays that way.
    - Claims and proof: what may be cited by name, what has not been signed off.
    - Vocabulary and language: confirm the always-write and never-write pairs, the
      banned words, the character bans.
    - Structure and capacity: pillar pages, never-index paths, pages per month.
+   - Outcome and metric: what should be true that is not true now, and separately
+     the number that would show it. **Do not convert an outcome into a metric.** If
+     the answer is "people find us and actually use the guides", that is the
+     outcome, and the metric is `<unknown>` until someone names one. Writing
+     "organic sessions" there invents a target nobody set.
    - AI visibility: which engines matter, where the prompt set lives, which sources
      this buyer trusts.
    Skip any batch the evidence already settled. Confirm rather than re-ask.
-7. **Ask where it goes.** Offer two locations and state the difference plainly:
+
+8. **Classify every remaining question before you ask it, and stop when the useful
+   ones run out.** This skill has a completionist pull: a blank field looks like a
+   task. It is not. Sort each unresolved field into one of three, and only one of
+   them is yours:
+
+   | Kind | What it is | What to do |
+   |------|-----------|-----------|
+   | Configuration | A choice only this person can make, and something downstream depends on it. Markets, banned words, who approves a publish | Ask now |
+   | Researchable | A skill in this pack can find the answer from evidence | **Do not ask.** Write `<unknown - requires research>` and name the skill |
+   | Operational | Access, tooling, capacity | Ask only where a named skill is blocked without it |
+
+   **Asking a person to guess at something a skill can research is the worst of the
+   three**, because their guess arrives with a founder's authority attached and
+   nothing downstream will question it again. Pillar pages are the clearest case:
+   this pack has `/site-inventory` and `/keyword-page-mapping` for exactly that, and
+   an evidence-first system that opens by asking someone to architect their site
+   from memory has argued against itself in the first ten minutes.
+
+   **Stop when the remaining unknowns are researchable or non-blocking.** Say what
+   is left, say which skill resolves each, and hand over. Do not prolong the
+   interview to eliminate `<unknown>` fields: a profile with six honest qualified
+   unknowns and a clear next command is worth more than a full one built on guesses,
+   and it takes ten minutes rather than forty.
+9. **Ask where it goes.** Offer two locations and state the difference plainly:
    `.seo/profile.md` for one site in this working directory, `~/.seo-skills/profile.md`
    for a profile that applies everywhere. Default to `.seo/profile.md` when the working
    directory looks like a site repo. Never write both.
-8. **Diff before you write.** In update mode, show a table of every field that
+10. **Diff before you write.** In update mode, show a table of every field that
    changes: field, old value, new value, why. Get an explicit yes. In first-run mode,
    confirm the path and the unknown list, then write.
-9. **Report the gaps.** Close with the `<unknown>` fields, what each one blocks, and
-   the cheapest way to fill it. An unknown buyer blocks keyword prioritisation. An
-   unknown competitor set blocks comparison pages. Say which.
-10. **No filesystem?** In a chat-only agent, output the finished profile in one fenced
+11. **Report the gaps as routing, not as regret.** Close with the qualified
+   unknowns, what each one blocks, and the skill or command that resolves it. An
+   unknown buyer blocks keyword prioritisation. An unknown competitor set blocks
+   comparison pages. Say which, and name the command.
+
+   A `<unknown - requires research>` is a next step. A bare `<unknown>` is a shrug,
+   and the next skill has to work out for itself whether to ask, look, or leave it.
+12. **No filesystem?** In a chat-only agent, output the finished profile in one fenced
     block with the target filename on the first line as a comment, and tell the user to
     save it at that path before running any other seo-skills skill. Do not pretend a file
     was written.
@@ -113,7 +169,7 @@ never filled with an estimate.
 Two things, in this order.
 
 **The profile file**, written to the chosen path, following
-`profiles/PROFILE.template.md` section for section: Site, Markets, Who we sell to,
+`profiles/PROFILE.template.md` section for section: Site, Markets, Who this is for,
 What we sell, Product vocabulary, Language rules, Competitors, Site structure, This
 quarter, AI visibility. Each field carries its value or `<unknown>`, nothing else.
 

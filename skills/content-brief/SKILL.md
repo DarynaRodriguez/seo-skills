@@ -114,7 +114,26 @@ wearing a dozen costumes.
 10. **List required proof assets.** Which number, from which source; which customer,
     with permission status; which third-party citation. State plainly: a claim whose
     proof is missing is cut, not softened into a vaguer version of itself.
-11. **Write the fixes in the platform's own vocabulary.** Profile section 1 records
+11. **Carry the editorial policy into the brief, where the profile has one.**
+    Section 12 exists for sites where a page can affect someone's health, money,
+    legal position or safety, and it answers a question the claims list cannot:
+    not what may be said, but how a conclusion may be reached.
+
+    The case it is written for looks like this. A reader searches for the best
+    hospital to give birth in. **Target that intent**, because it is what she
+    types. Then let the policy decide the shape of the answer: a page built on
+    transparent criteria she can apply herself, rather than a ranked list with a
+    winner. Same query, same traffic, an answer the site is allowed to publish.
+
+    So the brief states the evidence standard, whether the page may recommend or
+    only compare, how lived experience is marked, and what the page must never
+    advise on. A writer given the keyword and not the policy will write the ranked
+    list, because that is what the query looks like it wants.
+
+    Where section 12 is absent, say the brief carries no editorial policy rather
+    than inventing one.
+
+12. **Write the fixes in the platform's own vocabulary.** Profile section 1 records
     the CMS. A brief that says "add a canonical tag" is generic advice; "set the
     canonical in Page settings, and note the global one in Site settings is already
     self-referencing" is an instruction someone can follow without a detour.
@@ -137,7 +156,7 @@ wearing a dozen costumes.
     thing it can do. A request the platform cannot execute wastes the reader's hour
     and the brief's credibility.
 
-12. **Set the CTA and the definition of done.** The CTA matches the funnel stage,
+13. **Set the CTA and the definition of done.** The CTA matches the funnel stage,
     not the highest-value action available. Definition of done is checkable by
     someone who did not write the page.
 

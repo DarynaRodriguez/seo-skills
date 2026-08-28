@@ -33,6 +33,7 @@ correct behaviour as a defect:
 | CMS or platform | 1. Site | Decides which page types are generated and indexable by default |
 | Markets, languages, hreflang pairs | 2. Markets | Decides whether a language variant in the index is right or wrong |
 | Pages that must never be indexed | 8. Site structure | Turns a noindex from a defect into intended behaviour |
+| Privacy-sensitive surfaces | 8. Site structure | An indexable one is a risk to escalate, never an opportunity to exploit |
 | Pillar, solution and blog paths | 8. Site structure | Defines the set that must be indexed |
 | Who can publish | 1. Site | The named approver for any de-indexing or robots change |
 
