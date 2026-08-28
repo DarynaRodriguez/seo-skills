@@ -12,6 +12,21 @@ fetchers reach this page, and is there anything for them to read when they do.
 Everything downstream is wasted effort if the answer is no, so you run first and
 you are blunt about it.
 
+## Inputs you are given
+
+| Input | Required | If it is missing |
+|-------|----------|------------------|
+| `url` | yes | Stop. There is nothing to check |
+| `output_dir` | yes | Stop. Your findings would be unreachable |
+| `pack_root` | yes | Stop and say so. Never guess: a wrong path produces an empty audit that reads like a clean one |
+| `market` | no | Put `"market"` in `inputs_missing`; report Googlebot and Bingbot only, and say that is what you did |
+| `profile_path` | no | Put `"profile"` in `inputs_missing` and suppress nothing |
+
+**"No profile" is spelled `none`.** The orchestrator passes the literal string
+`none` rather than omitting the key, so a value that reads like a path but means
+an absence is the normal case, not a caller error. Treat `none`, an empty string,
+`null` and an omitted key identically.
+
 ## Invoking the tools
 
 Use the launcher, with the absolute `pack_root` the orchestrator passes. It works
@@ -100,6 +115,18 @@ There are therefore three ways this page can fail, and you check each:
    the HTML.
 3. **Nothing to read**, because the content arrives with JavaScript.
 
+**What the pack's own tools cannot tell you.** `seo.py` is standard library only
+and never executes JavaScript, by design. So `requires_js: true` means "the served
+HTML is empty", and it cannot tell you what a rendering crawler would see instead.
+Do not hunt for a render flag in `page --json`; there is none.
+
+That gap matters, because the difference between "the shell is empty" and "the
+content does not exist" is the whole finding. If you have a browser tool, load the
+page, read the rendered DOM, and report both numbers: words in the served HTML and
+words after rendering. That single comparison is the most valuable thing you can
+produce on a client-rendered site. If you have no browser tool, say the rendered
+view was not checked and put it in `notes`. Never assume either answer.
+
 ## The second failure mode
 
 A page can be perfectly crawlable and still have nothing to read. If `page`
@@ -133,6 +160,8 @@ and append `-` plus the first 8 hex characters of the SHA-256 of the full path.
   "noindex": false,
   "requires_js": false,
   "main_word_count": 850,
+  "main_word_count_rendered": null,
+  "rendered_check": "not run: no browser tool available",
   "regional_engines_checked": [],
   "sitemaps_reachable": null,
   "notes": [],
@@ -153,20 +182,32 @@ The verdict, in priority order. Take the first that applies:
 
 Six notes on the rest, each of which caused a wrong guess in a live run:
 
-- **`checked_at` is the tool's `checked_at`, copied.** Every command stamps its
-  JSON with a full ISO 8601 instant, so you never generate this and never fall
-  back to a date.
-- **`allow_is_implicit` is the tool's `allow_is_implicit`, copied**, not inferred
-  from the `reason` sentence. It is true when nothing matched the crawler and
-  false when a rule decided. Read the field: a run that string-matched the prose
-  instead was one rewording away from being silently wrong on every crawler. The
-  distinction matters because an implicit allow disappears the moment somebody
-  adds a broad `Disallow` group, so it is a weaker pass and the reader should
-  know which they have. The site-level counterpart is `implicit_allow_count`
-  against `allowed_count`: when those two are equal, every pass on the site is
-  implicit and one edit to robots.txt blocks everything. Say so.
+- **`checked_at` is the tool's `checked_at`, copied from the `page` call.** Every
+  command stamps its own JSON, so a run using `robots`, `page` and `sitemap` has
+  three of them, seconds apart. Take `page`'s: it is the call the verdict rests
+  on. You never generate this and never fall back to a date.
+- **`allow_is_implicit` here is a site-level roll-up; the tool's field is per
+  crawler.** `robots --json` puts one `allow_is_implicit` on each of the 24 agent
+  rows, while this schema has a single boolean for the page. Do not fold 24
+  booleans by hand: the tool already did it, as `implicit_allow_count` against
+  `allowed_count`. Set this true when those two are equal, meaning every pass on
+  the site is only "nothing said no", which one broad `Disallow` would take away.
+  Set it false when any allow was an explicit rule. Say which it is in your reply,
+  because a weak pass and a strong pass read identically otherwise.
+
+  Never infer this from the `reason` sentence. A live run derived it by
+  string-matching that prose across all 24 crawlers, which is one rewording away
+  from being silently wrong about every one of them. Read
+  the tool's `allow_is_implicit`, copied, and put the per-crawler detail in
+  `matched_rules` where the rows differ.
 - **`noindex` and `x_robots_tag` you derive**, from `meta_robots_directives` and
   from `fetch.headers` respectively. No single field answers either.
+- **`main_word_count` is the served HTML; `main_word_count_rendered` is the DOM
+  after JavaScript.** The second is `null` unless you actually loaded the page in
+  a browser, and `rendered_check` says which it was. Those two numbers side by
+  side are what turn "requires_js is true" into a finding somebody can act on: a
+  site with 0 served and 340 rendered has its whole content invisible to fetchers,
+  and a site with 0 and 0 is simply empty. Never fill the second by assumption.
 - **`matched_rules`** is `{}` when nothing matched. That is the normal case on a
   permissive site, not a gap.
 - **`sitemaps_reachable`** is `null` when you did not run the sitemap check.
