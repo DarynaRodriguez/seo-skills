@@ -1208,5 +1208,85 @@ class TestNoUnsubstitutedPlaceholdersShip(unittest.TestCase):
         self.assertNotRegex("run `python <pack_root>/seo.py`", self.PLACEHOLDER)
 
 
+class TestTheReadmeDescribesTheActualRepo(unittest.TestCase):
+    """The README is the first thing anyone reads and nothing was checking it.
+
+    It claimed twenty-seven skills when there were twenty-eight, and 140 tests when
+    there were 375. Both drifted silently over several releases. A pack whose whole
+    argument is "cite it or do not claim it" should hold its own front page to that.
+    """
+
+    NUMBER_WORDS = {
+        "Twenty-five": 25, "Twenty-six": 26, "Twenty-seven": 27, "Twenty-eight": 28,
+        "Twenty-nine": 29, "Thirty": 30, "Thirty-one": 31, "Thirty-two": 32,
+    }
+
+    def setUp(self):
+        self.root = AGENTS_DIR.parent
+        self.readme = (self.root / "README.md").read_text(encoding="utf-8")
+        self.skills = sorted(d.name for d in SKILLS_DIR.iterdir() if (d / "SKILL.md").exists())
+
+    def test_the_spelled_out_skill_count_is_right(self):
+        claimed = [w for w in self.NUMBER_WORDS if "{} skills".format(w) in self.readme]
+        self.assertEqual(len(claimed), 1, "expected exactly one spelled-out skill count")
+        self.assertEqual(
+            self.NUMBER_WORDS[claimed[0]], len(self.skills),
+            "README says {} skills, the repo has {}".format(claimed[0], len(self.skills)),
+        )
+
+    def test_every_skill_has_a_catalogue_entry(self):
+        for name in self.skills:
+            with self.subTest(skill=name):
+                self.assertIn("`/{}`".format(name), self.readme,
+                              "{} is not in the README catalogue".format(name))
+
+    def test_every_skill_has_a_support_matrix_row(self):
+        for name in self.skills:
+            with self.subTest(skill=name):
+                self.assertRegex(
+                    self.readme, r"\|\s*" + re.escape(name) + r"\s*\|",
+                    "{} has no support matrix row".format(name),
+                )
+
+    def test_every_agent_is_named(self):
+        for path in sorted(AGENTS_DIR.glob("*.md")):
+            with self.subTest(agent=path.stem):
+                self.assertIn("`{}`".format(path.stem), self.readme)
+
+    def test_the_command_count_is_right(self):
+        from seo_tools.cli import build_parser
+
+        # Read the subparser choices, which is the same list --help prints, so the
+        # README cannot drift from the commands that actually exist.
+        actions = [a for a in build_parser()._actions if getattr(a, "dest", "") == "command"]
+        self.assertEqual(len(actions), 1, "expected one subcommand group")
+        actual = len(actions[0].choices)
+        words = {"Twelve": 12, "Thirteen": 13, "Fourteen": 14, "Fifteen": 15, "Sixteen": 16}
+        claimed = [w for w in words if "{} commands".format(w) in self.readme]
+        self.assertEqual(len(claimed), 1, "expected exactly one spelled-out command count")
+        self.assertEqual(words[claimed[0]], actual)
+
+    def test_the_test_count_is_not_badly_stale(self):
+        """Deliberately a tolerance, not an equality.
+
+        Pinning it exactly would mean every new test breaks the README, which
+        trains people to edit the number without reading the sentence. This
+        catches the failure that actually happened: a count left behind for
+        several releases.
+        """
+        claimed = [int(m) for m in re.findall(r"\*\* (\d{2,4}) tests,", self.readme)]
+        self.assertEqual(len(claimed), 1, "expected exactly one test-count claim")
+        loader = unittest.TestLoader()
+        actual = loader.discover(str(self.root / "tests"), top_level_dir=str(self.root)).countTestCases()
+        self.assertGreaterEqual(
+            claimed[0], actual * 0.8,
+            "README claims {} tests, the suite has {}".format(claimed[0], actual),
+        )
+        self.assertLessEqual(
+            claimed[0], actual,
+            "README claims {} tests, more than the {} that exist".format(claimed[0], actual),
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

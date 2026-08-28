@@ -7,8 +7,9 @@ skills, stops giving you generic SEO advice and starts doing the work: keyword
 maps, content briefs, meta copy, technical triage, cannibalisation resolution,
 and honest AI-answer visibility.
 
-Not a checklist. Twenty-seven skills that each do one job, hand off to each other,
-and refuse to invent a number.
+Not a checklist. Twenty-eight skills that each do one job, hand off to each other,
+refuse to invent a number, and cite the operator's own documentation for every
+threshold they state.
 
 📋 **Copy this prompt into any AI:**
 
@@ -163,13 +164,17 @@ python -m seo_tools page <url>        # everything measurable on one page
 python -m seo_tools meta <url>        # does the title fit, in pixels
 python -m seo_tools robots <url>      # which AI crawlers may read this
 python -m seo_tools gsc export.csv    # what your Search Console export says
+python -m seo_tools crawl export.csv  # any crawler's export, one row shape
+python -m seo_tools normalise <url>   # the join key, when two exports disagree
 ```
+
+Fourteen commands in total, all offline except the ones that fetch a page.
 
 **No install.** Standard library Python only, so it runs with whatever Python is
 already on your machine. No `pip install`, no requirements file, no API key, no
 account. CI fails the build if a dependency file ever appears.
 
-**Testable, which is the point.** 140 tests, run with
+**Testable, which is the point.** 381 tests, run with
 `python -m unittest discover -s tests -t .` and no test runner to install.
 Writing them found five real bugs, including a robots.txt group-precedence case
 that would have reported GPTBot as allowed when it was blocked.
@@ -196,6 +201,47 @@ Full reference, including the deliberate limits and how to use it from ChatGPT:
 
 ---
 
+## Sourced, not repeated
+
+SEO runs on folklore. Rules outlive the reason for them, get repeated until they
+sound like facts, and end up in tools.
+
+So every threshold in this pack either cites the operator that decides the
+behaviour, cites another operator's docs where that one is silent, or is labelled
+as this pack's own judgement. Anything else is folklore, and
+[`docs/source-of-record.md`](docs/source-of-record.md) is where the citations live,
+with the date each was checked.
+
+**The clearest example is one this pack got wrong itself.** Titles were capped at
+"50 to 60 characters" and descriptions at "140 to 155", the way most SEO tools do
+it. Google publishes no character limit for either, and truncates to fit the device
+width. Meanwhile `seo_tools` had been measuring pixel width correctly the whole
+time. The tools were right and the prose was folklore, which is roughly the state
+of the field. The rules are gone and a test scans for them coming back.
+
+Some other things the documentation says that the industry does not:
+
+- **`llms.txt` is ignored by Google Search**, neither harm nor help.
+- **Structured data is not required for generative AI search.** It earns rich
+  results, which is a different and real prize.
+- **E-E-A-T is not a ranking factor**, and of the four, trust is the one that
+  matters.
+- **There is no ideal page length.**
+- **Blocking `Google-Extended` does not remove you from AI Overviews.**
+
+**Where operators disagree, the pack says so rather than picking one.** Google
+states there is nothing extra to do for AI features. Bing publishes a grounding
+checklist and treats GEO as its own discipline. Both are true about their own
+systems, and a tool that quotes one as the industry position is misleading you
+about the other.
+
+That divergence is not academic. Bing documents `noarchive` as preventing content
+being used in Copilot answers, with no Google equivalent, so a page can stay
+perfectly indexable while dropping out of AI responses entirely. Every robots.txt
+check passes and the site is invisible where it matters. `seo.py page` raises it.
+
+---
+
 ## Agents, for the work that is too big for one pass
 
 A site audit is not one job. It is the same job on thirty pages, and doing it
@@ -214,9 +260,15 @@ the fan-out and can be put back together:
 
 A fifth runs on the other side of the work. Once an audit has said what is wrong,
 `/content-brief` fans out `seo-brief-writer`, one instance per page, to say what
-should be written instead. It answers with one of `write`, `rewrite`, `merge` or
-`do_not_publish`, and the last of those is the point: an agent that can only say
-yes is a content mill with a schema.
+should be written instead. It answers with exactly one of `write`, `rewrite`,
+`merge`, `do_not_publish` or `blocked`.
+
+The last two are the point. An agent that can only say yes is a content mill with
+a schema, so `do_not_publish` is a first-class answer and the definition forbids
+softening it because a brief was requested. `blocked` came from running it: six
+briefs all hit URLs that answered 200, sat in the sitemap, and rendered the
+application's own 404. No amount of good copy fixes a missing route, and the brief
+still gets written for the day the block clears.
 
 The orchestrator then aggregates by finding rather than by page, so one template
 problem across thirty URLs is one row and not thirty, and ranks by clicks at risk
@@ -338,7 +390,7 @@ skills/
 ├── site-inventory/SKILL.md             the page baseline every audit reads
 ├── keyword-discovery/SKILL.md
 ├── serp-analysis/SKILL.md
-├── ... 21 more
+├── ... 23 more
 └── schema-builder/
     ├── SKILL.md
     └── references/schema-recipes.md    copy-paste JSON-LD per page type
@@ -366,6 +418,8 @@ included. The short version:
 - **Never promise a ranking, a citation, or a date for one.** Nobody controls search results or AI answers.
 - **No black hat.** No cloaking, bought links, doorway pages, spun content, or schema describing something the page does not contain.
 - **Changing the tracked prompt set is not a way to improve AI visibility.** It changes coverage, not performance. Aided and unaided prompts are never blended.
+- **Cite the source or label the judgement.** Every threshold traces to the
+  operator that decides it, or says plainly that it is this pack's opinion.
 - **A named human approves every publish.** Skills draft, audit, and recommend.
 
 ---
