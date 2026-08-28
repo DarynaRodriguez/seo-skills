@@ -355,5 +355,133 @@ class TestEveryAgentDeclaresItsInputs(unittest.TestCase):
                 )
 
 
+class TestTheBriefWriterCanSayNo(unittest.TestCase):
+    """A brief writer that can only say yes is a content mill with a schema.
+
+    The valuable answer is often "do not publish this", and an agent asked for a
+    brief will produce one unless the definition makes refusing a first-class
+    outcome with a name.
+    """
+
+    def setUp(self):
+        self.text = (AGENTS_DIR / "seo-brief-writer.md").read_text(encoding="utf-8")
+
+    def test_the_recommendation_set_is_closed_and_named(self):
+        for value in ("write", "rewrite", "merge", "do_not_publish"):
+            with self.subTest(value=value):
+                self.assertIn("`{}`".format(value), self.text)
+
+    def test_refusing_is_explicitly_permitted(self):
+        self.assertIn("Do not soften `do_not_publish`", self.text)
+
+    def test_no_angle_forces_the_refusal(self):
+        # Otherwise an agent records angle_found false and recommends writing
+        # anyway, which is the failure this coupling exists to prevent.
+        self.assertIn('`angle_found: false` forces `recommendation: "do_not_publish"`', self.text)
+
+
+class TestTheBriefWriterCannotInventNumbers(unittest.TestCase):
+    """Every figure carries a source or is null. A brief's whole value is that.
+
+    Two specific lies are called out because both are easy and both are common:
+    a zero standing in for "no data", and a head term's volume standing in for
+    the page's opportunity.
+    """
+
+    def setUp(self):
+        self.text = (AGENTS_DIR / "seo-brief-writer.md").read_text(encoding="utf-8")
+
+    def test_absent_volume_is_null_not_zero(self):
+        self.assertIn("never `0`", self.text)
+
+    def test_the_head_term_substitution_is_named_as_a_guardrail(self):
+        self.assertIn("Never quote the head term's volume as this page's opportunity", self.text)
+
+    def test_questions_must_be_sourced(self):
+        self.assertIn("Never invent a reader question", self.text)
+
+    def test_the_render_gap_is_handled_rather_than_ignored(self):
+        # Briefing the shell of a client-rendered page describes a page that does
+        # not exist, and somebody would act on it.
+        self.assertIn("Do not brief the shell", self.text)
+
+
+class TestTheBriefWriterIsWiredIn(unittest.TestCase):
+    def test_a_skill_invokes_it(self):
+        # The validator warns on an agent nothing invokes. An agent no skill
+        # names is an agent nobody will ever run.
+        skills = (AGENTS_DIR.parent / "skills").rglob("SKILL.md")
+        named = [p for p in skills if "seo-brief-writer" in p.read_text(encoding="utf-8")]
+        self.assertTrue(named, "no skill mentions seo-brief-writer")
+
+    def test_it_writes_both_a_human_file_and_a_machine_file(self):
+        text = (AGENTS_DIR / "seo-brief-writer.md").read_text(encoding="utf-8")
+        self.assertIn("briefs/<slug>.md", text)
+        self.assertIn("briefs/<slug>.json", text)
+
+
+class TestBlockedIsAFirstClassOutcome(unittest.TestCase):
+    """A brief can be correct and still be worthless if the page cannot receive it.
+
+    Six live briefs all hit a URL that answered 200, sat in the sitemap, and
+    rendered the app's own 404. Three of the agents each invented a different key
+    for that fact, `critical_blocker`, `critical_finding_not_in_contract` and
+    `recommendation_caveat`, which is three names for one thing and unreadable to
+    any orchestrator comparing files.
+    """
+
+    def setUp(self):
+        self.text = (AGENTS_DIR / "seo-brief-writer.md").read_text(encoding="utf-8")
+
+    def test_blocked_is_in_the_closed_set(self):
+        self.assertIn("| `blocked` |", self.text)
+
+    def test_it_has_a_field_and_not_just_a_verdict(self):
+        self.assertIn("blocking_issue", self.text)
+
+    def test_the_field_is_coupled_to_the_verdict_in_both_directions(self):
+        self.assertIn(
+            "`blocking_issue` is `null` unless `recommendation` is `blocked`, and non-null",
+            self.text,
+        )
+
+    def test_a_soft_404_is_named_as_its_own_case(self):
+        # Distinct from an empty shell: one needs rendering, the other needs a
+        # route. Conflating them sends the wrong team.
+        self.assertIn("soft\n  404", self.text.replace("\r\n", "\n"))
+
+    def test_the_research_is_not_thrown_away(self):
+        self.assertIn("still write the rest of the brief", self.text)
+
+
+class TestHostProvidedToolsAreNotThisRepoBusiness(unittest.TestCase):
+    """The validator must not warn on one host's MCP names.
+
+    Enumerating Claude Code's browser tools in a known-tools list would make the
+    pack warn on every other host's, which inverts the purpose of the check. The
+    rule is the prefix, not an allowlist.
+    """
+
+    def test_an_mcp_tool_does_not_warn(self):
+        import subprocess
+        import sys
+
+        root = AGENTS_DIR.parent
+        result = subprocess.run(
+            [sys.executable, str(root / "scripts" / "validate.py")],
+            capture_output=True,
+            text=True,
+            cwd=str(root),
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("is not one this repo knows about", result.stdout)
+
+    def test_a_typo_in_a_core_tool_would_still_warn(self):
+        # The check still has to catch `Bahs`, or it is doing nothing at all.
+        source = (AGENTS_DIR.parent / "scripts" / "validate.py").read_text(encoding="utf-8")
+        self.assertIn("KNOWN_TOOLS", source)
+        self.assertIn('base.startswith("mcp__")', source)
+
+
 if __name__ == "__main__":
     unittest.main()

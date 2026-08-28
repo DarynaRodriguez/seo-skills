@@ -211,6 +211,12 @@ the fan-out and can be put back together:
 | `seo-page-auditor` | once per URL, concurrently | Everything measurable on one page |
 | `seo-drift-watcher` | once per baselined URL | What changed since the snapshot |
 
+A fifth runs on the other side of the work. Once an audit has said what is wrong,
+`/content-brief` fans out `seo-brief-writer`, one instance per page, to say what
+should be written instead. It answers with one of `write`, `rewrite`, `merge` or
+`do_not_publish`, and the last of those is the point: an agent that can only say
+yes is a content mill with a schema.
+
 The orchestrator then aggregates by finding rather than by page, so one template
 problem across thirty URLs is one row and not thirty, and ranks by clicks at risk
 rather than by severity. Ten rows out, the rest counted in a line.
