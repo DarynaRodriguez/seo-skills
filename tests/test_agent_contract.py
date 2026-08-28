@@ -586,11 +586,13 @@ class TestCitationsPointAtGoogle(unittest.TestCase):
 
     # The documentation roots this pack is allowed to cite as Google's own word.
     # Search Central for search behaviour, /speed for PageSpeed and Core Web Vitals
-    # measurement. Anything else on google.com is a blog post, a marketing page or
-    # an invention, and none of those is a source of record.
+    # measurement, Search Console Help for what its numbers mean. Anything else on
+    # google.com is a blog post, a marketing page or an invention, and none of those
+    # is a source of record.
     GOOGLE_DOC_ROOTS = (
         "https://developers.google.com/search/",
         "https://developers.google.com/speed/",
+        "https://support.google.com/webmasters/",
     )
 
     def test_every_google_looking_link_is_a_documented_source(self):
@@ -891,6 +893,135 @@ class TestPerformanceGuidanceMatchesTheSource(unittest.TestCase):
 
     def test_a_provider_row_exists_for_field_data(self):
         self.assertIn("CrUX", self.flat)
+
+
+class TestEeatIsStatedAccurately(unittest.TestCase):
+    """Two facts about E-E-A-T are routinely inverted, and both change the advice.
+
+    It is not a ranking factor, and trust is the component that matters. A pack
+    telling someone to "improve E-E-A-T to rank" is selling a lever that does not
+    exist.
+    """
+
+    def setUp(self):
+        self.quality = " ".join(
+            (SKILLS_DIR / "page-optimiser" / "references" / "content-quality.md")
+            .read_text(encoding="utf-8").split()
+        )
+        self.guidance = " ".join((DOCS_DIR / "google-guidance.md").read_text(encoding="utf-8").split())
+
+    def test_it_is_not_sold_as_a_ranking_factor(self):
+        for text in (self.quality, self.guidance):
+            with self.subTest():
+                self.assertIn("not a ranking factor", text)
+
+    def test_trust_is_named_as_the_one_that_matters(self):
+        for text in (self.quality, self.guidance):
+            with self.subTest():
+                self.assertIn("trust is most important", text.lower())
+
+    def test_the_four_letters_are_expanded(self):
+        for word in ("Experience", "Expertise", "Authoritativeness", "Trustworthiness"):
+            with self.subTest(word=word):
+                self.assertIn(word, self.quality)
+
+    def test_the_who_how_why_frame_is_present(self):
+        self.assertIn("who, how and why", self.guidance)
+
+    def test_the_authority_collision_is_called_out(self):
+        # "Authority" already means link equity in two other skills. Blurring the
+        # two produces advice to build links when the problem is an anonymous byline.
+        self.assertIn("link equity", self.guidance)
+        self.assertIn("different sense of", self.quality)
+
+
+class TestSearchConsoleSemanticsAreDocumented(unittest.TestCase):
+    """Every one of these produces a plausible wrong answer rather than an error."""
+
+    def setUp(self):
+        self.guidance = " ".join((DOCS_DIR / "google-guidance.md").read_text(encoding="utf-8").split())
+        self.code = (AGENTS_DIR.parent / "seo_tools" / "gsc.py").read_text(encoding="utf-8")
+
+    def test_position_is_documented_as_non_additive(self):
+        self.assertIn("not additive", self.guidance)
+
+    def test_position_is_documented_as_not_a_rank(self):
+        self.assertIn("Position is not a rank", self.guidance)
+
+    def test_rows_not_summing_to_totals_is_documented(self):
+        self.assertIn("do not sum to totals", self.guidance)
+
+    def test_anonymised_queries_are_documented(self):
+        self.assertIn("anonymised", self.guidance)
+
+    def test_the_code_explains_itself_where_it_is_read(self):
+        # A caveat only in the docs is a caveat the next maintainer will not see.
+        self.assertIn("not additive", self.code)
+        self.assertIn("support.google.com/webmasters", self.code)
+
+    def test_the_summary_field_names_its_own_weighting(self):
+        from seo_tools.gsc import summarise
+
+        rows = [
+            {"clicks": 10, "impressions": 1000, "position": 8.0},
+            {"clicks": 1, "impressions": 10, "position": 40.0},
+        ]
+        out = summarise(rows)
+        self.assertIn("avg_position_impression_weighted", out)
+        # A naive mean would be 24.0; weighting keeps the big row dominant.
+        self.assertLess(out["avg_position_impression_weighted"], 12)
+
+
+class TestIndexNowIsScopedHonestly(unittest.TestCase):
+    """The name promises Google. The protocol does not deliver it."""
+
+    def setUp(self):
+        self.skill = " ".join(
+            (SKILLS_DIR / "indexation-check" / "SKILL.md").read_text(encoding="utf-8").split()
+        )
+        self.guidance = " ".join((DOCS_DIR / "google-guidance.md").read_text(encoding="utf-8").split())
+
+    def test_the_skill_says_google_is_not_a_participant(self):
+        self.assertIn("Google is not a participant", self.skill)
+
+    def test_the_guidance_says_it_too(self):
+        self.assertIn("Google is not a participant", self.guidance)
+
+    def test_the_engines_it_does_reach_are_named(self):
+        for engine in ("Bing", "Seznam", "Naver"):
+            with self.subTest(engine=engine):
+                self.assertIn(engine, self.skill)
+
+    def test_it_is_not_offered_as_a_google_indexing_fix(self):
+        self.assertIn("never as a fix for a Google indexing problem", self.skill)
+
+
+class TestTheValidatorReadsCodeSpansAsCode(unittest.TestCase):
+    """A URL path in backticks is not a reference to a skill.
+
+    `/indexnow?url=` tripped the sibling-reference check, which would hit anyone
+    documenting a URL. The fix has to stay precise: a real bad reference in prose
+    must still be caught.
+    """
+
+    def test_a_url_path_in_a_code_span_is_ignored(self):
+        import subprocess
+        import sys
+
+        root = AGENTS_DIR.parent
+        result = subprocess.run(
+            [sys.executable, str(root / "scripts" / "validate.py")],
+            capture_output=True, text=True, cwd=str(root),
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("which is not a skill in this repo", result.stdout)
+
+    def test_the_check_still_exists_and_strips_both_forms(self):
+        source = (AGENTS_DIR.parent / "scripts" / "validate.py").read_text(encoding="utf-8")
+        self.assertIn("CODE_SPAN", source)
+        self.assertIn("FENCE.sub", source)
+        self.assertIn("CODE_SPAN.sub", source)
+        self.assertIn("which is not a skill in this repo", source)
 
 
 if __name__ == "__main__":

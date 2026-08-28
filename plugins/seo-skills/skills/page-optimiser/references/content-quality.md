@@ -22,6 +22,63 @@ and four filler ones.
 
 ---
 
+## E-E-A-T, stated accurately
+
+Experience, Expertise, Authoritativeness, Trustworthiness. Two things about it are
+routinely got wrong, and both change how you use it.
+
+**It is not a ranking factor.** Google says so directly: E-E-A-T itself is not a
+specific ranking factor, and its systems use a mix of signals that tend to identify
+content with good E-E-A-T ([creating-helpful-content](https://developers.google.com/search/docs/fundamentals/creating-helpful-content)). So never write "this
+will improve E-E-A-T and therefore rankings". Write what is missing and why a reader
+would not believe the page.
+
+**Trust is the one that matters.** Google's own wording: of these aspects, trust is
+most important, the others contribute to trust, and content does not necessarily
+have to demonstrate all of them. A page can be light on Experience and still be
+excellent if it is trustworthy. Judge trust first and let the rest serve it.
+
+Note this is a different sense of "authority" from the one `/internal-linking` and
+`/competitor-gap` use. Those mean link equity and domain rating. This means whether
+a reader has reason to believe the page. Do not let the two blur.
+
+### The three questions, applied to a live page
+
+Google frames self-assessment as who, how and why. Each is checkable by looking:
+
+- **Who wrote it.** Is there a byline, and does it lead anywhere that establishes
+  the person knows this? A brand name in a `Person` slot is not a byline. On a page
+  making financial, medical or legal claims, an unnamed author is the finding.
+- **How it was made.** Where a page rests on testing, a dataset, or automation
+  including AI generation, is that self-evident to a reader? Google asks for
+  disclosure where automation is involved. A page of AI-written comparisons with no
+  disclosure and no method is the case it describes.
+- **Why it exists.** Does it read as written to help someone, or to attract a
+  visit? Content made mainly because someone thought it would earn search traffic is
+  the thing Google names as the failure.
+
+### What to flag, in trust order
+
+1. **A claim with no source.** "Reduces cost dramatically" with no number, or a
+   number with no origin. This is the single most common trust failure and the
+   easiest to fix or cut.
+2. **No named author on a page that needs one.** Anything a reader would act on.
+3. **Undisclosed automation** on a page presented as researched or tested.
+4. **Verifiable factual errors.** Google lists these explicitly. One wrong figure
+   costs more than ten missing ones.
+5. **No first-hand evidence where the topic demands it.** A review of software
+   nobody appears to have used. Experience is the E that was added, and it is the
+   hardest to fake and the easiest to show: a screenshot from the actual product, a
+   number from your own run, a photograph you took.
+6. **A page that cannot say who stands behind it.** No organisation, no contact, no
+   accountability.
+
+Where the fix is a person, say so plainly. "Add a byline from someone who has done
+this" is a real recommendation, and a rewrite that leaves the page anonymous has not
+addressed the finding.
+
+---
+
 ## Text quality
 
 ### Failure patterns to flag and fix

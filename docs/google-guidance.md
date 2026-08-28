@@ -27,6 +27,9 @@ pages, and the AI optimization guide was last updated 2026-07-10.
 | How Core Web Vitals are measured | [PageSpeed Insights](https://developers.google.com/speed/docs/insights/v5/about) |
 | Performance technique | [web.dev/performance](https://web.dev/performance) |
 | Accessibility technique | [web.dev/accessibility](https://web.dev/accessibility) |
+| E-E-A-T and content quality | [creating-helpful-content](https://developers.google.com/search/docs/fundamentals/creating-helpful-content) |
+| What Search Console's numbers mean | [performance data](https://support.google.com/webmasters/answer/7042828) |
+| The IndexNow protocol | [indexnow.org](https://www.indexnow.org/documentation) |
 
 ## What Google says, and what this pack does about it
 
@@ -192,6 +195,104 @@ and never calls a page accessible.
 Accessibility is not a documented Google ranking factor and no skill here claims it
 is. It is worth doing because more people can then use the page, and in many
 jurisdictions because it is required by law.
+
+## E-E-A-T, and the two things everyone gets wrong about it
+
+Experience, Expertise, Authoritativeness, Trustworthiness
+([creating-helpful-content](https://developers.google.com/search/docs/fundamentals/creating-helpful-content)).
+
+**It is not a ranking factor.** Google states that E-E-A-T itself is not a specific
+ranking factor, and that its systems use a mix of signals which tend to identify
+content with good E-E-A-T. So it is a lens for judging a page, never a lever to
+pull. No skill here may write "improve E-E-A-T to rank".
+
+**Trust is the one that matters.** Google's wording is that of these aspects trust
+is most important, that the others contribute to trust, and that content does not
+necessarily have to demonstrate all of them. A page thin on Experience can still be
+excellent. A page nobody has reason to believe cannot.
+
+Google frames the self-assessment as **who, how and why**: who wrote it, how it was
+made including whether automation is disclosed, and why it exists at all. All three
+are checkable by looking at the page, which is what makes them usable in an audit
+rather than a philosophy.
+
+**One naming collision to avoid.** "Authority" in `/internal-linking` and
+`/competitor-gap` means link equity and domain rating. "Authoritativeness" here
+means whether a reader has reason to believe the page. Different concepts, and
+blurring them produces advice to build links when the actual problem is an
+anonymous byline.
+
+`skills/page-optimiser/references/content-quality.md` carries the applied version,
+in trust order, with what to flag on a live page.
+
+## Search Console: the only real traffic number, and four ways to misread it
+
+Search Console is the one source in this pack that reports traffic a site actually
+received. Everything else is a model. That makes its quirks worth knowing, because
+each one produces a plausible wrong answer rather than an error
+([performance data](https://support.google.com/webmasters/answer/7042828)).
+
+**Position is not additive.** It is the topmost placement seen, averaged per query.
+A plain mean across rows weights a nine-impression query the same as a
+ninety-thousand-impression one. `seo_tools/gsc.py` returns
+`avg_position_impression_weighted` and names it that way, which is the least wrong
+summary available and still discards the distribution.
+
+**Position is not a rank.** Position 11 can be a desktop knowledge panel, the first
+result on page two, or the second image row on mobile. Comparing position across
+years without accounting for layout changes compares two different things.
+
+**Rows do not sum to totals.** Group by query or by page and the numbers will not
+reconcile with the property total, because one result element can carry several
+URLs and is counted once per property and once per URL. A report whose rows do not
+add up is not necessarily broken.
+
+**Low-frequency queries are anonymised away.** Query-level clicks are a floor, not
+the truth, and the gap is largest exactly where a long tail matters most.
+
+The practical rule for this pack: weight findings by clicks, which are countable,
+and treat position as a direction rather than a measurement.
+
+## Other engines document themselves, and IndexNow is not a Google lever
+
+Google's docs say nothing about other engines, and have no reason to. Where this
+pack covers Bing, Naver, Seznam or the AI fetchers, the source is each operator's
+own documentation, and the pack says which.
+
+**IndexNow** is worth knowing precisely because its name suggests more than it
+delivers ([protocol](https://www.indexnow.org/documentation)):
+
+- **Google is not a participant.** It tested the protocol and never adopted it.
+  Recommending IndexNow to fix a Google indexing problem is the single most likely
+  error here, and the name invites it.
+- **Participants are Bing, Yandex, Seznam, Naver and Yep.** Submitting to one
+  shares the URL with the others. Through Bing it reaches Copilot, which is the
+  part that matters for AI visibility work.
+- The implementation is a key file at the domain root and either a GET per URL or
+  a POST carrying up to 10,000. Cheap enough that the usual objection is ownership
+  rather than cost.
+
+`/indexation-check` carries it as a step, framed as a discovery fix for those
+engines and explicitly not for Google.
+
+## What is not a source of truth
+
+Worth stating, because the alternative is a pack that quietly mixes evidence with
+folklore:
+
+- **Correlation studies** describe what co-occurs, not what causes. `/citation-gap`
+  uses one, and it is legitimate as evidence about how answers get assembled and
+  illegitimate as a mechanism. Label it that way wherever it appears.
+- **Vendor ranking-factor lists** are marketing built on correlation. They are not
+  sources of record and nothing here should cite one as though they were.
+- **Blog consensus**, including good blogs. If a claim only exists because people
+  repeat it, it goes in the folklore bin. The 60-character title rule lived there
+  for a decade.
+- **This pack's own past output.** An audit is evidence about one site on one day,
+  not a general rule.
+
+The test in `AGENTS.md` stands: cite a primary source, cite an operator's own docs,
+or label it as this pack's judgement.
 
 ## Where this pack goes beyond Google
 
