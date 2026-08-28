@@ -1683,9 +1683,24 @@ class TestEverySkillNumbersItsStepsInOrder(unittest.TestCase):
 
     STEP = re.compile(r"^(\d+)\. \*\*", re.M)
 
+    @staticmethod
+    def _procedure(text):
+        """Only the Procedure section counts.
+
+        A numbered list elsewhere is prose, not a step, and a skill may legitimately
+        enumerate four things inside an explanation without those becoming part of
+        its procedure.
+        """
+        start = text.find("## Procedure")
+        if start == -1:
+            return ""
+        rest = text[start + len("## Procedure"):]
+        end = rest.find(chr(10) + "## ")
+        return rest if end == -1 else rest[:end]
+
     def test_all_skills(self):
         for path in sorted(SKILLS_DIR.rglob("SKILL.md")):
-            numbers = [int(n) for n in self.STEP.findall(path.read_text(encoding="utf-8"))]
+            numbers = [int(n) for n in self.STEP.findall(self._procedure(path.read_text(encoding="utf-8")))]
             if not numbers:
                 continue
             with self.subTest(skill=path.parent.name):
@@ -1885,6 +1900,97 @@ class TestPrivacyOutranksOpportunity(unittest.TestCase):
     def test_indexation_check_reads_the_field(self):
         text = (SKILLS_DIR / "indexation-check" / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("Privacy-sensitive surfaces", text)
+
+
+class TestSitemapDiscoveryNamesItsState(unittest.TestCase):
+    """"No sitemap" and "I could not reach the sitemap" look identical in a count of zero.
+
+    They are not the same fact. A missing sitemap is a site to crawl instead. An
+    unreachable one leaves you not knowing whether one exists, and falling back as
+    though it were absent produces a partial inventory presented as a whole one.
+    Found by an external tester whose environment refused to fetch either file.
+    """
+
+    def test_the_field_exists_and_names_the_ok_case(self):
+        from seo_tools.sitemaps import _discovery_state
+
+        found = [{"url": "https://e.com/sitemap.xml", "reachable": True, "status": 200}]
+        self.assertEqual(_discovery_state(True, found, found), "ok")
+
+    def test_all_404s_with_a_reachable_robots_is_missing(self):
+        from seo_tools.sitemaps import _discovery_state
+
+        found = [{"url": "https://e.com/sitemap.xml", "reachable": False, "status": 404},
+                 {"url": "https://e.com/sitemap_index.xml", "reachable": False, "status": 404}]
+        self.assertEqual(_discovery_state(True, found, []), "missing")
+
+    def test_an_unreachable_robots_is_not_a_missing_sitemap(self):
+        # robots.txt is the most reliably present file on the web. Failing to get it
+        # says more about the connection than about the site.
+        from seo_tools.sitemaps import _discovery_state
+
+        self.assertEqual(_discovery_state(False, [], []), "unreachable")
+
+    def test_a_fetch_error_is_unreachable_not_missing(self):
+        from seo_tools.sitemaps import _discovery_state
+
+        found = [{"url": "https://e.com/sitemap.xml", "reachable": False, "error": "timed out"}]
+        self.assertEqual(_discovery_state(True, found, []), "unreachable")
+
+    def test_the_state_is_in_the_payload(self):
+        from seo_tools import sitemaps
+
+        # No network: exercise the assembly path through a stubbed fetch.
+        original = sitemaps.fetch
+        try:
+            sitemaps.fetch = lambda url, **kw: {"ok": True, "status": 404, "final_url": url, "text": "", "body": b""}
+            out = sitemaps.discover("https://example.invalid/")
+        finally:
+            sitemaps.fetch = original
+        self.assertIn("discovery_state", out)
+        self.assertEqual(out["discovery_state"], "missing")
+
+
+class TestSiteInventoryHasABlockedContract(unittest.TestCase):
+    """Three search-discovered URLs are three findings, not a site inventory.
+
+    An external tester ran this skill in an environment with web search but no
+    fetch capability. The skill told them to fall back to a depth-3 crawl, which
+    needs the same capability they did not have, and said nothing about the state
+    they were actually in.
+    """
+
+    def setUp(self):
+        self.text = (SKILLS_DIR / "site-inventory" / "SKILL.md").read_text(encoding="utf-8")
+        self.flat = " ".join(self.text.split())
+
+    def test_the_four_states_are_named(self):
+        for state in ("`ok`", "`missing`", "`unreachable`", "not supported by the environment"):
+            with self.subTest(state=state):
+                self.assertIn(state, self.text)
+
+    def test_missing_and_unreachable_are_distinguished(self):
+        self.assertIn("Not the same as missing", self.flat)
+
+    def test_search_results_are_forbidden_as_a_url_source(self):
+        # The most tempting wrong answer: site: query, 27 URLs, call it an inventory.
+        self.assertIn("Never build the URL set from search results", self.flat)
+        self.assertIn("biased towards what is already indexed", self.flat)
+
+    def test_a_blocked_run_produces_no_csv(self):
+        self.assertIn("produces **no `.seo/pages.csv`**", self.text)
+
+    def test_the_blocked_report_names_the_missing_capability(self):
+        self.assertIn("authoritative URL discovery", self.flat)
+
+    def test_findings_are_preserved_without_becoming_an_inventory(self):
+        self.assertIn("it is not a row in a page inventory", self.flat)
+
+    def test_a_blocked_run_is_framed_as_a_useful_result(self):
+        self.assertIn("A blocked run that names its missing capability is a useful result", self.flat)
+
+    def test_the_data_row_points_at_the_contract(self):
+        self.assertIn("see the blocked contract above and produce no inventory", self.flat)
 
 
 if __name__ == "__main__":

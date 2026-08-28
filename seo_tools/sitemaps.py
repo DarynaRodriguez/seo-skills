@@ -69,6 +69,37 @@ def parse_sitemap(body: bytes, url: str = "") -> Dict[str, object]:
     }
 
 
+def _discovery_state(robots_ok: bool, found: List[Dict[str, object]], reachable: List[Dict[str, object]]) -> str:
+    """Name why there is no URL list, because the reasons need different actions.
+
+    "No sitemap" and "I could not reach the sitemap" look identical in a count of
+    zero and are not the same fact. A missing sitemap is a site to crawl instead. An
+    unreachable one leaves you not knowing whether it exists, so falling back as
+    though it were absent produces a partial inventory presented as a whole one.
+
+    A caller that cannot reach the host at all never gets here: validate_url and
+    fetch raise or return ok=False first, and the CLI reports that as its own
+    failure.
+    """
+    if reachable:
+        return "ok"
+    if not robots_ok:
+        # robots.txt is the most reliably present file on the web. Failing to get it
+        # says more about the connection than about the site.
+        return "unreachable"
+    # Errors first. A candidate that failed without a status never answered at all,
+    # and `all()` over an empty list of statuses is True, which would otherwise read
+    # a timeout as a clean 404.
+    if any(f.get("error") for f in found):
+        return "unreachable"
+    statuses = [f.get("status") for f in found if f.get("status") is not None]
+    if statuses and all(s == 404 for s in statuses):
+        return "missing"
+    if not statuses:
+        return "unreachable"
+    return "missing"
+
+
 def discover(site_url: str, allow_private: bool = False) -> Dict[str, object]:
     """Find the sitemaps for a site: robots.txt declarations, then conventions."""
     split = urlsplit(site_url)
@@ -137,6 +168,7 @@ def discover(site_url: str, allow_private: bool = False) -> Dict[str, object]:
     ]
     return {
         "site": origin,
+        "discovery_state": _discovery_state(robots_ok, found, reachable),
         "robots_reachable": robots_ok,
         "declared_in_robots": declared,
         "stale_declarations": stale_declarations,
