@@ -1571,5 +1571,107 @@ class TestBothWorkedExamplesExist(unittest.TestCase):
                 self.assertNotIn("<unknown>", text)
 
 
+class TestCompetitorIsThreeThings(unittest.TestCase):
+    """One bucket meant a forum could reach a skill that pulls ranking data.
+
+    An external tester predicted the contamination before it happened: their site's
+    real search rivals are Reddit threads and an expat portal, its product rivals
+    are arguably nothing, and /keyword-discovery was reading a single undifferentiated
+    list of "competitor names".
+    """
+
+    def setUp(self):
+        self.template = (PROFILES_DIR / "PROFILE.template.md").read_text(encoding="utf-8")
+        self.flat = " ".join(self.template.split())
+
+    def test_the_three_buckets_exist(self):
+        for heading in ("### Product alternatives",
+                        "### Organic search competitors",
+                        "### Information alternatives"):
+            with self.subTest(heading=heading):
+                self.assertIn(heading, self.template)
+
+    def test_search_competitors_carry_provenance(self):
+        # A name from an interview is a hypothesis, not a search competitor.
+        self.assertIn("| Verified by |", self.template)
+        self.assertIn("UNVERIFIED", self.template)
+
+    def test_the_reason_for_the_split_is_stated(self):
+        self.assertIn("downstream skills use them differently", self.flat)
+
+    def test_comparison_policy_separates_products_from_decisions(self):
+        self.assertIn("Decision-support comparisons", self.template)
+
+    def test_keyword_discovery_reads_only_the_verified_bucket(self):
+        flat = " ".join((SKILLS_DIR / "keyword-discovery" / "SKILL.md").read_text(encoding="utf-8").split())
+        self.assertIn("organic search competitors only", flat)
+
+    def test_competitor_gap_says_which_bucket_it_means(self):
+        flat = " ".join((SKILLS_DIR / "competitor-gap" / "SKILL.md").read_text(encoding="utf-8").split())
+        self.assertIn("Which competitors this skill means", flat)
+        self.assertIn("never \"write a better Reddit\"", flat)
+
+    def test_competitor_gap_refuses_an_unverified_set(self):
+        flat = " ".join((SKILLS_DIR / "competitor-gap" / "SKILL.md").read_text(encoding="utf-8").split())
+        self.assertIn("say so and stop before the comparison", flat)
+
+
+class TestAnOutcomeIsNotAMetric(unittest.TestCase):
+    """"People find us and use the guides" is an outcome. Converting it invents a target.
+
+    The template demanded "the one metric that matters". A founder answered with the
+    result they cared about, and turning that into "organic sessions" would have
+    broken the pack's own rule against inventing values, silently.
+    """
+
+    def setUp(self):
+        self.template = (PROFILES_DIR / "PROFILE.template.md").read_text(encoding="utf-8")
+
+    def test_the_two_fields_are_separate(self):
+        self.assertIn("Primary SEO outcome:", self.template)
+        self.assertIn("Success metric:", self.template)
+
+    def test_the_old_single_field_is_gone(self):
+        self.assertNotIn("The one metric that matters", self.template)
+
+    def test_a_missing_metric_is_a_documented_answer(self):
+        flat = " ".join(self.template.split())
+        self.assertIn("or `<unknown>` if there is not one yet", flat)
+
+    def test_the_setup_skill_forbids_the_conversion(self):
+        flat = " ".join((SKILLS_DIR / "seo-profile-setup" / "SKILL.md").read_text(encoding="utf-8").split())
+        self.assertIn("Do not convert an outcome into a metric", flat)
+
+    def test_both_examples_carry_both_fields(self):
+        for name in ("example-b2b-saas.md", "example-b2c-app.md"):
+            text = (PROFILES_DIR / name).read_text(encoding="utf-8")
+            with self.subTest(example=name):
+                self.assertIn("Primary SEO outcome:", text)
+                self.assertIn("Success metric:", text)
+
+
+class TestTheExamplesShowTheTaxonomyWorking(unittest.TestCase):
+    def test_both_examples_use_the_three_buckets(self):
+        for name in ("example-b2b-saas.md", "example-b2c-app.md"):
+            text = (PROFILES_DIR / name).read_text(encoding="utf-8")
+            with self.subTest(example=name):
+                self.assertIn("### Product alternatives", text)
+                self.assertIn("### Organic search competitors", text)
+                self.assertIn("### Information alternatives", text)
+
+    def test_the_consumer_example_shows_an_honest_none(self):
+        # A product with no direct equivalent should be able to say so.
+        text = (PROFILES_DIR / "example-b2c-app.md").read_text(encoding="utf-8")
+        self.assertIn("none identified", text)
+
+    def test_the_consumer_example_marks_its_unverified_row(self):
+        text = (PROFILES_DIR / "example-b2c-app.md").read_text(encoding="utf-8")
+        self.assertIn("UNVERIFIED", text)
+
+    def test_an_official_source_is_cited_not_outranked(self):
+        flat = " ".join((PROFILES_DIR / "example-b2c-app.md").read_text(encoding="utf-8").split())
+        self.assertIn("Link to them", flat)
+
+
 if __name__ == "__main__":
     unittest.main()

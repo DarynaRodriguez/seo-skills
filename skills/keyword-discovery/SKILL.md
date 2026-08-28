@@ -31,7 +31,7 @@ From the profile, extract the seed inputs explicitly before pulling any data:
 |-------------|-----------------|
 | Category words buyers use | 4. What we sell |
 | Audience language and the job to be done | 3. Who this is for |
-| Competitor names | 7. Competitors |
+| Competitor domains, **organic search competitors only** | 7. Competitive landscape |
 | Markets, languages, engines | 2. Markets |
 | Terms that must never appear | 5. Product vocabulary, 6. Language rules |
 | Topics that are off limits | 9. This quarter |

@@ -12,6 +12,28 @@ start by checking whether the rivals in the sales deck are the rivals in the sea
 results. They usually are not, and the difference is the most useful thing in the
 report.
 
+## Which competitors this skill means
+
+Profile section 7 holds three different lists, and this skill uses exactly one of
+them: **organic search competitors**, the domains search data has actually shown
+ranking for the terms in question.
+
+- **Product alternatives** are a commercial fact, not a search one. A product that
+  nobody ranks against is not a gap in your content.
+- **Information alternatives**, meaning forums, communities and official sources,
+  are where a lot of demand genuinely goes, and they are not a domain-versus-domain
+  comparison. A Reddit thread outranking you is a real finding and the fix is never
+  "write a better Reddit". Report it as an intent this site does not serve, and hand
+  it to `/content-brief` rather than treating it as a competitor to close a gap
+  against.
+- **An official source** outranking you is usually correct. Cite it; do not plan to
+  displace it.
+
+If the organic list is empty or every row says `UNVERIFIED`, say so and stop before
+the comparison. A gap analysis against an unverified competitor set produces a
+confident ranked list built on somebody's guess, which is worse than no list. Pull
+the SERP or the ranking data first, then come back.
+
 ## Step 0: Load the profile
 
 Read the site profile before anything else:

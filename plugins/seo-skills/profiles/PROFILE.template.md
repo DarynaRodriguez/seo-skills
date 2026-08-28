@@ -93,13 +93,47 @@ just in section 2, because it decides whether the whole keyword set is viable.
 - **Numbers:** <% with numerals, no spelled-out percentages>
 - **Tone in one line:** <how a smart peer would say it out loud>
 
-## 7. Competitors
+## 7. Competitive landscape
 
-| Competitor | Why they show up | Where they beat us |
-|-----------|-----------------|-------------------|
-| <Name> | <ranks for our category terms> | <domain authority, content depth, brand> |
+**"Competitor" means three different things and downstream skills use them
+differently.** Keep them apart. A forum in the product row is how `/competitor-gap`
+ends up comparing you to Reddit, and how `/keyword-discovery` tries to pull ranking
+data for a Facebook group.
 
-- **Comparison pages we will write:** <which "X alternative" pages are allowed>
+### Product alternatives
+
+What someone would use instead of this. `none` and `<unknown>` are both real
+answers, and for a product with no direct equivalent, `none` is the honest one.
+
+| Name | What they do instead | Where they beat us |
+|------|---------------------|-------------------|
+| <Name> | <the job they solve instead> | <what they are genuinely better at> |
+
+### Organic search competitors
+
+Domains that rank for the terms you want. **Only list a domain here once search data
+shows it ranking**, and say what showed it. A name offered in an interview is a
+hypothesis, not a search competitor, and promoting it silently puts unverified input
+into every skill that reads this.
+
+| Domain | Verified by | Why they show up | Where they beat us |
+|--------|-------------|-----------------|-------------------|
+| <domain> | <Ahrefs project, SERP read with date, or UNVERIFIED> | <ranks for our category terms> | <domain authority, content depth, brand> |
+
+### Information alternatives
+
+Where the audience gets answers that are not a product: forums, communities,
+official sources, group chats. Some you can compete with. Some you should not try
+to, and an official source is usually one to cite rather than outrank.
+
+| Source | Why it wins | Can we compete for this query |
+|--------|------------|------------------------------|
+| <forum, community, official page> | <peer experience, authority, freshness> | <yes, partly, no and we link to it instead> |
+
+### Comparison-content policy
+
+- **Comparison pages we will write:** <which "X alternative" pages are allowed, or none>
+- **Decision-support comparisons:** <comparisons between options in the world rather than between products, such as one procedure against another>
 - **Competitors we will not name in copy:** <legal or partnership reasons>
 
 ## 8. Site structure
@@ -112,7 +146,8 @@ just in section 2, because it decides whether the whole keyword set is viable.
 
 ## 9. This quarter
 
-- **The one metric that matters:** <qualified demo requests from organic, not sessions>
+- **Primary SEO outcome:** <what should be true that is not true now, in plain words>
+- **Success metric:** <the number that would show it, or `<unknown>` if there is not one yet>
 - **Target market and language for new work:** <UK English first, DE second>
 - **Content capacity:** <pages per month the team can actually publish and review>
 - **No-go areas:** <topics, claims, or pages that are off limits>

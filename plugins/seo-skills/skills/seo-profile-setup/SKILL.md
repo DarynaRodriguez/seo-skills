@@ -102,12 +102,22 @@ never filled with an estimate.
      does not count, which language they search in. For a consumer audience, ask
      about life stage and need state rather than role and company size, and ask
      what ends their need for it: a life stage has an exit, a job title does not.
-   - Competitors: confirm or cut the Ahrefs list, name anyone missing, name anyone
-     legal will not let you write about.
+   - Competitive landscape: ask the three separately, because the answers differ
+     and mixing them poisons `/competitor-gap` and `/keyword-discovery`. What would
+     someone use instead of this. Which domains rank for these terms, which you
+     confirm from search data rather than from the answer. And where else this
+     audience gets answers, which is often a forum, a group or an official page
+     rather than a product at all. Anything a person names without search data
+     behind it is recorded as `UNVERIFIED` and stays that way.
    - Claims and proof: what may be cited by name, what has not been signed off.
    - Vocabulary and language: confirm the always-write and never-write pairs, the
      banned words, the character bans.
    - Structure and capacity: pillar pages, never-index paths, pages per month.
+   - Outcome and metric: what should be true that is not true now, and separately
+     the number that would show it. **Do not convert an outcome into a metric.** If
+     the answer is "people find us and actually use the guides", that is the
+     outcome, and the metric is `<unknown>` until someone names one. Writing
+     "organic sessions" there invents a target nobody set.
    - AI visibility: which engines matter, where the prompt set lives, which sources
      this buyer trusts.
    Skip any batch the evidence already settled. Confirm rather than re-ask.

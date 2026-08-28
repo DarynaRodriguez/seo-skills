@@ -79,16 +79,40 @@ reader and the search query need it.
 "Simply" and "just" are banned because the process is not simple and the reader
 already feels behind.
 
-## 7. Competitors
+## 7. Competitive landscape
 
-| Competitor | Why they show up | Where they beat us |
-|-----------|-----------------|-------------------|
-| A large English-language expat portal | Ranks for almost every procedural term in English | Domain age, breadth, a full-time editorial team |
-| Official government pages | Rank for the German term and are the authority | They are the source. We link to them and never compete on being the source |
-| Reddit and Facebook groups | Rank for the long, panicked phrasings | Real people answering in real time, which we cannot match on freshness |
+This is the section that showed why one bucket was not enough. Almost everything
+competing for this audience's attention is not a product, and two of the three rows
+below must never be treated as domains to outrank.
 
-- **Comparison pages we will write:** none. There is nothing to compare and it would be tasteless here
-- **Competitors we will not name in copy:** none for legal reasons, but official sources are cited rather than framed as competition
+### Product alternatives
+
+| Name | What they do instead | Where they beat us |
+|------|---------------------|-------------------|
+| none identified | The realistic alternative is a spreadsheet, a group chat and a friend who arrived earlier | Free, already in use, and personalised |
+
+### Organic search competitors
+
+| Domain | Verified by | Why they show up | Where they beat us |
+|--------|-------------|-----------------|-------------------|
+| a large English-language expat portal | UNVERIFIED, named by the founder, no ranking data pulled | Believed to rank for most English procedural terms | Domain age, breadth, a full-time editorial team |
+
+One row, unverified, and it stays that way until a SERP is read. Nothing downstream
+may treat this as a competitor set.
+
+### Information alternatives
+
+| Source | Why it wins | Can we compete for this query |
+|--------|------------|------------------------------|
+| Official government pages | They are the authority and the source of the deadline | No. Link to them. Being cited alongside them is the goal |
+| Reddit and Facebook groups | Real people answering the long, panicked phrasing within the hour | Partly. We can answer the same question better once, but never fresher |
+| A friend who arrived two years earlier | Trusted, specific, free | No, and this is the standard the writing is measured against |
+
+### Comparison-content policy
+
+- **Comparison pages we will write:** none. There is no product to compare against and it would be tasteless here
+- **Decision-support comparisons:** yes, and they are the strongest content on the site. Hospital birth against home birth, statutory against private insurance. Comparisons between options in the world, never between brands
+- **Competitors we will not name in copy:** none for legal reasons. Official sources are cited, not framed as competition
 
 ## 8. Site structure
 
@@ -100,7 +124,8 @@ already feels behind.
 
 ## 9. This quarter
 
-- **The one metric that matters:** Completed checklists, not sessions. Someone who reads and does nothing has not been helped
+- **Primary SEO outcome:** Someone with a letter they do not understand finds the right guide and gets the thing done, rather than missing a deadline
+- **Success metric:** Completed checklists, not sessions. Someone who reads and does nothing has not been helped
 - **Target market and language for new work:** Germany, English
 - **Content capacity:** Two guides a month, both reviewed. That is the real ceiling and briefs should respect it rather than proposing twelve
 - **No-go areas:** Anything diagnostic or prescriptive. Any deadline or figure without an official source. Anything that reads as a substitute for a professional
