@@ -30,7 +30,7 @@ From the profile, extract the seed inputs explicitly before pulling any data:
 | Seed source | Profile section |
 |-------------|-----------------|
 | Category words buyers use | 4. What we sell |
-| Buyer language and the job to be done | 3. Who we sell to |
+| Audience language and the job to be done | 3. Who this is for |
 | Competitor names | 7. Competitors |
 | Markets, languages, engines | 2. Markets |
 | Terms that must never appear | 5. Product vocabulary, 6. Language rules |

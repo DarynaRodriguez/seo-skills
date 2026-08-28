@@ -42,7 +42,13 @@ Two notes for the tools, which follow from this table rather than from any defau
   14 languages; anything else is named positionally with `--columns`. See
   `docs/execution-layer.md`.
 
-## 3. Who we sell to
+## 3. Who this is for
+
+**Two shapes. Keep the one that fits and delete the other**, because a buying
+committee and a person in a life stage need different questions, and answering the
+wrong set produces a profile full of `<unknown>` that is not actually unknown.
+
+<!-- KEEP ONE: business audience -->
 
 - **Primary buyer:** <role, seniority, company size, industry>
 - **Secondary buyer or influencer:** <role>
@@ -50,12 +56,26 @@ Two notes for the tools, which follow from this table rather than from any defau
 - **What disqualifies a visitor:** <who this product is not for>
 - **How they search:** <do they search the category, the problem, a competitor, or a compliance term>
 
-## 4. What we sell
+<!-- KEEP ONE: consumer audience -->
 
-- **Category we compete in:** <the words buyers use, not internal branding>
-- **What the product actually does:** <two sentences, no adjectives>
-- **Proof we can cite:** <named customers, verified numbers, certifications, analyst mentions>
-- **Claims we may not make:** <anything legal, security or product has not signed off>
+- **Primary audience:** <who they are, in their own words>
+- **Life stage or situation:** <what is true of them right now that makes this relevant, and for how long>
+- **Where they are:** <country, city, or a situation such as newly arrived, remote, shift work>
+- **The need state:** <what they are trying to sort out, in the words they would use to a friend>
+- **What disqualifies a visitor:** <who this is not for>
+- **How they search:** <do they search the problem, a procedure or form name, a place, or in a second language>
+
+Note for non-English audiences in a non-English country: **the language they search
+in is a real question and often not the language of the site.** Record it here, not
+just in section 2, because it decides whether the whole keyword set is viable.
+
+## 4. What we offer
+
+- **Category we compete in:** <the words the audience uses, not internal branding>
+- **What it actually does:** <two sentences, no adjectives>
+- **How it is paid for, if at all:** <subscription, one-off, free, free pilot, ad supported, grant funded>
+- **Proof we can cite:** <named customers or users, verified numbers, certifications, credentials, published sources>
+- **Claims we may not make:** <anything legal, medical, financial, security or product has not signed off>
 
 ## 5. Product vocabulary
 

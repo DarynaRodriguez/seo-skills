@@ -113,7 +113,11 @@ buyer and job to be done, product vocabulary, banned words, competitors, site
 structure, this quarter's one metric, and which answer engines matter.
 
 Schema and a fully commented example: [`profiles/PROFILE.template.md`](profiles/PROFILE.template.md).
-A filled-in worked example: [`profiles/example-b2b-saas.md`](profiles/example-b2b-saas.md).
+Two filled-in worked examples, because the shape of the audience changes the
+questions: [`profiles/example-b2b-saas.md`](profiles/example-b2b-saas.md) for a
+business audience with a buying committee, and
+[`profiles/example-b2c-app.md`](profiles/example-b2c-app.md) for a consumer one
+defined by a life stage rather than a job title.
 
 ---
 
@@ -174,7 +178,7 @@ Fourteen commands in total, all offline except the ones that fetch a page.
 already on your machine. No `pip install`, no requirements file, no API key, no
 account. CI fails the build if a dependency file ever appears.
 
-**Testable, which is the point.** 406 tests, run with
+**Testable, which is the point.** 421 tests, run with
 `python -m unittest discover -s tests -t .` and no test runner to install.
 Writing them found five real bugs, including a robots.txt group-precedence case
 that would have reported GPTBot as allowed when it was blocked.

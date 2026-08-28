@@ -75,15 +75,33 @@ never filled with an estimate.
    if it uses them heavily, say so and ask whether that is deliberate. Collect the
    words the site never uses and the AI-tell vocabulary it does use, and propose the
    banned list from that. Present every inference with the sentence you drew it from.
-5. **Build the draft profile.** Fill every field of the template you have evidence
+5. **Decide which shape section 3 takes, before drafting it.** The template
+   branches: a business audience is described by role, seniority and company size,
+   a consumer audience by life stage, location and need state. Answering the wrong
+   set produces a profile full of `<unknown>` that is not actually unknown, which
+   is worse than a gap because it looks like one.
+
+   The site almost always tells you. A pricing page with seats and procurement
+   language is one; a product about a life event, a place or a personal situation is
+   the other. If the evidence is genuinely mixed, that is a legitimate first
+   question rather than a guess. Delete the branch you did not use.
+
+   **A consumer audience in a country whose language it does not speak is a
+   distinct case, and the most common one this branch exists for.** Record the
+   language they search in, which is often not the language of the site, because it
+   decides whether the keyword set is viable at all.
+
+6. **Build the draft profile.** Fill every field of the template you have evidence
    for. Mark each filled field with its source in a working note: `site`, `Ahrefs`,
    `Peec`, or `inferred`. Every field with no evidence gets the literal string
    `<unknown>`. Do not soften an unknown into a plausible default.
-6. **Show the draft, then ask in batches.** Present the whole draft first so the user
+7. **Show the draft, then ask in batches.** Present the whole draft first so the user
    sees what you already know. Then ask **at most 4 questions per turn**, grouped by
    profile section, highest-consequence sections first:
-   - Buyer and market: who buys, which market matters this quarter, who does not
-     count as a lead, which language leads.
+   - Audience and market: who this is for, which market matters this quarter, who
+     does not count, which language they search in. For a consumer audience, ask
+     about life stage and need state rather than role and company size, and ask
+     what ends their need for it: a life stage has an exit, a job title does not.
    - Competitors: confirm or cut the Ahrefs list, name anyone missing, name anyone
      legal will not let you write about.
    - Claims and proof: what may be cited by name, what has not been signed off.
@@ -93,17 +111,17 @@ never filled with an estimate.
    - AI visibility: which engines matter, where the prompt set lives, which sources
      this buyer trusts.
    Skip any batch the evidence already settled. Confirm rather than re-ask.
-7. **Ask where it goes.** Offer two locations and state the difference plainly:
+8. **Ask where it goes.** Offer two locations and state the difference plainly:
    `.seo/profile.md` for one site in this working directory, `~/.seo-skills/profile.md`
    for a profile that applies everywhere. Default to `.seo/profile.md` when the working
    directory looks like a site repo. Never write both.
-8. **Diff before you write.** In update mode, show a table of every field that
+9. **Diff before you write.** In update mode, show a table of every field that
    changes: field, old value, new value, why. Get an explicit yes. In first-run mode,
    confirm the path and the unknown list, then write.
-9. **Report the gaps.** Close with the `<unknown>` fields, what each one blocks, and
+10. **Report the gaps.** Close with the `<unknown>` fields, what each one blocks, and
    the cheapest way to fill it. An unknown buyer blocks keyword prioritisation. An
    unknown competitor set blocks comparison pages. Say which.
-10. **No filesystem?** In a chat-only agent, output the finished profile in one fenced
+11. **No filesystem?** In a chat-only agent, output the finished profile in one fenced
     block with the target filename on the first line as a comment, and tell the user to
     save it at that path before running any other seo-skills skill. Do not pretend a file
     was written.
@@ -113,7 +131,7 @@ never filled with an estimate.
 Two things, in this order.
 
 **The profile file**, written to the chosen path, following
-`profiles/PROFILE.template.md` section for section: Site, Markets, Who we sell to,
+`profiles/PROFILE.template.md` section for section: Site, Markets, Who this is for,
 What we sell, Product vocabulary, Language rules, Competitors, Site structure, This
 quarter, AI visibility. Each field carries its value or `<unknown>`, nothing else.
 

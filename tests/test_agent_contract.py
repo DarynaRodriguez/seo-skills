@@ -1470,5 +1470,106 @@ class TestTheOrchestratorStepsAreSequential(unittest.TestCase):
         self.assertEqual(numbers, list(range(1, len(numbers) + 1)), "steps are not sequential")
 
 
+PROFILES_DIR = AGENTS_DIR.parent / "profiles"
+
+
+class TestTheProfileServesBothAudienceShapes(unittest.TestCase):
+    """A buying committee and a person in a life stage need different questions.
+
+    Section 3 asked for role, seniority, company size and industry, which is a
+    business audience and only that. Run against a consumer product it produced a
+    section full of `<unknown>` values that were not unknown at all, which is worse
+    than a gap because it looks like one. Found by an external tester on a real
+    site in the first ten minutes.
+    """
+
+    def setUp(self):
+        self.template = (PROFILES_DIR / "PROFILE.template.md").read_text(encoding="utf-8")
+        self.flat = " ".join(self.template.split())
+
+    def test_the_section_offers_both_branches(self):
+        self.assertIn("KEEP ONE: business audience", self.template)
+        self.assertIn("KEEP ONE: consumer audience", self.template)
+
+    def test_the_consumer_branch_asks_consumer_questions(self):
+        for field in ("Primary audience", "Life stage or situation", "The need state"):
+            with self.subTest(field=field):
+                self.assertIn(field, self.template)
+
+    def test_the_business_branch_is_still_there(self):
+        for field in ("Primary buyer", "Secondary buyer or influencer"):
+            with self.subTest(field=field):
+                self.assertIn(field, self.template)
+
+    def test_the_reader_is_told_to_delete_the_other_one(self):
+        self.assertIn("Keep the one that fits and delete the other", self.flat)
+
+    def test_the_search_language_question_is_asked(self):
+        # A consumer audience in a country whose language they do not speak is the
+        # case this branch exists for, and the search language decides whether the
+        # keyword set is viable at all.
+        self.assertIn("the language they search in is a real question", self.flat.lower())
+
+    def test_section_four_no_longer_assumes_a_sale(self):
+        # Free, pilot, grant funded and ad supported are all real answers.
+        self.assertIn("How it is paid for, if at all", self.template)
+
+
+class TestTheSetupSkillPicksTheBranchFirst(unittest.TestCase):
+    def setUp(self):
+        self.text = (SKILLS_DIR / "seo-profile-setup" / "SKILL.md").read_text(encoding="utf-8")
+        self.flat = " ".join(self.text.split())
+
+    def test_the_branch_is_decided_before_the_draft_is_built(self):
+        decide = self.text.index("Decide which shape section 3 takes")
+        build = self.text.index("Build the draft profile")
+        self.assertLess(decide, build, "the draft is built before the branch is chosen")
+
+    def test_it_names_the_false_unknown_failure(self):
+        self.assertIn("`<unknown>` that is not actually unknown", self.flat)
+
+    def test_the_question_batch_covers_both_shapes(self):
+        self.assertIn("life stage and need state rather than role and company size", self.flat)
+
+    def test_the_steps_are_sequential(self):
+        numbers = [int(n) for n in re.findall(r"^(\d+)\. \*\*", self.text, re.M)]
+        self.assertEqual(numbers, list(range(1, len(numbers) + 1)))
+
+
+class TestBothWorkedExamplesExist(unittest.TestCase):
+    """The B2B example was the only one, which is partly why the gap survived."""
+
+    def test_there_is_an_example_for_each_shape(self):
+        for name in ("example-b2b-saas.md", "example-b2c-app.md"):
+            with self.subTest(example=name):
+                self.assertTrue((PROFILES_DIR / name).exists())
+
+    def test_the_consumer_example_uses_the_consumer_branch(self):
+        text = (PROFILES_DIR / "example-b2c-app.md").read_text(encoding="utf-8")
+        self.assertIn("Primary audience:", text)
+        self.assertNotIn("Primary buyer:", text)
+
+    def test_every_example_carries_all_eleven_sections(self):
+        for name in ("example-b2b-saas.md", "example-b2c-app.md"):
+            text = (PROFILES_DIR / name).read_text(encoding="utf-8")
+            headings = set(re.findall(r"^## (\d+)\. ", text, re.M))
+            for n in range(1, 12):
+                with self.subTest(example=name, section=n):
+                    self.assertIn(str(n), headings, "section {} missing".format(n))
+
+    def test_the_readme_points_at_both(self):
+        readme = (AGENTS_DIR.parent / "README.md").read_text(encoding="utf-8")
+        self.assertIn("example-b2b-saas.md", readme)
+        self.assertIn("example-b2c-app.md", readme)
+
+    def test_no_example_leaves_a_template_placeholder_behind(self):
+        # A worked example still carrying <role, seniority...> is not worked.
+        for name in ("example-b2b-saas.md", "example-b2c-app.md"):
+            text = (PROFILES_DIR / name).read_text(encoding="utf-8")
+            with self.subTest(example=name):
+                self.assertNotIn("<role", text)
+                self.assertNotIn("<unknown>", text)
+
+
 if __name__ == "__main__":
     unittest.main()
