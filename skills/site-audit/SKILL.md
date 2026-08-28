@@ -34,6 +34,7 @@ Four fields decide the shape of this audit:
 
 | Field | Section | Why it matters here |
 |-------|---------|--------------------|
+| CMS or platform | 1. Site | Decides whether a rendering finding is real, and whether a fix is a click or a deploy |
 | Pages that carry the commercial load | 8. Site structure | Goes on the page set regardless of what the crawl says |
 | Pages that must never be indexed | 8. Site structure | A `noindex` there is correct, and agents are told to suppress it |
 | Markets and their search engines | 2. Markets | One access check per market, against that market's crawler |
@@ -99,6 +100,7 @@ the fan-out and can be aggregated:
    | `output_dir` | The audit directory you just created |
    | `home` | The baseline store, for `seo-drift-watcher` only. Without it `drift` reads a different store, finds no baseline, and reports a coverage gap indistinguishable from the truth |
    | `profile_path` | The profile, or the word `none` |
+   | `platform` | The CMS from profile section 1, or the word `none`. It decides whether a rendering finding is real |
 
    Per-agent, add the URL or export path, the market, and `clicks_28d` where you
    have it. Where you do not, say so rather than omitting it: an agent told
@@ -127,27 +129,44 @@ the fan-out and can be aggregated:
    false gap rather than a real one. These answer "what changed", which is a cheaper question than
    "what is wrong" and often names the cause outright.
 
-6. **Read the files, not the replies.** The agents' replies are summaries for you.
+6. **Apply the platform before you believe a rendering finding.** `docs/platforms.md`
+   records which hosts pre-render for verified crawlers only. On those, `seo.py`
+   receives the app shell while Google and Bing may receive full HTML, so
+   `requires_js` and `reachable but empty` are claims about our fetcher rather than
+   about a search engine.
+
+   This is not hypothetical. An audit this pack produced reported a critical
+   rendering defect across nine pages of a Lovable site on exactly that evidence,
+   and it had to be downgraded once the host's behaviour was documented. Confirm in
+   a browser or in Search Console before a rendering row reaches the report, or
+   label it unconfirmed and say which check would settle it.
+
+   The platform also decides the shape of every fix. A canonical is a field in Page
+   settings on Webflow, a plugin field on WordPress, and a code change on Lovable.
+   Same finding, three different owners and three different amounts of work, and a
+   report that does not say which is asking the reader to find out.
+
+7. **Read the files, not the replies.** The agents' replies are summaries for you.
    The JSON files are the data. Read every file in the output directory before
    writing anything, and note any URL on the page set with no file: that agent
    failed and its page is unaudited, which belongs in the caveats.
 
-7. **Aggregate by finding, not by page.** This is the step that turns thirty
+8. **Aggregate by finding, not by page.** This is the step that turns thirty
    reports into one. The same `check` appearing on eleven pages is one row with a
    count and an affected-URL list, not eleven rows. Where those eleven share a
    path prefix, say it is a template fix and name the pattern.
 
-8. **Rank by clicks at risk, then by severity.** A critical finding on a page with
+9. **Rank by clicks at risk, then by severity.** A critical finding on a page with
    no traffic sits below a warning on a page with four thousand clicks. Sum the
    clicks of the affected URLs per finding and order by that. Where no traffic
    data was available, order by severity, and say in the header that the ranking
    is unweighted, because an unweighted ranking read as a weighted one sends the
    team at the wrong thing first.
 
-9. **Cut the list to what a team can do.** Ten rows, with the rest counted in one
+10. **Cut the list to what a team can do.** Ten rows, with the rest counted in one
    line. A finding nobody will action is not a finding, it is a statistic.
 
-10. **Say what was not checked.** Pages not on the set, markets with no access
+11. **Say what was not checked.** Pages not on the set, markets with no access
     check, findings that needed a provider the profile does not have, agents that
     failed. This section is not a disclaimer, it is the part that makes the rest
     trustworthy.

@@ -6,6 +6,113 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.7.0] 2026-08-28
+
+Sourcing, and then the thing sourcing kept revealing: this pack was repeatedly more
+correct in its code than in its prose.
+
+### Added
+
+- **`docs/source-of-record.md`**, renamed from `google-guidance.md` once the name
+  stopped being true. Every threshold now cites the operator that decides the
+  behaviour, cites another operator where that one is silent, or is labelled as this
+  pack's judgement. It carries Google Search Central, Bing's webmaster guidelines,
+  schema.org, web.dev, PageSpeed Insights, Search Console Help and the IndexNow
+  spec, each with the date it was checked, plus a section naming where the pack
+  knowingly goes beyond all of them.
+- **`docs/platforms.md`**, recording what WordPress, Webflow, Framer and Lovable can
+  actually do, where each setting lives, and who owns the change. The profile has
+  recorded CMS since the beginning and nothing read it, so every brief gave the same
+  instruction whether or not the site could follow it.
+- **`/accessibility-audit`**, and the discovery behind it: four checks this pack
+  already ran are WCAG success criteria. `images.missing_alt` is 1.1.1,
+  `heading.level_skipped` is 1.3.1, `lang.missing` is 3.1.1, `mobile.no_viewport` is
+  1.4.10. Each finding now carries its criterion and conformance level. The skill's
+  main job is refusing to overclaim: it reports what was checked, names every
+  category no automated tool can see, and never calls a page accessible.
+- **`robots.noarchive` and `robots.nocache`**, scoped to Bing and Copilot because
+  Google documents no equivalent. `noarchive` is the one to look for: a page
+  carrying it stays fully indexable while dropping out of Copilot answers, so every
+  robots.txt check passes and the site is invisible where it matters.
+- **E-E-A-T**, stated accurately for the first time. It is not a ranking factor, and
+  of the four, trust is the one that matters. The applied version is in
+  page-optimiser's quality reference, in trust order, framed as who wrote it, how it
+  was made including whether automation is disclosed, and why it exists.
+- **IndexNow** in `/indexation-check`, with the correction that matters stated
+  first: Google is not a participant. It reaches Bing and through Bing, Copilot,
+  plus Seznam, Naver and Yep. Submit as content changes rather than in nightly
+  batches, which is Bing's own instruction.
+- **The European Accessibility Act**, cited from the directive rather than a summary
+  and deliberately not applied. Article 2(2) covers named services provided to
+  consumers, not websites in general, so a business-to-business site is a different
+  case. A guardrail forbids a compliance verdict outright.
+- `platform` as an input to the brief writer and to every audit agent, plus
+  `urls_truncated` and `urls_shown` on grouped crawl findings, and `confirm_with` on
+  the rendering finding.
+
+### Changed
+
+- **Titles and descriptions are measured, not counted.** Google publishes no
+  character limit for either and truncates to fit the device width. `meta-writer`
+  said 50 to 60 characters and `site-inventory` flagged rows over 60 and over 155,
+  while `seo.py meta` measured pixel width the whole time. The tools were right and
+  the prose was folklore, which is roughly the state of the field. A test scans
+  normalised paragraphs to keep the rules out.
+- **"Required" in schema means required by Google for a rich result.** Schema.org
+  requires nothing: no property is mandatory, entities may carry properties from
+  several types, and text where an object is expected is explicitly not an error. A
+  missing property is an eligibility problem, never a validity error.
+- **Performance claims carry both halves of Google's position.** Core Web Vitals are
+  used by its ranking systems, and there is no single page experience signal, good
+  scores guarantee nothing, and Search shows the most relevant content even where
+  page experience is sub-par. `technical-audit` gains provider rows for CrUX and
+  Lighthouse and states that `seo.py` cannot measure any Core Web Vital.
+- **The AI skills lead with Google's position** that AI features need no special
+  optimization and that AEO and GEO are SEO reframed, and with Bing's, which
+  publishes a grounding checklist and treats GEO as its own discipline. Both are
+  true about their own systems. The pack records the disagreement rather than
+  picking a winner.
+- **Search Console's four traps are documented** where a maintainer reads them:
+  position is not additive, position is not a rank, rows do not sum to totals, and
+  low-frequency queries are anonymised away. The code already returned
+  `avg_position_impression_weighted`; what was missing was why.
+- `validate.py` treats any `mcp__` prefixed tool as host-provided, and no longer
+  reads a URL path inside a code span as a sibling skill reference.
+
+### Fixed
+
+- **`@id` reference stubs were reported as missing required properties.** A node
+  with an `@id` and no properties of its own points at a definition elsewhere, which
+  is the entire purpose of `@id`.
+- **Two stale rich-result claims.** `Course` was listed as retired while Google
+  documents a Course list feature. `FAQPage`, `HowTo` and `Book` now have no entry
+  in the structured data gallery at all. Every remaining entry carries the date it
+  was checked, and a test enforces that.
+- **`requires_js` was reported as fact about search engines.** Some hosts pre-render
+  for verified crawlers only, so a shell in our fetch can mean the host did not
+  recognise this fetcher. An audit this pack produced called that a critical
+  rendering defect across nine pages and had to be downgraded. The finding, the four
+  audit agents and the orchestrator all now require a rendered view before the claim
+  is made.
+- **A silent cap.** `duplicates()` trimmed its URL list to 20 while `count` reported
+  the real size, so a 31-page finding was read as 20.
+- **"No profile" had no documented spelling**, so each agent decided alone what a
+  path-shaped value meaning an absence was.
+- **The README claimed twenty-seven skills and 140 tests** when there were
+  twenty-eight and 375. Six tests now hold the front page to the repo's own rule.
+- A skill shipped an unsubstituted template placeholder, producing a dead link to
+  the one source that section rested on. No prose file may carry one now.
+
+### Testing
+
+406 tests, up from 334 at 0.6.0. The suite treats the definitions, the skills and
+the documentation as one contract: every field an agent is told to copy must exist,
+no skill may state a character limit, every link presented as Google guidance must
+resolve to a real documentation root, the orchestrator's steps must be sequential,
+and the README's counts must match the repo.
+
+Guards were verified against planted violations rather than assumed to work.
+
 ## [0.6.0] 2026-08-28
 
 A fifth agent, a new skill, and a sourcing rule that removed a decade of folklore

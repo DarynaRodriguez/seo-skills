@@ -45,6 +45,7 @@ is the whole point.
 | `pack_root` | yes | Stop and say so. Never guess a path |
 | `home` | yes | **Stop and say so.** See below: guessing produces a wrong answer that looks right |
 | `clicks_28d` | no | Put `"clicks"` in `inputs_missing` and set the field to `null` |
+| `platform` | no | Put `"platform"` in `inputs_missing`. Describe findings generically and say the platform was not supplied |
 
 **`home` is the one input you must never default.** It is the directory holding
 the baseline database. Point at the wrong one and `drift` finds no baseline for
@@ -88,10 +89,18 @@ release is almost certainly a side effect nobody noticed. Mark each change
 guess: the person who shipped it can settle it in one sentence, and a wrong guess
 either raises a false alarm or buries a real one.
 
-**Escalate the rendering rule.** If `rendering.became_client_side` fired, that
-outranks everything else in your output regardless of what else changed. Content
-that used to be in the served HTML and now is not still looks correct in a
-browser, so it passes every human check while fetchers see an empty page.
+**Escalate the rendering rule, then check it is real.** If
+`rendering.became_client_side` fired, that outranks everything else in your output
+regardless of what else changed. Content that used to be in the served HTML and now
+is not still looks correct in a browser, so it passes every human check while
+fetchers see an empty page.
+
+Before you escalate it, rule out the boring explanation. Some platforms pre-render
+for verified crawlers only, so this rule can fire because the host stopped
+recognising our fetcher rather than because the site changed. That is a
+configuration change worth reporting and it is not the emergency the rule is
+written for. Where `platform` is one of those in `docs/platforms.md`, say which of
+the two you are looking at, or that you could not tell.
 
 ## Persistence contract
 
