@@ -6,6 +6,108 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.6.0] 2026-08-28
+
+A fifth agent, a new skill, and a sourcing rule that removed a decade of folklore
+from the pack's own prose. The theme: state where a recommendation comes from, or
+do not make it.
+
+### Added
+
+- **`seo-brief-writer`**, the fifth agent. The pack could say what was wrong with a
+  page and never what should be written instead. `/content-brief` covered that for
+  one page in conversation; there was no agent, so a page set could not be briefed
+  in parallel the way it can be audited. It writes two files per page, markdown for
+  the writer and JSON for aggregation, and it passed the existing contract tests
+  with no changes, which is the first evidence those tests generalise past the
+  agents they were written for.
+- **A closed recommendation set the writer can refuse with**: `write`, `rewrite`,
+  `merge`, `do_not_publish`, `blocked`. `angle_found: false` forces
+  `do_not_publish`, and the definition says outright not to soften a refusal
+  because a brief was requested. An agent that can only say yes is a content mill
+  with a schema.
+- **`blocked`, with a `blocking_issue` field coupled to it in both directions.** Six
+  live briefs all hit a URL that answered HTTP 200, sat in the sitemap and rendered
+  the application's own 404. The enum had no value for it, so three agents each
+  invented a different key: `critical_blocker`,
+  `critical_finding_not_in_contract`, `recommendation_caveat`. Three names for one
+  thing, unreadable to any orchestrator comparing files.
+- **`/accessibility-audit`**, and the discovery behind it: the pack already ran four
+  WCAG success criteria and never said so. `images.missing_alt` is 1.1.1,
+  `heading.level_skipped` is 1.3.1, `lang.missing` is 3.1.1, `mobile.no_viewport`
+  is 1.4.10. Every one of those findings now carries its criterion and conformance
+  level, so it can serve the accessibility work it was always evidence for.
+- **`docs/google-guidance.md`**, the source of record. Citations with the date they
+  were fetched, the myths Google names explicitly, and a section stating where this
+  pack knowingly goes beyond Google. A pack claiming everything traced to Google
+  would be lying, and that section is what makes the rest credible.
+- `urls_truncated` and `urls_shown` on grouped crawl findings, so a capped list says
+  it is capped.
+
+### Changed
+
+- **Titles and descriptions are measured, not counted.** Google publishes no
+  character limit for either and truncates to fit the device width. `meta-writer`
+  said 50 to 60 characters and `site-inventory` flagged rows over 60 and over 155,
+  while `seo.py meta` measured pixel width the whole time. The folk rules are gone
+  from every skill, and a test scans normalised paragraphs to keep them out.
+- **"Required" in schema now means required by Google for a rich result.**
+  Schema.org requires nothing: no property is ever mandatory, entities may carry
+  properties from several types, and text where an object is expected is explicitly
+  not an error. Google draws the lines because Google decides eligibility. A
+  missing property is an eligibility problem, never a validity error.
+- **Performance claims are bounded by Google's own words.** Core Web Vitals are
+  used by its ranking systems, and there is no single page experience signal, good
+  scores guarantee nothing, and Search shows the most relevant content even where
+  page experience is sub-par. Both halves are quoted. `technical-audit` gains
+  provider rows for CrUX and Lighthouse and states plainly that `seo.py` cannot
+  measure any Core Web Vital, because it never renders.
+- The AI skills lead with Google's position that AI features need no special
+  optimization and that AEO and GEO are SEO reframed. They earn their place because
+  the reporting differs, not the work, and they say so in those words.
+- `validate.py` treats any `mcp__` prefixed tool as host-provided. Enumerating one
+  host's MCP names would make the pack warn on every other host's.
+
+### Fixed
+
+- **`@id` reference stubs were reported as missing required properties.** A node
+  carrying an `@id` and no properties of its own points at a definition elsewhere,
+  which is the entire purpose of `@id`. Nodes carrying real properties are still
+  checked.
+- **Two stale rich-result claims.** `Course` was listed as retired while Google
+  documents a Course list feature. `FAQPage` carried 2023 wording about health and
+  government sites; it, `HowTo` and `Book` now have no entry in the structured data
+  gallery at all. Every remaining entry carries the date it was checked, and a test
+  enforces that, because a stale "no rich result" note is the same defect as a stale
+  "use this" note.
+- **A silent cap.** `duplicates()` trimmed its URL list to 20 while `count` reported
+  the real size, so a crawl analyst reading `len(urls)` put a 31-page finding at 20.
+- **"No profile" had no documented spelling.** The orchestrator passes the literal
+  string `none`; no agent definition said so, and two runs each decided alone what a
+  path-shaped value meaning an absence was.
+- **`seo-ai-access-checker` documented none of its five inputs**, and was asked a
+  question its own toolset cannot answer: `seo.py` never executes JavaScript, so it
+  cannot say what a rendering crawler sees. The limit is stated, a browser tool is
+  named where one exists, and both numbers have fields.
+- `seo-brief-writer`'s frontmatter declared only `Bash, Read, Write` while its body
+  told the agent to read the rendered DOM, so a real subagent could never have done
+  it.
+- A real null byte in this changelog, inside the entry describing the null-byte
+  hostname bypass. A heredoc had collapsed the escape into the byte it documented,
+  making the file binary to every text tool that opened it.
+
+### Testing
+
+334 tests, up from 232 at 0.5.0's start. `tests/test_agent_contract.py` treats the
+agent definitions and the skills as a contract with the tools and with the
+documentation: every field an agent is told to copy must exist, no runnable block
+may use the module form, every contract template must parse as JSON, no skill may
+state a character limit, and every link presented as Google guidance must resolve
+to a real documentation root.
+
+The folklore ban was verified against a planted violation rather than assumed to
+work.
+
 ## [0.5.0] 2026-08-27
 
 Two rounds of running the four subagents against a live site, each time asking
