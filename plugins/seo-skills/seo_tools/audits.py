@@ -241,10 +241,12 @@ def check_headings(page: Dict[str, object]) -> List[Finding]:
                 _finding(
                     "heading.level_skipped",
                     "info",
-                    "H{} follows H{}, skipping a level.".format(level, previous),
+                    "H{} follows H{}, skipping a level, which breaks the outline "
+                    "screen reader users navigate by.".format(level, previous),
                     observed=heading.get("text"),
                     level=level,
                     previous_level=previous,
+                    wcag="1.3.1 Info and Relationships (Level A)",
                 )
             )
         previous = level
@@ -318,11 +320,23 @@ def check_indexability(page: Dict[str, object], headers: Optional[Dict[str, str]
         )
     if not page.get("has_viewport"):
         findings.append(
-            _finding("mobile.no_viewport", "warning", "No viewport meta tag, so mobile rendering is unmanaged.")
+            _finding(
+                "mobile.no_viewport",
+                "warning",
+                "No viewport meta tag, so mobile rendering is unmanaged and the page "
+                "may not reflow or zoom.",
+                wcag="1.4.10 Reflow (Level AA)",
+            )
         )
     if not page.get("html_lang"):
         findings.append(
-            _finding("lang.missing", "info", "No lang attribute on the html element.")
+            _finding(
+                "lang.missing",
+                "info",
+                "No lang attribute on the html element, so assistive technology "
+                "cannot tell which language to pronounce the page in.",
+                wcag="3.1.1 Language of Page (Level A)",
+            )
         )
     return findings
 
@@ -403,6 +417,7 @@ def check_images(page: Dict[str, object]) -> List[Finding]:
                 "{} of {} images have no alt text.".format(missing, total),
                 missing=missing,
                 total=total,
+                wcag="1.1.1 Non-text Content (Level A)",
                 examples=page.get("images_missing_alt_examples"),
             )
         )

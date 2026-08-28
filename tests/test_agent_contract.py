@@ -584,15 +584,26 @@ class TestCitationsPointAtGoogle(unittest.TestCase):
 
     CITE = re.compile(r"\]\((https?://[^)]+)\)")
 
-    def test_every_google_looking_link_is_a_real_search_central_path(self):
+    # The documentation roots this pack is allowed to cite as Google's own word.
+    # Search Central for search behaviour, /speed for PageSpeed and Core Web Vitals
+    # measurement. Anything else on google.com is a blog post, a marketing page or
+    # an invention, and none of those is a source of record.
+    GOOGLE_DOC_ROOTS = (
+        "https://developers.google.com/search/",
+        "https://developers.google.com/speed/",
+    )
+
+    def test_every_google_looking_link_is_a_documented_source(self):
         for path in _prose_files() + [DOCS_DIR / "google-guidance.md"]:
             for url in self.CITE.findall(path.read_text(encoding="utf-8")):
                 if "google.com" not in url:
                     continue
                 with self.subTest(file=path.name, url=url):
                     self.assertTrue(
-                        url.startswith("https://developers.google.com/search/"),
-                        "{} cites {} as Google guidance, which is not Search Central".format(path.name, url),
+                        url.startswith(self.GOOGLE_DOC_ROOTS),
+                        "{} cites {} as Google guidance, which is not a documentation root".format(
+                            path.name, url
+                        ),
                     )
 
 
@@ -758,6 +769,128 @@ class TestGoogleStructuredDataPoliciesAreCited(unittest.TestCase):
         self.assertIn("schema.org/docs/datamodel.html", text)
         self.assertIn("sd-policies", text)
         self.assertIn("only one of them draws lines", text)
+
+
+class TestAccessibilityFindingsCiteTheirCriterion(unittest.TestCase):
+    """Four checks here are WCAG criteria. A reader must be able to look them up.
+
+    They were being reported as SEO findings with no standard attached, which made
+    them unusable for the accessibility work they are actually evidence for.
+    """
+
+    EXPECTED = {
+        "images.missing_alt": "1.1.1",
+        "heading.level_skipped": "1.3.1",
+        "lang.missing": "3.1.1",
+        "mobile.no_viewport": "1.4.10",
+    }
+
+    def setUp(self):
+        from seo_tools.audits import audit_page
+
+        broken = (
+            "<html><head><title>T</title></head><body>"
+            "<h1>A</h1><h3>skipped a level</h3>"
+            "<img src=a.png><img src=b.png>"
+            "</body></html>"
+        )
+        self.findings = {f["check"]: f for f in audit_page(parse_page(broken, "https://e.com/"))["findings"]}
+
+    def test_each_one_is_raised_and_carries_its_criterion(self):
+        for check, criterion in self.EXPECTED.items():
+            with self.subTest(check=check):
+                self.assertIn(check, self.findings, "{} did not fire".format(check))
+                self.assertIn("wcag", self.findings[check])
+                self.assertIn(criterion, str(self.findings[check]["wcag"]))
+
+    def test_each_one_names_its_conformance_level(self):
+        for check in self.EXPECTED:
+            with self.subTest(check=check):
+                self.assertRegex(str(self.findings[check]["wcag"]), r"Level A{1,3}\)")
+
+    def test_a_clean_page_raises_none_of_them(self):
+        from seo_tools.audits import audit_page
+
+        good = (
+            '<html lang="en"><head><title>T</title>'
+            '<meta name="viewport" content="width=device-width"></head>'
+            "<body><h1>A</h1><h2>B</h2><img src=a.png alt=described></body></html>"
+        )
+        raised = {f["check"] for f in audit_page(parse_page(good, "https://e.com/"))["findings"]}
+        for check in self.EXPECTED:
+            with self.subTest(check=check):
+                self.assertNotIn(check, raised)
+
+    def test_wcag_appears_only_on_accessibility_findings(self):
+        # Otherwise the field stops being a way to filter for them.
+        from seo_tools.audits import audit_page
+
+        broken = "<html><head></head><body><h1>A</h1><h3>s</h3><img src=a.png></body></html>"
+        for f in audit_page(parse_page(broken, "https://e.com/"))["findings"]:
+            if "wcag" in f:
+                with self.subTest(check=f["check"]):
+                    self.assertIn(f["check"], self.EXPECTED)
+
+
+class TestTheAccessibilitySkillRefusesToOverclaim(unittest.TestCase):
+    """Automated checks find a minority of barriers. A clean run is not a verdict."""
+
+    def setUp(self):
+        self.text = (SKILLS_DIR / "accessibility-audit" / "SKILL.md").read_text(encoding="utf-8")
+        self.flat = " ".join(self.text.split())
+
+    def test_it_refuses_to_call_a_page_accessible(self):
+        self.assertIn("Never call a page accessible", self.text)
+
+    def test_it_names_what_it_cannot_check(self):
+        for category in ("Contrast", "keyboard", "ARIA", "tap target"):
+            with self.subTest(category=category):
+                self.assertIn(category, self.text)
+
+    def test_it_does_not_claim_a_ranking_benefit(self):
+        self.assertIn("Never claim accessibility improves ranking", self.text)
+
+    def test_it_protects_deliberate_empty_alt(self):
+        # Flagging alt="" teaches people to add noise for screen reader users.
+        self.assertIn('Never report `alt=""` as a missing alt', self.flat.replace("  ", " "))
+
+    def test_it_lists_the_four_criteria_the_pack_can_decide(self):
+        for criterion in ("1.1.1", "1.3.1", "3.1.1", "1.4.10"):
+            with self.subTest(criterion=criterion):
+                self.assertIn(criterion, self.text)
+
+
+class TestPerformanceGuidanceMatchesTheSource(unittest.TestCase):
+    """The thresholds are published. Drifting from them is a silent wrong answer."""
+
+    def setUp(self):
+        self.flat = " ".join(
+            (SKILLS_DIR / "technical-audit" / "SKILL.md").read_text(encoding="utf-8").split()
+        )
+
+    def test_the_three_thresholds_are_the_published_ones(self):
+        for threshold in ("2.5s or less", "200ms or less", "0.1 or less"):
+            with self.subTest(threshold=threshold):
+                self.assertIn(threshold, self.flat)
+
+    def test_field_data_is_read_at_the_75th_percentile(self):
+        self.assertIn("75th", self.flat)
+
+    def test_the_pack_admits_it_cannot_measure_them(self):
+        self.assertIn("This pack cannot measure any of them", self.flat)
+
+    def test_the_ranking_claim_is_bounded_by_googles_own_words(self):
+        # Core Web Vitals are used by ranking systems AND good scores guarantee
+        # nothing. Stating the first without the second oversells the work.
+        self.assertIn("used by its ranking systems", self.flat)
+        self.assertIn("do not guarantee a top ranking", self.flat)
+
+    def test_it_cites_both_sources(self):
+        self.assertIn("developers.google.com/speed/docs/insights", self.flat)
+        self.assertIn("developers.google.com/search/docs/appearance/page-experience", self.flat)
+
+    def test_a_provider_row_exists_for_field_data(self):
+        self.assertIn("CrUX", self.flat)
 
 
 if __name__ == "__main__":

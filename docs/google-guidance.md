@@ -23,6 +23,10 @@ pages, and the AI optimization guide was last updated 2026-07-10.
 | Structured data policies | [sd-policies](https://developers.google.com/search/docs/appearance/structured-data/sd-policies) |
 | Which rich results exist | [search-gallery](https://developers.google.com/search/docs/appearance/structured-data/search-gallery) |
 | The schema.org vocabulary and its data model | [schema.org/docs](https://schema.org/docs/documents.html), [datamodel](https://schema.org/docs/datamodel.html) |
+| Page experience and ranking | [page-experience](https://developers.google.com/search/docs/appearance/page-experience) |
+| How Core Web Vitals are measured | [PageSpeed Insights](https://developers.google.com/speed/docs/insights/v5/about) |
+| Performance technique | [web.dev/performance](https://web.dev/performance) |
+| Accessibility technique | [web.dev/accessibility](https://web.dev/accessibility) |
 
 ## What Google says, and what this pack does about it
 
@@ -135,6 +139,59 @@ before trusting it in either direction.
 **And structured data is not the route into an AI answer.** Google says it is not
 required for generative AI search. It earns rich results, which is a real and
 separate prize.
+
+## Performance: real, measurable, and routinely oversold
+
+The thresholds are not in dispute, and this pack uses them exactly as published:
+LCP good at 2.5s or less, INP at 200ms or less, CLS at 0.1 or less, read at the
+75th percentile of real users
+([PageSpeed Insights](https://developers.google.com/speed/docs/insights/v5/about)).
+
+**Field data and lab data answer different questions.** Field data is CrUX: real
+users over a trailing 28 days. Lab data is Lighthouse: one simulated load on a
+mid-tier device. They legitimately disagree, and where they do, the field data
+describes your users and the lab data explains why. Quote which one you used.
+
+**What Google actually claims about ranking**, and the pack must not exceed it:
+Core Web Vitals are used by its ranking systems, and there is no single page
+experience signal, good scores do not guarantee a top ranking, and Search shows the
+most relevant content even where the page experience is sub-par
+([page-experience](https://developers.google.com/search/docs/appearance/page-experience)).
+
+So performance is worth doing because slow pages lose people and lose conversions,
+and because it is one input among many to ranking. A team promised a ranking jump
+and handed a conversion lift has still been misled.
+
+**This pack cannot measure any of it.** `seo.py` is standard library only and never
+renders, so every Core Web Vital comes from a provider or is reported as unknown.
+It is never estimated.
+
+## Accessibility: the pack already checks four criteria and never said so
+
+Four of the checks here are WCAG success criteria that happen to also matter for
+parsing, and each now carries its criterion and level in the finding:
+
+| Check | Criterion |
+|-------|-----------|
+| `images.missing_alt` | 1.1.1 Non-text Content (Level A) |
+| `heading.level_skipped` | 1.3.1 Info and Relationships (Level A) |
+| `lang.missing` | 3.1.1 Language of Page (Level A) |
+| `mobile.no_viewport` | 1.4.10 Reflow (Level AA) |
+
+web.dev's guidance is that semantic HTML is the cornerstone, and its named
+practices are structured documents, text alternatives, captions, visible focus
+styling, adequate tap targets, accessible forms and a sensible heading structure
+([web.dev/accessibility](https://web.dev/accessibility)).
+
+**Four criteria is a floor, not a verdict.** Contrast, keyboard navigation, focus
+order, ARIA correctness, tap target size, form error handling, captions and motion
+control are all invisible to markup parsing, and each fails real users.
+`/accessibility-audit` reports what was checked, names every category that was not,
+and never calls a page accessible.
+
+Accessibility is not a documented Google ranking factor and no skill here claims it
+is. It is worth doing because more people can then use the page, and in many
+jurisdictions because it is required by law.
 
 ## Where this pack goes beyond Google
 

@@ -51,6 +51,7 @@ or just describe what you want and your agent picks the right one.
 ### 🩺 Audit, find and rank what is broken
 
 - **`/technical-audit`** triages technical health by traffic at risk, not by issue count, and returns six fixes instead of three hundred rows.
+- **`/accessibility-audit`** reports the WCAG criteria this pack can decide from markup, with the success criterion on every finding, then names every category no automated tool can see. It never calls a page accessible.
 - **`/cannibalisation-audit`** proves two pages are competing with position history, then names which one should win and why.
 - **`/content-decay`** separates real decay from seasonality, dead demand, and a SERP layout change, then decides refresh, consolidate, or retire.
 - **`/indexation-check`** answers both halves of the question: what should be indexed and is not, and what is indexed and should not be.
@@ -257,6 +258,7 @@ tool command they reference actually exists.
 | internal-linking | 🔧 | 🔧 | 🔧 | ⚠️ |
 | **Audit** | | | | |
 | technical-audit | 🔧 | 🔧 | 🔧 | ⚠️ |
+| accessibility-audit | 🔧 | 🔧 | 🔧 | ⚠️ |
 | cannibalisation-audit | 🔧 | 🔧 | 🔧 | ⚠️ |
 | content-decay | 🔧 | 🔧 | 🔧 | ⚠️ |
 | indexation-check | 🔧 | 🔧 | 🔧 | ⚠️ |
