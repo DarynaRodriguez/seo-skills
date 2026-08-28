@@ -1783,5 +1783,109 @@ class TestVoiceIsNotAddress(unittest.TestCase):
         self.assertIn("an agent given only the stance will infer the address from it", self.flat)
 
 
+class TestUnknownsCarryRouting(unittest.TestCase):
+    """A bare `<unknown>` tells the next skill nothing about what to do next.
+
+    Ask, look, connect a provider, or leave it alone are four different answers,
+    and every skill downstream was working it out again from scratch.
+    """
+
+    QUALIFIERS = (
+        "<unknown - requires research>",
+        "<unknown - provider unavailable>",
+        "<unknown - not yet decided>",
+        "<unknown - not verified>",
+    )
+
+    def setUp(self):
+        self.template = (PROFILES_DIR / "PROFILE.template.md").read_text(encoding="utf-8")
+        self.flat = " ".join(self.template.split())
+
+    def test_the_four_qualifiers_are_specified(self):
+        for q in self.QUALIFIERS:
+            with self.subTest(qualifier=q):
+                self.assertIn(q, self.template)
+
+    def test_the_reason_is_given_as_routing(self):
+        self.assertIn("routing information rather than an absence", self.flat)
+
+    def test_belief_is_not_configuration(self):
+        # "I think the platform handles it" written as "allowed" is a fact nobody
+        # checked, and everything after it inherits the error.
+        self.assertIn("it stays a belief", self.flat)
+
+    def test_the_qualifier_may_not_smuggle_a_value(self):
+        self.assertIn("a guess wearing a disclaimer", self.flat)
+
+
+class TestSetupKnowsWhenToStop(unittest.TestCase):
+    """A blank field looks like a task. It is not.
+
+    An external tester typed "continue" to see whether the skill would finish
+    gracefully or keep interrogating. It kept interrogating, and one of the
+    questions asked a founder to architect their site from memory in a pack whose
+    whole argument is evidence first.
+    """
+
+    def setUp(self):
+        self.text = (SKILLS_DIR / "seo-profile-setup" / "SKILL.md").read_text(encoding="utf-8")
+        self.flat = " ".join(self.text.split())
+
+    def test_questions_are_classified_before_being_asked(self):
+        for kind in ("Configuration", "Researchable", "Operational"):
+            with self.subTest(kind=kind):
+                self.assertIn("| " + kind + " |", self.text)
+
+    def test_researchable_questions_are_not_asked(self):
+        self.assertIn("**Do not ask.**", self.text)
+
+    def test_the_pillar_pages_case_is_named(self):
+        self.assertIn("architect their site from memory", self.flat)
+
+    def test_there_is_a_stopping_rule(self):
+        self.assertIn("Stop when the remaining unknowns are researchable or non-blocking", self.flat)
+
+    def test_it_refuses_completionism(self):
+        self.assertIn("Do not prolong the interview to eliminate", self.flat)
+
+    def test_gaps_are_reported_as_next_steps(self):
+        self.assertIn("A bare `<unknown>` is a shrug", self.flat)
+
+
+class TestTheRuleIsGlobalNotLocal(unittest.TestCase):
+    """The tester called this the biggest of the findings, and it is not one skill's."""
+
+    def test_agents_md_carries_it(self):
+        flat = " ".join((AGENTS_DIR.parent / "AGENTS.md").read_text(encoding="utf-8").split())
+        self.assertIn("Never ask a person for something a skill can research", flat)
+        self.assertIn("A blank field is not a task", flat)
+
+
+class TestPrivacyOutranksOpportunity(unittest.TestCase):
+    """A crawlable set built from user content is an incident, not a template.
+
+    site-inventory is the skill that would find it, and a report framing 4,000
+    indexable profile pages as reach is one somebody will act on.
+    """
+
+    def test_the_profile_names_the_surfaces(self):
+        text = (PROFILES_DIR / "PROFILE.template.md").read_text(encoding="utf-8")
+        self.assertIn("Privacy-sensitive surfaces:", text)
+        self.assertIn("Privacy outranks any indexation opportunity, without exception", text)
+
+    def test_site_inventory_refuses_the_framing(self):
+        flat = " ".join((SKILLS_DIR / "site-inventory" / "SKILL.md").read_text(encoding="utf-8").split())
+        self.assertIn("finding to escalate, not a template to exploit", flat)
+        self.assertIn("do not describe it as a programmatic opportunity", flat)
+
+    def test_it_applies_judgement_where_the_profile_is_silent(self):
+        flat = " ".join((SKILLS_DIR / "site-inventory" / "SKILL.md").read_text(encoding="utf-8").split())
+        self.assertIn("whether or not anyone wrote it down", flat)
+
+    def test_indexation_check_reads_the_field(self):
+        text = (SKILLS_DIR / "indexation-check" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("Privacy-sensitive surfaces", text)
+
+
 if __name__ == "__main__":
     unittest.main()

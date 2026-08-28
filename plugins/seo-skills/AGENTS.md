@@ -65,6 +65,13 @@ listed in `docs/execution-layer.md`. Notes that matter when calling them:
   between two clients, it belongs in the profile.
 - Do not add a metric a skill cannot source. Do not add a composite score without
   showing its inputs and weights.
+- **Never ask a person for something a skill can research.** A guess given under
+  interview arrives with the asker's authority attached and nothing downstream
+  questions it again, so the wrong answer becomes permanent in a way an honest gap
+  never does. Sort an unresolved field into configuration (only this person can
+  decide, so ask), researchable (a skill finds it, so write
+  `<unknown - requires research>` and name the skill), or operational (ask only
+  where a named skill is blocked). A blank field is not a task.
 - **Google Search Central is the source of record.** Any threshold, limit or "best
   practice" a skill states must either cite a Google page that says it, cite another
   operator's own docs for something Google does not cover, or be labelled plainly as

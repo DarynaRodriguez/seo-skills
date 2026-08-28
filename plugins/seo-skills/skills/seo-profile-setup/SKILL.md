@@ -121,17 +121,45 @@ never filled with an estimate.
    - AI visibility: which engines matter, where the prompt set lives, which sources
      this buyer trusts.
    Skip any batch the evidence already settled. Confirm rather than re-ask.
-8. **Ask where it goes.** Offer two locations and state the difference plainly:
+
+8. **Classify every remaining question before you ask it, and stop when the useful
+   ones run out.** This skill has a completionist pull: a blank field looks like a
+   task. It is not. Sort each unresolved field into one of three, and only one of
+   them is yours:
+
+   | Kind | What it is | What to do |
+   |------|-----------|-----------|
+   | Configuration | A choice only this person can make, and something downstream depends on it. Markets, banned words, who approves a publish | Ask now |
+   | Researchable | A skill in this pack can find the answer from evidence | **Do not ask.** Write `<unknown - requires research>` and name the skill |
+   | Operational | Access, tooling, capacity | Ask only where a named skill is blocked without it |
+
+   **Asking a person to guess at something a skill can research is the worst of the
+   three**, because their guess arrives with a founder's authority attached and
+   nothing downstream will question it again. Pillar pages are the clearest case:
+   this pack has `/site-inventory` and `/keyword-page-mapping` for exactly that, and
+   an evidence-first system that opens by asking someone to architect their site
+   from memory has argued against itself in the first ten minutes.
+
+   **Stop when the remaining unknowns are researchable or non-blocking.** Say what
+   is left, say which skill resolves each, and hand over. Do not prolong the
+   interview to eliminate `<unknown>` fields: a profile with six honest qualified
+   unknowns and a clear next command is worth more than a full one built on guesses,
+   and it takes ten minutes rather than forty.
+9. **Ask where it goes.** Offer two locations and state the difference plainly:
    `.seo/profile.md` for one site in this working directory, `~/.seo-skills/profile.md`
    for a profile that applies everywhere. Default to `.seo/profile.md` when the working
    directory looks like a site repo. Never write both.
-9. **Diff before you write.** In update mode, show a table of every field that
+10. **Diff before you write.** In update mode, show a table of every field that
    changes: field, old value, new value, why. Get an explicit yes. In first-run mode,
    confirm the path and the unknown list, then write.
-10. **Report the gaps.** Close with the `<unknown>` fields, what each one blocks, and
-   the cheapest way to fill it. An unknown buyer blocks keyword prioritisation. An
-   unknown competitor set blocks comparison pages. Say which.
-11. **No filesystem?** In a chat-only agent, output the finished profile in one fenced
+11. **Report the gaps as routing, not as regret.** Close with the qualified
+   unknowns, what each one blocks, and the skill or command that resolves it. An
+   unknown buyer blocks keyword prioritisation. An unknown competitor set blocks
+   comparison pages. Say which, and name the command.
+
+   A `<unknown - requires research>` is a next step. A bare `<unknown>` is a shrug,
+   and the next skill has to work out for itself whether to ask, look, or leave it.
+12. **No filesystem?** In a chat-only agent, output the finished profile in one fenced
     block with the target filename on the first line as a comment, and tell the user to
     save it at that path before running any other seo-skills skill. Do not pretend a file
     was written.

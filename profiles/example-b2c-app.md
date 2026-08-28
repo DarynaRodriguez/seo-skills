@@ -116,10 +116,11 @@ may treat this as a competitor set.
 
 ## 8. Site structure
 
-- **Pillar pages:** /guides/arriving, /guides/having-a-baby, /guides/money-and-tax
+- **Pillar pages:** `<unknown - requires research>`, from `/site-inventory` then `/keyword-page-mapping`. The three working assumptions are /guides/arriving, /guides/having-a-baby and /guides/money-and-tax, and none has been checked against demand
 - **Solution / product pages:** /checklist, /about
 - **Blog or resources path:** /guides/
 - **Pages that must never be indexed:** /checklist/shared/*, which contains personal progress. Also /account/*
+- **Privacy-sensitive surfaces:** /checklist/* holds what a person has and has not done, which is a health signal by inference. Never indexable, and an indexable one is an incident rather than a finding
 - **Known redirect chains or legacy paths:** /blog/* was renamed to /guides/* in 2026. The 301s exist. Two old URLs are still linked from an external forum post and still resolve
 
 ## 9. This quarter
@@ -133,7 +134,8 @@ may treat this as a competitor set.
 ## 10. AI visibility
 
 - **Engines that matter to this buyer:** ChatGPT first, by a distance. This audience asks an assistant before it asks a search engine, because the question is embarrassing to ask a person
-- **Tracked prompt set lives in:** nowhere yet. To be created before any AI visibility claim is made
+- **Tracked prompt set lives in:** `<unknown - not yet decided>`. Nothing exists, and no AI visibility claim may be made until it does
+- **AI crawler access:** `<unknown - not verified>`. Believed open because the host sets robots.txt, and nothing has confirmed it. `/ai-crawler-access` settles this in one command
 - **Aided prompts and unaided prompts are counted separately.**
 - **Sources this buyer trusts:** Official government pages, their own Krankenkasse, and other foreigners who have done it. Not brands
 
@@ -143,7 +145,7 @@ may treat this as a competitor set.
 |------|----------|-----------------|
 | crawl | none | No crawler. Sitemap expansion, with the sample size stated |
 | traffic | Search Console | CSV export, monthly |
-| keywords | none | Findings are unweighted and say so |
+| keywords | `<unknown - provider unavailable>` | No keyword tool. Findings are unweighted and say so |
 | serp | manual | Read the live SERP, record the date and country |
 | backlinks | none | Authority is unmeasured. Do not infer it |
 | ai-visibility | none | No claim about AI presence until a prompt set exists |

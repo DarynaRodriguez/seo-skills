@@ -5,6 +5,32 @@ Save to `.seo/profile.md` in the project you work in, or `~/.seo-skills/profile.
 to use it everywhere. Delete any line you cannot answer honestly, and leave the
 gap visible: a blank is information, a guess is not.
 
+## How to write an unknown
+
+`<unknown>` on its own tells the next skill that a value is missing and nothing
+else. It cannot tell whether to ask a person, run a tool, connect a provider, or
+leave it alone, so every skill downstream makes that call again from scratch.
+
+**Qualify it where the reason changes what happens next.** A qualified unknown is
+routing information rather than an absence:
+
+| Write | Means |
+|-------|-------|
+| `<unknown - requires research>` | A skill can find this. Do not ask a person to guess it |
+| `<unknown - provider unavailable>` | A tool would answer it and no tool is connected |
+| `<unknown - not yet decided>` | A person has to choose, and has not yet |
+| `<unknown - not verified>` | Somebody believes this, and nothing has confirmed it |
+
+`<unknown - not verified>` is the one people skip, and it is the most useful.
+"I think our AI crawlers are allowed, the platform handles it" is a belief. Written
+as "AI crawlers: allowed" it becomes a fact nobody checked, and every skill after it
+inherits the error. Written as
+`<unknown - not verified, believed allowed via the platform>` it stays a belief and
+becomes something `/ai-crawler-access` can settle in one command.
+
+**Never use the qualifier to smuggle in a value.**
+`<unknown - probably around 500 a month>` is a guess wearing a disclaimer.
+
 ---
 
 ## 1. Site
@@ -151,6 +177,13 @@ to, and an official source is usually one to cite rather than outrank.
 - **Solution / product pages:** <URL list or pattern>
 - **Blog or resources path:** <example.com/blog/>
 - **Pages that must never be indexed:** <thank-you, gated confirmations, internal tools>
+- **Privacy-sensitive surfaces:** <anything holding user content: profiles, journals, saved items, community posts, uploads. Name the paths>
+
+  **Privacy outranks any indexation opportunity, without exception.** A route
+  that generates thousands of crawlable pages from user content is not a
+  programmatic SEO find, it is an incident waiting to be written up. Any skill
+  that meets one reports it as a risk and never as an opportunity, whatever the
+  traffic maths says.
 - **Known redirect chains or legacy paths:** <if any>
 
 ## 9. This quarter
